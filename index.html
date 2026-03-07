@@ -1244,22 +1244,65 @@ function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  // Show loading state
+  const statusEl = document.getElementById('dataStatus');
+  statusEl.className = 'data-status';
+  statusEl.textContent = 'Cargando ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + 'MB)...';
+  showToast('Procesando archivo...');
+
   const reader = new FileReader();
+
+  reader.onerror = function() {
+    showToast('Error al leer el archivo');
+    statusEl.textContent = 'Error al leer archivo';
+  };
+
   reader.onload = async function(e) {
     try {
+      statusEl.textContent = 'Parseando Excel...';
       const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
 
-      if (jsonData.length === 0) {
-        showToast('El archivo esta vacio');
+      // Check if XLSX library is loaded
+      if (typeof XLSX === 'undefined') {
+        showToast('Error: libreria XLSX no cargada. Verifica tu conexion.');
         return;
       }
 
-      productData = jsonData;
+      const workbook = XLSX.read(data, { type: 'array' });
+      statusEl.textContent = 'Leyendo hoja: ' + workbook.SheetNames[0] + '...';
 
-      // Cache in IndexedDB (localStorage is too small for 90K+ rows)
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+      // Try with range detection
+      const range = XLSX.utils.decode_range(firstSheet['!ref'] || 'A1');
+      statusEl.textContent = 'Rango: ' + (firstSheet['!ref'] || 'N/A') + ' - Convirtiendo...';
+
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+
+      if (jsonData.length === 0) {
+        // Try second sheet if first is empty
+        if (workbook.SheetNames.length > 1) {
+          const secondSheet = workbook.Sheets[workbook.SheetNames[1]];
+          const jsonData2 = XLSX.utils.sheet_to_json(secondSheet, { defval: '' });
+          if (jsonData2.length > 0) {
+            productData = jsonData2;
+          } else {
+            showToast('El archivo no contiene datos en ninguna hoja');
+            statusEl.textContent = 'Archivo vacio - Hojas: ' + workbook.SheetNames.join(', ');
+            return;
+          }
+        } else {
+          showToast('El archivo esta vacio. Hoja: ' + workbook.SheetNames[0] + ', Rango: ' + (firstSheet['!ref'] || 'sin rango'));
+          statusEl.textContent = 'Archivo vacio - Ref: ' + (firstSheet['!ref'] || 'N/A');
+          return;
+        }
+      } else {
+        productData = jsonData;
+      }
+
+      statusEl.textContent = 'Guardando en cache...';
+
+      // Cache in IndexedDB
       try {
         await cacheProductData(productData);
         localStorage.setItem('trackinn_file', file.name);
@@ -1270,7 +1313,9 @@ function handleFileUpload(event) {
       updateDataStatus();
       showToast(productData.length + ' productos cargados');
     } catch(err) {
-      showToast('Error al leer archivo: ' + err.message);
+      showToast('Error: ' + err.message);
+      statusEl.textContent = 'Error: ' + err.message;
+      console.error('Excel parse error:', err);
     }
   };
   reader.readAsArrayBuffer(file);
