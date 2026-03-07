@@ -1481,17 +1481,28 @@ function displayProduct(rows, scannedCode) {
     const savings = Math.round((1 - actualNum / origNum) * 100);
     const origP = formatPrice(origNum);
     const actualP = formatPrice(actualNum);
-    priceHTML = '<div style="background:#FFF3F3;border-radius:12px;padding:12px 16px;margin:12px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+    priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:12px;padding:14px 16px;margin:12px 0">'
+      + '<div style="font-size:13px;color:#999;margin-bottom:4px">Precio Original</div>'
       + '<span style="font-size:16px;color:#999;text-decoration:line-through">' + origP + '</span>'
+      + '<div style="font-size:13px;color:#E63946;margin-bottom:4px;margin-top:8px">Precio Actual</div>'
+      + '<div style="display:flex;align-items:center;gap:10px">'
       + '<span style="font-size:32px;font-weight:800;color:#E63946">' + actualP + '</span>'
       + '<span style="background:#2ECC71;color:#fff;padding:4px 10px;border-radius:8px;font-size:13px;font-weight:700">-' + savings + '%</span>'
-      + '</div>';
+      + '</div></div>';
+  } else if (origNum > 0 && actualNum > 0) {
+    priceHTML = '<div style="background:#EAEAEA;border-radius:12px;padding:14px 16px;margin:12px 0">'
+      + '<div style="font-size:13px;color:#666;margin-bottom:4px">Precio</div>'
+      + '<span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(actualNum) + '</span></div>';
   } else if (actualNum > 0) {
-    priceHTML = '<div style="background:#F5F5F5;border-radius:12px;padding:12px 16px;margin:12px 0"><span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(actualNum) + '</span></div>';
+    priceHTML = '<div style="background:#EAEAEA;border-radius:12px;padding:14px 16px;margin:12px 0">'
+      + '<div style="font-size:13px;color:#666;margin-bottom:4px">Precio Actual</div>'
+      + '<span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(actualNum) + '</span></div>';
   } else if (origNum > 0) {
-    priceHTML = '<div style="background:#F5F5F5;border-radius:12px;padding:12px 16px;margin:12px 0"><span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(origNum) + '</span></div>';
+    priceHTML = '<div style="background:#EAEAEA;border-radius:12px;padding:14px 16px;margin:12px 0">'
+      + '<div style="font-size:13px;color:#666;margin-bottom:4px">Precio Original</div>'
+      + '<span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(origNum) + '</span></div>';
   } else {
-    priceHTML = '<div style="background:#FFF3F3;border-radius:12px;padding:12px 16px;margin:12px 0"><span style="font-size:16px;font-weight:700;color:#E63946">Precio no disponible</span></div>';
+    priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:12px;padding:14px 16px;margin:12px 0"><span style="font-size:16px;font-weight:700;color:#E63946">Precio no disponible</span></div>';
   }
 
   // Build stores/inventory HTML from all matching rows (same UPC across sucursales)
