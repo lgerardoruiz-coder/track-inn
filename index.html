@@ -1457,7 +1457,7 @@ function displayProduct(rows, scannedCode) {
   const silueta = getField('Silueta') || '';
   const proveedor = getField('Proveedor') || '';
   const precioOriginal = getField('Precio Original') || getField('PrecioOriginal') || '';
-  const precioActual = getField('Precio Actual') || getField('PrecioActual') || '';
+  const precioActual = getField('Precio Promo') || getField('Precio Actual') || getField('PrecioActual') || '';
   const imageUrl = getField('Imagen') || getField('Foto') || '';
 
   // Build price HTML
@@ -1474,8 +1474,9 @@ function displayProduct(rows, scannedCode) {
     return '\u0024' + result;
   };
 
-  const origNum = Number(precioOriginal);
-  const actualNum = Number(precioActual);
+  const cleanPrice = (v) => Number(String(v).replace(/[$,\s]/g, '')) || 0;
+  const origNum = cleanPrice(precioOriginal);
+  const actualNum = cleanPrice(precioActual);
 
   if (actualNum > 0 && origNum > 0 && actualNum < origNum) {
     const savings = Math.round((1 - actualNum / origNum) * 100);
