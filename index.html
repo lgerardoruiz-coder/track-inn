@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Track Inn - Escaner de Precios</title>
+<meta name="theme-color" content="#E63946">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --red: #E63946;
+  --black: #1D1D1D;
+  --dark-gray: #2B2B2B;
+  --white: #FFFFFF;
+  --light-gray: #F5F5F5;
+  --green: #2ECC71;
+  --orange: #F39C12;
+  --gray: #95A5A6;
+}
+
+html, body {
+  font-family: 'Poppins', sans-serif;
+  background: #111;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+/* Phone Frame */
+.phone-frame {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  max-height: 932px;
+  margin: 0 auto;
+  background: var(--black);
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,0,0,0.5);
+}
+
+@media (min-width: 500px) {
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0a;
+  }
+  .phone-frame {
+    border-radius: 40px;
+    border: 3px solid #333;
+    height: 90vh;
+  }
+}
+
+/* Status Bar */
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 24px 0;
+  z-index: 100;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.status-bar-dark { color: var(--white); }
+.status-bar-light { color: var(--black); }
+
+.status-time {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-icons svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Screen Container */
+.screens-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.45s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.45s ease;
+  will-change: transform, opacity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.screen.active { transform: translateX(0); opacity: 1; z-index: 10; }
+.screen.left { transform: translateX(-100%); opacity: 0; z-index: 5; }
+.screen.right { transform: translateX(100%); opacity: 0; z-index: 5; }
+
+/* SCREEN 1 - SPLASH */
+.screen-splash {
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 30px;
+  height: 100%;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.logo-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+.logo-icon svg { width: 100%; height: 100%; }
+
+.logo-text {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--white);
+  text-transform: uppercase;
+  animation: pulse 2.5s ease-in-out infinite;
+  user-select: none;
+}
+
+.logo-text span { color: var(--red); }
+
+.tagline {
+  font-size: 16px;
+  color: var(--gray);
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.03); opacity: 0.9; }
+}
+
+.splash-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-primary {
+  width: 100%;
+  max-width: 320px;
+  padding: 18px 40px;
+  background: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+}
+
+.btn-primary:active::after { width: 300px; height: 300px; }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-secondary {
+  width: 100%;
+  max-width: 320px;
+  padding: 16px 40px;
+  background: transparent;
+  color: var(--white);
+  border: 2px solid var(--dark-gray);
+  border-radius: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:active { transform: scale(0.97); border-color: var(--red); }
+
+.data-status {
+  font-size: 12px;
+  color: var(--gray);
+  font-weight: 400;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.data-status.loaded { color: var(--green); }
+
+.no-register {
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 300;
+}
+
+/* HEADER */
+.screen-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  padding: 56px 20px 16px;
+  z-index: 50;
+}
+
+.screen-header.header-dark { background: var(--black); color: var(--white); }
+.screen-header.header-light { background: var(--white); color: var(--black); }
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.back-btn:active { transform: scale(0.9); }
+.header-dark .back-btn { background: var(--dark-gray); color: var(--white); }
+.header-light .back-btn { background: var(--light-gray); color: var(--black); }
+.back-btn svg { width: 20px; height: 20px; }
+
+.header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  margin-right: 40px;
+}
+
+/* SCREEN 2 - SCANNER */
+.screen-scanner { background: var(--black); }
+
+.scanner-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 24px 40px;
+  gap: 20px;
+}
+
+#scanner-reader {
+  width: 100%;
+  max-width: 340px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0d0d0d;
+}
+
+#scanner-reader video {
+  border-radius: 24px;
+}
+
+/* Override html5-qrcode styles */
+#scanner-reader img[alt="Info"] { display: none; }
+#scanner-reader__dashboard { display: none !important; }
+#scanner-reader__scan_region { border-radius: 24px; overflow: hidden; }
+#scanner-reader__scan_region > br { display: none; }
+#scanner-reader__header_message { display: none; }
+
+.scanner-frame {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0d0d0d;
+}
+
+.scanner-frame #scanner-reader {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none;
+}
+
+.scanner-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-color: var(--red);
+  border-style: solid;
+  border-width: 0;
+}
+
+.corner-tl { top: 40px; left: 40px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 12px; }
+.corner-tr { top: 40px; right: 40px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 12px; }
+.corner-bl { bottom: 40px; left: 40px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 12px; }
+.corner-br { bottom: 40px; right: 40px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 12px; }
+
+.scan-line {
+  position: absolute;
+  left: 50px; right: 50px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), var(--red), transparent);
+  box-shadow: 0 0 12px var(--red), 0 0 30px rgba(230, 57, 70, 0.3);
+  animation: scanLine 2.2s ease-in-out infinite;
+  opacity: 0.9;
+  z-index: 6;
+}
+
+@keyframes scanLine {
+  0%, 100% { top: 50px; }
+  50% { top: calc(100% - 50px); }
+}
+
+.scanner-instruction {
+  color: var(--gray);
+  font-size: 15px;
+  text-align: center;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.scanner-instruction strong { color: var(--white); font-weight: 600; }
+
+/* Manual barcode input */
+.manual-input-section {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.manual-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.manual-input-row input {
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 2px solid var(--dark-gray);
+  background: var(--dark-gray);
+  color: var(--white);
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.manual-input-row input:focus { border-color: var(--red); }
+.manual-input-row input::placeholder { color: #666; }
+
+.manual-input-row button {
+  padding: 14px 20px;
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.manual-input-row button:active { transform: scale(0.95); }
+
+.manual-label {
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* SCREEN 3 - PRODUCT RESULT */
+.screen-product { background: var(--white); }
+
+.product-body { padding: 0 20px 140px; }
+
+.product-image-area {
+  width: 100%;
+  height: 220px;
+  background: var(--white);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 80px;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.1));
+}
+
+.product-image-area img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.no-image-placeholder {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #bbb;
+}
+
+.no-image-placeholder svg {
+  width: 48px;
+  height: 48px;
+  stroke: #ccc;
+}
+
+.no-image-placeholder span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #aaa;
+  letter-spacing: 0.5px;
+}
+
+.product-badge-overlay {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  background: var(--red);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.product-info { margin-bottom: 24px; }
+
+.product-brand {
+  font-size: 14px;
+  color: var(--gray);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.product-name {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+
+.product-sku {
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.product-barcode-label {
+  font-size: 12px;
+  color: var(--gray);
+  font-weight: 400;
+  margin-bottom: 10px;
+  font-family: monospace;
+}
+
+.category-badge {
+  display: inline-block;
+  background: var(--light-gray);
+  color: var(--dark-gray);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Price Section */
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.original-price {
+  font-size: 18px;
+  color: var(--gray);
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.promo-price {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--red);
+}
+
+.current-price {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--black);
+}
+
+.savings-badge {
+  background: var(--green);
+  color: var(--white);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Detail rows */
+.detail-section { margin-bottom: 24px; }
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 14px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: var(--gray);
+  font-weight: 400;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: var(--black);
+  font-weight: 600;
+  text-align: right;
+  max-width: 60%;
+}
+
+/* Size Grid */
+.size-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.size-btn {
+  padding: 14px 8px;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  background: var(--white);
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--black);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: center;
+}
+
+.size-btn:active { transform: scale(0.95); }
+.size-btn.available:hover { border-color: var(--red); }
+
+.size-btn.low-stock { border-color: var(--orange); }
+.size-btn.low-stock::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: var(--orange);
+  border-radius: 50%;
+}
+
+.size-btn.sold-out {
+  background: #fdeaea;
+  color: var(--red);
+  border-color: var(--red);
+  cursor: not-allowed;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.size-btn.selected { background: var(--red); border-color: var(--red); color: var(--white); }
+.size-btn.selected.low-stock::after { background: var(--white); }
+
+.size-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--gray);
+}
+
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+.legend-dot.green { background: var(--green); }
+.legend-dot.orange { background: var(--orange); }
+.legend-dot.red { background: var(--red); }
+
+/* Stores Section */
+.stores-section { margin-bottom: 28px; }
+
+.store-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--light-gray);
+  border-radius: 16px;
+  margin-bottom: 10px;
+}
+
+.store-status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.store-status-dot.green { background: var(--green); }
+.store-status-dot.orange { background: var(--orange); }
+.store-status-dot.red { background: var(--red); }
+
+.store-info { flex: 1; }
+.store-name { font-size: 14px; font-weight: 600; color: var(--black); margin-bottom: 2px; }
+.store-stock { font-size: 12px; font-weight: 400; }
+.store-stock.green { color: var(--green); }
+.store-stock.orange { color: var(--orange); }
+.store-stock.red { color: var(--red); font-weight: 600; }
+
+/* Not Found */
+.not-found-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 30px;
+  text-align: center;
+  gap: 16px;
+}
+
+.not-found-icon { font-size: 64px; opacity: 0.5; }
+
+.not-found-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.not-found-text {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.6;
+}
+
+.not-found-code {
+  font-family: monospace;
+  font-size: 16px;
+  background: var(--light-gray);
+  padding: 8px 20px;
+  border-radius: 10px;
+  color: var(--black);
+  font-weight: 600;
+}
+
+.btn-try-again {
+  margin-top: 12px;
+  padding: 14px 40px;
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-try-again:active { transform: scale(0.97); }
+
+/* Bottom CTAs */
+.bottom-ctas {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  padding: 16px 20px 28px;
+  background: linear-gradient(to top, var(--white) 80%, transparent);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 60;
+}
+
+.bottom-ctas.visible { display: flex; }
+
+.btn-cta-red {
+  width: 100%;
+  padding: 16px;
+  background: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cta-red:active { transform: scale(0.97); }
+
+.btn-cta-outline {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  color: var(--black);
+  border: 2px solid var(--black);
+  border-radius: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cta-outline:active { transform: scale(0.97); background: var(--light-gray); }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--dark-gray);
+  color: var(--white);
+  padding: 14px 24px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 200;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  max-width: 380px;
+  text-align: center;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.screen::-webkit-scrollbar { width: 0px; }
+
+/* File input hidden */
+.file-input-hidden { display: none; }
+
+/* Data loaded indicator */
+.data-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(46, 204, 113, 0.15);
+  color: var(--green);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.data-badge svg { width: 14px; height: 14px; }
+
+/* Last scan info */
+.last-scan-info {
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.last-scan-info strong { color: var(--white); }
+
+/* Location badge */
+.location-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.location-badge.detected {
+  background: rgba(46, 204, 113, 0.15);
+  color: var(--green);
+}
+
+.location-badge.nearby {
+  background: rgba(243, 156, 18, 0.15);
+  color: var(--orange);
+}
+
+.location-badge.error {
+  background: rgba(149, 165, 166, 0.15);
+  color: var(--gray);
+}
+
+/* Current store highlight in results */
+.store-card.current-store {
+  background: #eafaf1;
+  border: 2px solid var(--green);
+}
+
+.current-store-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  background: rgba(46, 204, 113, 0.15);
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- Status Bar -->
+  <div class="status-bar status-bar-dark" id="statusBar">
+    <div class="status-time" id="statusTime">9:41</div>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 9l4-4 4 4"/><path d="M5 5v14"/>
+        <path d="M15 19l4 4 4-4"/><path d="M19 23V9"/>
+      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+        <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <circle cx="12" cy="20" r="1" fill="currentColor"/>
+      </svg>
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <rect x="1" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+        <rect x="3" y="8" width="12" height="8" rx="1" fill="currentColor"/>
+        <rect x="21" y="10" width="2" height="4" rx="0.5" fill="currentColor"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="screens-viewport">
+    <!-- SCREEN 1: SPLASH -->
+    <div class="screen active" id="screen1">
+      <div class="screen-splash">
+        <div class="splash-content">
+          <div class="logo-icon">
+            <svg viewBox="0 0 80 80" fill="none">
+              <rect x="10" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+              <rect x="18" y="18" width="3" height="44" rx="1.5" fill="white" opacity="0.8"/>
+              <rect x="24" y="22" width="5" height="36" rx="2" fill="white"/>
+              <rect x="33" y="18" width="3" height="44" rx="1.5" fill="#E63946"/>
+              <rect x="40" y="22" width="6" height="36" rx="2" fill="white"/>
+              <rect x="50" y="18" width="3" height="44" rx="1.5" fill="#E63946" opacity="0.8"/>
+              <rect x="57" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+              <rect x="65" y="26" width="5" height="28" rx="2" fill="white" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="logo-text">TRACK <span>INN</span></div>
+          <div class="tagline">Escanea. Compara. Ahorra.</div>
+        </div>
+        <div class="splash-bottom">
+          <button class="btn-primary" id="btnScan" onclick="goToScreen(2)">ESCANEAR AHORA</button>
+          <button class="btn-secondary" id="btnLoadData" onclick="document.getElementById('excelInput').click()">
+            CARGAR DATOS (EXCEL)
+          </button>
+          <input type="file" id="excelInput" class="file-input-hidden" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(event)">
+          <div id="dataStatus" class="data-status">Sin datos cargados</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: SCANNER -->
+    <div class="screen right" id="screen2">
+      <div class="screen-header header-dark">
+        <button class="back-btn" onclick="stopScannerAndGoBack()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="header-title">Escaner</div>
+      </div>
+      <div class="scanner-body">
+        <div class="scanner-frame">
+          <div id="scanner-reader"></div>
+          <div class="scanner-overlay">
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+            <div class="scan-line"></div>
+          </div>
+        </div>
+        <div class="scanner-instruction">
+          <strong>Apunta al codigo de barras</strong> del producto<br>para obtener precio e inventario
+        </div>
+        <div class="manual-input-section">
+          <div class="manual-label">o ingresa el codigo manualmente</div>
+          <div class="manual-input-row">
+            <input type="text" id="manualBarcode" placeholder="Codigo de barras..." inputmode="numeric">
+            <button onclick="manualSearch()">Buscar</button>
+          </div>
+        </div>
+        <div id="locationBadge" class="location-badge nearby">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Detectando ubicacion...
+        </div>
+        <div class="last-scan-info" id="lastScanInfo"></div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: PRODUCT RESULT -->
+    <div class="screen right" id="screen3">
+      <div class="screen-header header-light">
+        <button class="back-btn" onclick="goToScreen(2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="header-title">Resultado</div>
+      </div>
+      <div id="productContent"></div>
+    </div>
+
+    <!-- SCREEN 4: NOT FOUND -->
+    <div class="screen right" id="screen4">
+      <div class="screen-header header-light">
+        <button class="back-btn" onclick="goToScreen(2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="header-title">No encontrado</div>
+      </div>
+      <div class="not-found-body">
+        <div class="not-found-icon">&#128269;</div>
+        <div class="not-found-title">Producto no encontrado</div>
+        <div class="not-found-code" id="notFoundCode"></div>
+        <div class="not-found-text">
+          Este codigo de barras no existe en la base de datos cargada.<br>
+          Verifica que el Excel contenga este producto.
+        </div>
+        <button class="btn-try-again" onclick="goToScreen(2)">Escanear otro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom CTAs (for Screen 3) -->
+  <div class="bottom-ctas" id="bottomCtas">
+    <button class="btn-cta-red" onclick="goToScreen(2)">Escanear otro producto</button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ============ STATE ============
+let currentScreen = 1;
+let productData = []; // Parsed from Excel
+let html5QrCode = null;
+let scannerRunning = false;
+let scanCooldown = false;
+let currentStore = null; // Detected store via GPS
+let userLat = null;
+let userLng = null;
+
+// ============ STORE COORDINATES ============
+const STORE_COORDS = {
+  'IS San Pedro':       { lat: 25.6515, lng: -100.3520, address: 'Humberto Lobo 520, San Pedro Garza Garcia, NLE' },
+  'IS Galerias Mty':    { lat: 25.6690, lng: -100.3100, address: 'Insurgentes 2500, Galerias Monterrey, NLE' },
+  'IS Paseo La Fe':     { lat: 25.6770, lng: -100.2140, address: 'Av. Miguel Aleman, Paseo La Fe, Guadalupe, NLE' },
+  'IS Contry':          { lat: 25.6380, lng: -100.2890, address: 'Av. Eugenio Garza Sada 75, Contry, Monterrey, NLE' },
+  'IS Plaza Cumbres':   { lat: 25.7540, lng: -100.3750, address: 'Hacienda Penuelos 6771, Plaza Cumbres, NLE' }
+};
+
+// ============ TIME ============
+function updateTime() {
+  const now = new Date();
+  document.getElementById('statusTime').textContent =
+    now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+}
+updateTime();
+setInterval(updateTime, 30000);
+
+// ============ GEOLOCATION ============
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // Earth radius in meters
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function detectStore() {
+  if (!navigator.geolocation) {
+    console.warn('Geolocation not available');
+    return;
+  }
+
+  navigator.geolocation.watchPosition(
+    (pos) => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+
+      let closest = null;
+      let minDist = Infinity;
+
+      for (const [name, coords] of Object.entries(STORE_COORDS)) {
+        const dist = haversineDistance(userLat, userLng, coords.lat, coords.lng);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = name;
+        }
+      }
+
+      // If within 500m of a store, we're "in" that store
+      if (minDist <= 500) {
+        currentStore = closest;
+        updateLocationBadge(closest, Math.round(minDist));
+      } else {
+        currentStore = null;
+        updateLocationBadge(closest, Math.round(minDist));
+      }
+    },
+    (err) => {
+      console.warn('Geo error:', err.message);
+      updateLocationBadge(null, null, 'GPS no disponible');
+    },
+    { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+  );
+}
+
+function updateLocationBadge(storeName, distance, errorMsg) {
+  const badge = document.getElementById('locationBadge');
+  if (!badge) return;
+
+  if (errorMsg) {
+    badge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + errorMsg;
+    badge.className = 'location-badge error';
+  } else if (distance <= 500) {
+    badge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + storeName + ' (' + distance + 'm)';
+    badge.className = 'location-badge detected';
+  } else {
+    const km = (distance / 1000).toFixed(1);
+    badge.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Mas cercana: ' + storeName + ' (' + km + 'km)';
+    badge.className = 'location-badge nearby';
+  }
+}
+
+// Start geolocation on load
+detectStore();
+
+// ============ ALGOLIA IMAGE SEARCH ============
+const ALGOLIA_APP_ID = 'WIE52UGB1T';
+const ALGOLIA_API_KEY = 'e34ff2be6f2ea02814fc690cc78a5d5f';
+const ALGOLIA_INDEX = 'innovasport_prd_slave_mxn_es';
+const imageCache = {}; // estilo → image URL
+
+async function fetchProductImage(description, brand, estilo) {
+  // Check cache first
+  const cacheKey = estilo || (brand + ' ' + description);
+  if (imageCache[cacheKey]) return imageCache[cacheKey];
+
+  // Try multiple search strategies
+  const queries = [];
+  if (brand && description) queries.push(brand + ' ' + description);
+  if (description) queries.push(description);
+  if (brand) queries.push(brand);
+
+  for (const query of queries) {
+    try {
+      const response = await fetch(
+        `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${ALGOLIA_INDEX}/query`,
+        {
+          method: 'POST',
+          headers: {
+            'X-Algolia-Application-Id': ALGOLIA_APP_ID,
+            'X-Algolia-API-Key': ALGOLIA_API_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: query,
+            hitsPerPage: 10,
+            attributesToRetrieve: ['image_string', 'name_text_es', 'baseProductCode_string', 'code_string']
+          })
+        }
+      );
+      const data = await response.json();
+
+      if (data.hits && data.hits.length > 0) {
+        // Try to match by estilo in the code_string
+        let bestHit = null;
+        if (estilo) {
+          bestHit = data.hits.find(h =>
+            h.code_string && h.code_string.includes(estilo)
+          );
+        }
+        // Fallback: first hit with an image
+        if (!bestHit) {
+          bestHit = data.hits.find(h => h.image_string) || data.hits[0];
+        }
+
+        const imgUrl = bestHit.image_string || '';
+        if (imgUrl) {
+          imageCache[cacheKey] = imgUrl;
+          try { localStorage.setItem('trackinn_imgcache', JSON.stringify(imageCache)); } catch(e) {}
+          return imgUrl;
+        }
+      }
+    } catch(err) {
+      console.warn('Algolia search error for "' + query + '":', err);
+    }
+  }
+  return null;
+}
+
+// Load image cache from localStorage
+try {
+  const cached = localStorage.getItem('trackinn_imgcache');
+  if (cached) Object.assign(imageCache, JSON.parse(cached));
+} catch(e) {}
+
+// ============ SERVICE WORKER ============
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ============ EXCEL HANDLING ============
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+
+      if (jsonData.length === 0) {
+        showToast('El archivo esta vacio');
+        return;
+      }
+
+      productData = jsonData;
+
+      // Cache in IndexedDB (localStorage is too small for 90K+ rows)
+      try {
+        await cacheProductData(productData);
+        localStorage.setItem('trackinn_file', file.name);
+        localStorage.setItem('trackinn_date', new Date().toLocaleDateString('es-MX'));
+        localStorage.setItem('trackinn_count', productData.length);
+      } catch(err) { console.warn('Cache error:', err); }
+
+      updateDataStatus();
+      showToast(productData.length + ' productos cargados');
+    } catch(err) {
+      showToast('Error al leer archivo: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  // Reset input so same file can be re-selected
+  event.target.value = '';
+}
+
+function updateDataStatus() {
+  const statusEl = document.getElementById('dataStatus');
+  const fileName = localStorage.getItem('trackinn_file') || '';
+  const loadDate = localStorage.getItem('trackinn_date') || '';
+
+  const count = productData.length || parseInt(localStorage.getItem('trackinn_count')) || 0;
+  if (count > 0) {
+    statusEl.className = 'data-status loaded';
+    statusEl.innerHTML = '&#9679; ' + count + ' registros cargados' +
+      (fileName ? ' (' + fileName + ')' : '') +
+      (loadDate ? ' - ' + loadDate : '');
+  } else {
+    statusEl.className = 'data-status';
+    statusEl.textContent = 'Sin datos cargados';
+  }
+}
+
+// ============ INDEXEDDB CACHE ============
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('TrackInnDB', 1);
+    req.onupgradeneeded = () => {
+      req.result.createObjectStore('products');
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function cacheProductData(data) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('products', 'readwrite');
+    tx.objectStore('products').put(data, 'all');
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadCachedData() {
+  try {
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction('products', 'readonly');
+      const req = tx.objectStore('products').get('all');
+      req.onsuccess = () => {
+        if (req.result) {
+          productData = req.result;
+          updateDataStatus();
+        }
+        resolve();
+      };
+      req.onerror = () => resolve();
+    });
+  } catch(e) {}
+}
+
+// Load cached data on start
+loadCachedData();
+
+// ============ BARCODE LOOKUP ============
+function lookupBarcode(code) {
+  if (!code) return null;
+  const normalizedCode = String(code).trim();
+
+  // Find ALL rows matching this UPC
+  const matchingRows = productData.filter(r => String(r.UPC).trim() === normalizedCode);
+
+  if (matchingRows.length > 0) return matchingRows;
+
+  // Fallback: search in Estilo or any other column
+  const fallbackRows = productData.filter(r => {
+    return Object.values(r).some(v => String(v).trim() === normalizedCode);
+  });
+
+  return fallbackRows.length > 0 ? fallbackRows : null;
+}
+
+// Find related products (same Estilo = same model, different sizes)
+function findRelatedByEstilo(estilo) {
+  if (!estilo || estilo === '(Sin valor)') return [];
+  return productData.filter(r =>
+    String(r['Estilo'] || '').trim() === String(estilo).trim() &&
+    String(r['Estilo']).trim() !== '(Sin valor)'
+  );
+}
+
+// ============ PRODUCT DISPLAY ============
+function displayProduct(rows, scannedCode) {
+  const container = document.getElementById('productContent');
+  const first = rows[0]; // Use first row for base product info
+
+  // Robust field getter - matches by normalized key name
+  const keys = Object.keys(first);
+  const getField = (search) => {
+    // Try exact match first
+    if (first[search] !== undefined && first[search] !== '' && first[search] !== null) return first[search];
+    // Try normalized match (remove accents, spaces, case)
+    const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[\s_-]/g, '');
+    const target = normalize(search);
+    const match = keys.find(k => normalize(k) === target);
+    if (match !== undefined && first[match] !== '' && first[match] !== null) return first[match];
+    // Try partial match
+    const partial = keys.find(k => normalize(k).includes(target) || target.includes(normalize(k)));
+    if (partial !== undefined && first[partial] !== '' && first[partial] !== null) return first[partial];
+    return '';
+  };
+
+  // Extract product fields
+  const brand = getField('Marca') || getField('Grupos de Marca') || '';
+  const description = getField('Descripcion') || '';
+  const estilo = getField('Estilo') || '';
+  const generico = getField('Generico') || '';
+  const division = getField('Division') || '';
+  const deporte = getField('Deporte') || '';
+  const genero = getField('Genero') || '';
+  const talla = getField('Talla') || '';
+  const silueta = getField('Silueta') || '';
+  const proveedor = getField('Proveedor') || '';
+  const precioOriginal = getField('Precio Original') || getField('PrecioOriginal') || '';
+  const precioActual = getField('Precio Actual') || getField('PrecioActual') || '';
+  const imageUrl = getField('Imagen') || getField('Foto') || '';
+
+  // Debug - remove later
+  // Build price HTML
+  let priceHTML = '';
+  const formatPrice = (n) => '$' + Number(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const origNum = Number(precioOriginal);
+  const actualNum = Number(precioActual);
+
+  if (actualNum > 0 && origNum > 0 && actualNum < origNum) {
+    const savings = Math.round((1 - actualNum / origNum) * 100);
+    priceHTML = `
+      <div class="price-section">
+        <span class="original-price">${formatPrice(origNum)}</span>
+        <span class="promo-price">${formatPrice(actualNum)}</span>
+        <span class="savings-badge">-${savings}%</span>
+      </div>`;
+  } else if (actualNum > 0) {
+    priceHTML = `<div class="price-section"><span class="current-price">${formatPrice(actualNum)}</span></div>`;
+  } else if (origNum > 0) {
+    priceHTML = `<div class="price-section"><span class="current-price">${formatPrice(origNum)}</span></div>`;
+  }
+
+  // Build stores/inventory HTML from all matching rows (same UPC across sucursales)
+  let storeHTML = '';
+  const storeCards = [];
+  const inventoryKey = Object.keys(first).find(k => k.trim().toLowerCase().startsWith('inventario')) || 'Inventario';
+
+  // Sort rows: current store first, then by inventory descending
+  const sortedRows = [...rows].sort((a, b) => {
+    const aIsCurrent = currentStore && a['Sucursal'] === currentStore ? 1 : 0;
+    const bIsCurrent = currentStore && b['Sucursal'] === currentStore ? 1 : 0;
+    if (aIsCurrent !== bIsCurrent) return bIsCurrent - aIsCurrent;
+    return (parseInt(b[inventoryKey]) || 0) - (parseInt(a[inventoryKey]) || 0);
+  });
+
+  sortedRows.forEach(r => {
+    const sucursal = r['Sucursal'] || '';
+    const inv = parseInt(r[inventoryKey]) || 0;
+    const direccion = r['Direcci\u00f3n'] || r['Direccion'] || '';
+    const estado = r['Estado'] || '';
+    const stockColor = inv <= 0 ? 'red' : (inv <= 3 ? 'orange' : 'green');
+    const stockText = inv <= 0 ? 'Agotado' : (inv <= 3 ? inv + ' unidades (poco stock)' : inv + ' unidades disponibles');
+    const isCurrent = currentStore && sucursal === currentStore;
+    const dist = STORE_COORDS[sucursal] && userLat
+      ? haversineDistance(userLat, userLng, STORE_COORDS[sucursal].lat, STORE_COORDS[sucursal].lng)
+      : null;
+    const distLabel = dist ? (dist < 1000 ? Math.round(dist) + 'm' : (dist / 1000).toFixed(1) + 'km') : '';
+
+    storeCards.push(`
+      <div class="store-card${isCurrent ? ' current-store' : ''}">
+        <div class="store-status-dot ${stockColor}"></div>
+        <div class="store-info">
+          <div class="store-name">${sucursal} ${isCurrent ? '<span class="current-store-tag">Estas aqui</span>' : ''}</div>
+          <div class="store-stock ${stockColor}">${stockText}</div>
+          ${direccion ? `<div style="font-size:11px;color:#999;margin-top:2px">${direccion}${estado ? ', ' + estado : ''}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+          <div style="font-size:20px;font-weight:800;color:${inv <= 0 ? '#ccc' : 'var(--black)'}">${inv}</div>
+          ${distLabel ? `<div style="font-size:11px;color:var(--gray)">${distLabel}</div>` : ''}
+        </div>
+      </div>`);
+  });
+
+  if (storeCards.length) {
+    const totalInv = rows.reduce((sum, r) => sum + (parseInt(r[inventoryKey]) || 0), 0);
+    storeHTML = `
+      <div class="stores-section">
+        <div class="section-title">Inventario por sucursal <span style="font-weight:400;font-size:13px;color:var(--gray)">(${totalInv} total)</span></div>
+        ${storeCards.join('')}
+      </div>`;
+  }
+
+  // Find other sizes of the same model (Estilo)
+  let sizesHTML = '';
+  if (estilo && estilo !== '(Sin valor)') {
+    const related = findRelatedByEstilo(estilo);
+    // Group by Talla and sum inventory
+    const sizeMap = {};
+    related.forEach(r => {
+      const t = String(r['Talla'] || '').trim();
+      if (!t || t === '(Sin valor)') return;
+      if (!sizeMap[t]) sizeMap[t] = { total: 0, upc: String(r.UPC) };
+      sizeMap[t].total += parseInt(r[inventoryKey]) || 0;
+    });
+
+    const sizeEntries = Object.entries(sizeMap);
+    if (sizeEntries.length > 1) {
+      let sizeButtons = '';
+      sizeEntries.forEach(([size, info]) => {
+        const isCurrentUPC = info.upc === scannedCode;
+        if (info.total <= 0) {
+          sizeButtons += `<button class="size-btn sold-out" disabled>${size}</button>`;
+        } else if (info.total <= 3) {
+          sizeButtons += `<button class="size-btn low-stock${isCurrentUPC ? ' selected' : ''}" onclick="selectSize(this)">${size}</button>`;
+        } else {
+          sizeButtons += `<button class="size-btn available${isCurrentUPC ? ' selected' : ''}" onclick="selectSize(this)">${size}</button>`;
+        }
+      });
+
+      sizesHTML = `
+        <div class="section-title">Otras tallas del mismo modelo</div>
+        <div class="size-grid">${sizeButtons}</div>
+        <div class="size-legend">
+          <div class="legend-item"><div class="legend-dot green"></div> Disponible (4+)</div>
+          <div class="legend-item"><div class="legend-dot orange"></div> Poco stock (1-3)</div>
+          <div class="legend-item"><div class="legend-dot red"></div> Agotado</div>
+        </div>`;
+    }
+  }
+
+  // Product details
+  let detailsHTML = '';
+
+  // Display name
+  const displayName = description || estilo || 'Producto';
+  const displayBrand = brand || '';
+  const categoryLabel = deporte || division || '';
+
+  // Image: start with placeholder, then async load from Algolia
+  const noImageHTML = `<div class="no-image-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <path d="M21 15l-5-5L5 21"/>
+      </svg>
+      <span>Buscando imagen...</span>
+    </div>`;
+  const imageHTML = (imageUrl && String(imageUrl).trim())
+    ? `<img src="${imageUrl}" alt="${displayName}" onerror="this.outerHTML=document.getElementById('noImgTemplate').innerHTML">`
+    : noImageHTML;
+
+  container.innerHTML = `
+    <div class="product-body">
+      <div class="product-image-area">
+        ${displayBrand ? `<div class="product-badge-overlay">${displayBrand}</div>` : ''}
+        ${imageHTML}
+      </div>
+      <div class="product-info">
+        ${displayBrand ? `<div class="product-brand">${displayBrand}</div>` : ''}
+        <div class="product-name">${displayName}</div>
+        ${priceHTML}
+        ${estilo && estilo !== '(Sin valor)' ? `<div class="product-sku">Estilo: ${estilo}</div>` : ''}
+        ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
+        <div class="product-barcode-label">UPC: ${scannedCode}</div>
+        ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
+      </div>
+      ${storeHTML}
+      ${sizesHTML}
+      ${detailsHTML}
+    </div>
+    <template id="noImgTemplate">
+      <div class="no-image-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <span>Imagen no disponible</span>
+      </div>
+    </template>`;
+
+  // Async: fetch image from Algolia if no image yet
+  if (!imageUrl || !String(imageUrl).trim()) {
+    fetchProductImage(description, brand, estilo).then(url => {
+      if (url) {
+        const imgArea = container.querySelector('.product-image-area');
+        if (imgArea) {
+          const placeholder = imgArea.querySelector('.no-image-placeholder');
+          if (placeholder) {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = displayName;
+            img.style.cssText = 'position:relative;z-index:1;width:100%;height:100%;object-fit:contain;padding:8px;';
+            img.onerror = () => {
+              img.outerHTML = `<div class="no-image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span>Imagen no disponible</span>
+              </div>`;
+            };
+            placeholder.replaceWith(img);
+          }
+        }
+      } else {
+        // No image found - update text
+        const span = container.querySelector('.no-image-placeholder span');
+        if (span) span.textContent = 'Imagen no disponible';
+      }
+    });
+  }
+}
+
+// ============ SIZE SELECTION ============
+function selectSize(btn) {
+  document.querySelectorAll('.size-btn.selected').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  btn.style.transform = 'scale(0.92)';
+  setTimeout(() => btn.style.transform = '', 150);
+}
+
+// ============ SCREEN NAVIGATION ============
+function goToScreen(target) {
+  if (target === currentScreen) return;
+  const goingForward = target > currentScreen;
+  const currentEl = document.getElementById('screen' + currentScreen);
+  const targetEl = document.getElementById('screen' + target);
+
+  targetEl.classList.remove('left', 'right', 'active');
+  targetEl.classList.add(goingForward ? 'right' : 'left');
+  targetEl.offsetHeight; // force reflow
+
+  currentEl.classList.remove('active');
+  currentEl.classList.add(goingForward ? 'left' : 'right');
+  targetEl.classList.remove('left', 'right');
+  targetEl.classList.add('active');
+
+  // Status bar color
+  const statusBar = document.getElementById('statusBar');
+  statusBar.className = (target <= 2)
+    ? 'status-bar status-bar-dark'
+    : 'status-bar status-bar-light';
+
+  // Bottom CTAs
+  const ctas = document.getElementById('bottomCtas');
+  ctas.classList.toggle('visible', target === 3);
+
+  // Start scanner when entering screen 2
+  if (target === 2) {
+    setTimeout(startScanner, 400);
+  }
+
+  // Stop scanner when leaving screen 2
+  if (currentScreen === 2 && target !== 2) {
+    stopScanner();
+  }
+
+  currentScreen = target;
+}
+
+// ============ BARCODE SCANNER ============
+function startScanner() {
+  if (scannerRunning) return;
+
+  const readerEl = document.getElementById('scanner-reader');
+  readerEl.innerHTML = '';
+
+  html5QrCode = new Html5Qrcode('scanner-reader');
+
+  const config = {
+    fps: 10,
+    qrbox: { width: 250, height: 150 },
+    aspectRatio: 1.0,
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.UPC_E,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.CODE_93,
+      Html5QrcodeSupportedFormats.ITF,
+      Html5QrcodeSupportedFormats.QR_CODE
+    ]
+  };
+
+  html5QrCode.start(
+    { facingMode: 'environment' },
+    config,
+    onScanSuccess,
+    () => {} // ignore scan failures
+  ).then(() => {
+    scannerRunning = true;
+  }).catch(err => {
+    console.warn('Camera error:', err);
+    readerEl.innerHTML = '<div style="color:#666;text-align:center;padding:60px 20px;font-size:14px;">' +
+      'No se pudo acceder a la camara.<br>Usa la entrada manual abajo.</div>';
+  });
+}
+
+function stopScanner() {
+  if (html5QrCode && scannerRunning) {
+    html5QrCode.stop().then(() => {
+      scannerRunning = false;
+      html5QrCode.clear();
+    }).catch(() => {
+      scannerRunning = false;
+    });
+  }
+}
+
+function stopScannerAndGoBack() {
+  stopScanner();
+  goToScreen(1);
+}
+
+function onScanSuccess(decodedText) {
+  if (scanCooldown) return;
+  scanCooldown = true;
+
+  // Vibrate if available
+  if (navigator.vibrate) navigator.vibrate(100);
+
+  const lastScanInfo = document.getElementById('lastScanInfo');
+  lastScanInfo.innerHTML = 'Ultimo escaneo: <strong>' + decodedText + '</strong>';
+
+  processBarcode(decodedText);
+
+  // Cooldown to prevent rapid re-scans
+  setTimeout(() => { scanCooldown = false; }, 2000);
+}
+
+function manualSearch() {
+  const input = document.getElementById('manualBarcode');
+  const code = input.value.trim();
+  if (!code) {
+    showToast('Ingresa un codigo de barras');
+    return;
+  }
+  processBarcode(code);
+  input.value = '';
+}
+
+function processBarcode(code) {
+  if (productData.length === 0) {
+    showToast('Carga un archivo Excel primero');
+    return;
+  }
+
+  const rows = lookupBarcode(code);
+
+  if (rows && rows.length > 0) {
+    displayProduct(rows, code);
+    goToScreen(3);
+  } else {
+    document.getElementById('notFoundCode').textContent = code;
+    goToScreen(4);
+  }
+}
+
+// ============ TOAST ============
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+// ============ ENTER KEY FOR MANUAL INPUT ============
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('manualBarcode').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') manualSearch();
+  });
+});
+</script>
+</body>
+</html>
