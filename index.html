@@ -1464,39 +1464,34 @@ function displayProduct(rows, scannedCode) {
   let priceHTML = '';
   const formatPrice = (n) => {
     const num = Math.round(Number(n));
-    if (isNaN(num) || num === 0) return '$0';
+    if (isNaN(num) || num === 0) return '\u00240';
     const str = String(num);
     let result = '';
     for (let i = 0; i < str.length; i++) {
       if (i > 0 && (str.length - i) % 3 === 0) result += ',';
       result += str[i];
     }
-    return '$' + result;
+    return '\u0024' + result;
   };
-
-  // Debug: show all keys and price values found
-  const allKeys = Object.keys(first).join(' | ');
-  const rawOrig = first['Precio Original'];
-  const rawActual = first['Precio Actual'];
-  const debugInfo = `Keys: ${allKeys} /// PO raw="${rawOrig}" PA raw="${rawActual}" getField PO="${precioOriginal}" PA="${precioActual}"`;
 
   const origNum = Number(precioOriginal);
   const actualNum = Number(precioActual);
 
   if (actualNum > 0 && origNum > 0 && actualNum < origNum) {
     const savings = Math.round((1 - actualNum / origNum) * 100);
-    priceHTML = `
-      <div class="price-section">
-        <span class="original-price">${formatPrice(origNum)}</span>
-        <span class="promo-price">${formatPrice(actualNum)}</span>
-        <span class="savings-badge">-${savings}%</span>
-      </div>`;
+    const origP = formatPrice(origNum);
+    const actualP = formatPrice(actualNum);
+    priceHTML = '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap">'
+      + '<span style="font-size:18px;color:#999;text-decoration:line-through">' + origP + '</span>'
+      + '<span style="font-size:34px;font-weight:800;color:#E63946">' + actualP + '</span>'
+      + '<span style="background:#2ECC71;color:#fff;padding:4px 12px;border-radius:8px;font-size:14px;font-weight:700">-' + savings + '%</span>'
+      + '</div>';
   } else if (actualNum > 0) {
-    priceHTML = `<div class="price-section"><span class="current-price">${formatPrice(actualNum)}</span></div>`;
+    priceHTML = '<div style="margin-bottom:16px"><span style="font-size:34px;font-weight:800;color:#1D1D1D">' + formatPrice(actualNum) + '</span></div>';
   } else if (origNum > 0) {
-    priceHTML = `<div class="price-section"><span class="current-price">${formatPrice(origNum)}</span></div>`;
+    priceHTML = '<div style="margin-bottom:16px"><span style="font-size:34px;font-weight:800;color:#1D1D1D">' + formatPrice(origNum) + '</span></div>';
   } else {
-    priceHTML = `<div class="price-section"><span class="current-price" style="font-size:14px;color:red">Sin precio - ${debugInfo}</span></div>`;
+    priceHTML = '<div style="margin-bottom:16px"><span style="font-size:16px;font-weight:700;color:#E63946">Precio no disponible</span></div>';
   }
 
   // Build stores/inventory HTML from all matching rows (same UPC across sucursales)
