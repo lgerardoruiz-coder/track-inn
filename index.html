@@ -380,6 +380,9 @@ html, body {
   0%, 100% { top: 50px; }
   50% { top: calc(100% - 50px); }
 }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 .scanner-instruction {
   color: var(--gray);
@@ -1642,6 +1645,7 @@ function displayProduct(rows, scannedCode) {
       </div>
       ${storeHTML}
       ${sizesHTML}
+      <div id="priceCompareSection"></div>
       ${detailsHTML}
     </div>
     <template id="noImgTemplate">
@@ -1693,6 +1697,95 @@ function displayProduct(rows, scannedCode) {
       }
     });
   }
+
+  // Async: fetch competitor prices
+  const compareQuery = estilo && estilo !== '(Sin valor)' ? estilo : (brand + ' ' + description).trim();
+  if (compareQuery) {
+    fetchCompetitorPrices(compareQuery, actualNum || origNum);
+  }
+}
+
+// ============ PRICE COMPARISON ============
+const PRICE_API = 'https://trackinn-price-api.vercel.app/api/prices';
+
+function fetchCompetitorPrices(query, ourPrice) {
+  var section = document.getElementById('priceCompareSection');
+  if (!section) return;
+
+  section.innerHTML = '<div style="padding:16px 0">'
+    + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
+    + '<div id="compareLoader" style="display:flex;align-items:center;gap:8px;color:#999;font-size:13px">'
+    + '<div style="width:16px;height:16px;border:2px solid #E63946;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></div>'
+    + 'Buscando en otras tiendas...</div>'
+    + '</div>';
+
+  fetch(PRICE_API + '?q=' + encodeURIComponent(query))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var results = data.results || [];
+      var found = results.filter(function(r) { return r.price > 0 && !r.error; });
+
+      if (!found.length) {
+        section.innerHTML = '<div style="padding:16px 0">'
+          + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
+          + '<div style="color:#999;font-size:13px">No se encontraron precios en otras tiendas</div></div>';
+        return;
+      }
+
+      found.sort(function(a, b) { return a.price - b.price; });
+
+      var cardsHTML = '';
+      var cheapest = found[0].price;
+
+      found.forEach(function(r) {
+        var diff = '';
+        var diffColor = '#999';
+        if (ourPrice > 0) {
+          var pct = Math.round(((r.price - ourPrice) / ourPrice) * 100);
+          if (pct > 0) {
+            diff = '+' + pct + '% mas caro';
+            diffColor = '#E63946';
+          } else if (pct < 0) {
+            diff = pct + '% mas barato';
+            diffColor = '#2ECC71';
+          } else {
+            diff = 'Mismo precio';
+            diffColor = '#999';
+          }
+        }
+
+        var isCheapest = r.price === cheapest && found.length > 1;
+        var borderStyle = isCheapest ? 'border:2px solid #2ECC71' : 'border:1px solid #E8E8E8';
+
+        var priceNum = Math.round(r.price);
+        var priceStr = '';
+        var s = String(priceNum);
+        for (var i = 0; i < s.length; i++) {
+          if (i > 0 && (s.length - i) % 3 === 0) priceStr += ',';
+          priceStr += s[i];
+        }
+
+        cardsHTML += '<a href="' + (r.url || '#') + '" target="_blank" rel="noopener" style="text-decoration:none;display:block">'
+          + '<div style="' + borderStyle + ';border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;background:#fff">'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:14px;font-weight:700;color:#1D1D1D">' + r.store + (isCheapest ? ' <span style="background:#2ECC71;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600">Mejor precio</span>' : '') + '</div>'
+          + '<div style="font-size:11px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">' + (r.name || '') + '</div>'
+          + (diff ? '<div style="font-size:11px;color:' + diffColor + ';font-weight:600;margin-top:2px">' + diff + '</div>' : '')
+          + '</div>'
+          + '<div style="font-size:22px;font-weight:800;color:#1D1D1D;margin-left:12px">\u0024' + priceStr + '</div>'
+          + '</div></a>';
+      });
+
+      section.innerHTML = '<div style="padding:16px 0">'
+        + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
+        + cardsHTML
+        + '</div>';
+    })
+    .catch(function(err) {
+      section.innerHTML = '<div style="padding:16px 0">'
+        + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
+        + '<div style="color:#999;font-size:13px">Error al buscar precios: ' + err.message + '</div></div>';
+    });
 }
 
 // ============ SIZE SELECTION ============
