@@ -1612,7 +1612,7 @@ function displayProduct(rows, scannedCode) {
       <div class="product-info">
         ${displayBrand ? `<div class="product-brand">${displayBrand}</div>` : ''}
         <div class="product-name">${displayName}</div>
-        ${priceHTML}
+        <div id="priceSlot"></div>
         ${estilo && estilo !== '(Sin valor)' ? `<div class="product-sku">Estilo: ${estilo}</div>` : ''}
         ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
         <div class="product-barcode-label">UPC: ${scannedCode}</div>
@@ -1632,6 +1632,12 @@ function displayProduct(rows, scannedCode) {
         <span>Imagen no disponible</span>
       </div>
     </template>`;
+
+  // Insert price separately to avoid template literal issues
+  var priceSlot = document.getElementById('priceSlot');
+  if (priceSlot) {
+    priceSlot.innerHTML = priceHTML;
+  }
 
   // Async: fetch image from Algolia if no image yet
   if (!imageUrl || !String(imageUrl).trim()) {
