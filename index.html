@@ -1175,11 +1175,27 @@ async function fetchProductImage(description, brand, estilo) {
   const cacheKey = estilo || (brand + ' ' + description);
   if (imageCache[cacheKey]) return imageCache[cacheKey];
 
-  // Try multiple search strategies
+  // Strategy 1: Direct CDN URL using Estilo (exact color match)
+  if (estilo) {
+    const directUrl = `https://site-product.innovasport.com/img-test/${estilo}/${estilo}_1-1200x1200.jpg`;
+    const works = await new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = directUrl;
+    });
+    if (works) {
+      imageCache[cacheKey] = directUrl;
+      try { localStorage.setItem('trackinn_imgcache', JSON.stringify(imageCache)); } catch(e) {}
+      return directUrl;
+    }
+  }
+
+  // Strategy 2: Algolia search with Estilo matching
   const queries = [];
+  if (estilo) queries.push(estilo);
   if (brand && description) queries.push(brand + ' ' + description);
   if (description) queries.push(description);
-  if (brand) queries.push(brand);
 
   for (const query of queries) {
     try {
@@ -1202,14 +1218,12 @@ async function fetchProductImage(description, brand, estilo) {
       const data = await response.json();
 
       if (data.hits && data.hits.length > 0) {
-        // Try to match by estilo in the code_string
         let bestHit = null;
         if (estilo) {
           bestHit = data.hits.find(h =>
             h.code_string && h.code_string.includes(estilo)
           );
         }
-        // Fallback: first hit with an image
         if (!bestHit) {
           bestHit = data.hits.find(h => h.image_string) || data.hits[0];
         }
@@ -1449,7 +1463,16 @@ function displayProduct(rows, scannedCode) {
   // Debug - remove later
   // Build price HTML
   let priceHTML = '';
-  const formatPrice = (n) => '$' + Number(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const formatPrice = (n) => {
+    const num = Math.round(Number(n));
+    const str = String(num);
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 === 0) result += ',';
+      result += str[i];
+    }
+    return '$' + result;
+  };
   const origNum = Number(precioOriginal);
   const actualNum = Number(precioActual);
 
