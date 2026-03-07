@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trackinn-v10';
+const CACHE_NAME = 'trackinn-v11';
 const ASSETS = [
   '/index.html',
   '/manifest.json'

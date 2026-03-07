@@ -1699,16 +1699,17 @@ function displayProduct(rows, scannedCode) {
   }
 
   // Async: fetch competitor prices
-  const compareQuery = estilo && estilo !== '(Sin valor)' ? estilo : (brand + ' ' + description).trim();
-  if (compareQuery) {
-    fetchCompetitorPrices(compareQuery, actualNum || origNum);
+  const compareEstilo = estilo && estilo !== '(Sin valor)' ? estilo : '';
+  const compareName = (brand + ' ' + description).trim();
+  if (compareName || compareEstilo) {
+    fetchCompetitorPrices(compareName, compareEstilo, actualNum || origNum);
   }
 }
 
 // ============ PRICE COMPARISON ============
 const PRICE_API = 'https://trackinn-price-api.vercel.app/api/prices';
 
-function fetchCompetitorPrices(query, ourPrice) {
+function fetchCompetitorPrices(name, estilo, ourPrice) {
   var section = document.getElementById('priceCompareSection');
   if (!section) return;
 
@@ -1719,7 +1720,9 @@ function fetchCompetitorPrices(query, ourPrice) {
     + 'Buscando en otras tiendas...</div>'
     + '</div>';
 
-  fetch(PRICE_API + '?q=' + encodeURIComponent(query))
+  var params = '?name=' + encodeURIComponent(name);
+  if (estilo) params += '&estilo=' + encodeURIComponent(estilo);
+  fetch(PRICE_API + params)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var results = data.results || [];
