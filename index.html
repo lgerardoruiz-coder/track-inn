@@ -1001,6 +1001,12 @@ html, body {
             <div class="scan-line"></div>
           </div>
         </div>
+        <div style="display:flex;justify-content:center;gap:16px;margin-top:12px">
+          <button id="torchBtn" onclick="toggleTorch()" style="display:none;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;cursor:pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Linterna
+          </button>
+        </div>
         <div class="scanner-instruction">
           <strong>Apunta al codigo de barras</strong> del producto<br>para obtener precio e inventario
         </div>
@@ -1742,9 +1748,10 @@ function startScanner() {
   html5QrCode = new Html5Qrcode('scanner-reader');
 
   const config = {
-    fps: 10,
-    qrbox: { width: 250, height: 150 },
+    fps: 15,
+    qrbox: { width: 280, height: 120 },
     aspectRatio: 1.0,
+    disableFlip: false,
     formatsToSupport: [
       Html5QrcodeSupportedFormats.EAN_13,
       Html5QrcodeSupportedFormats.EAN_8,
@@ -1765,6 +1772,32 @@ function startScanner() {
     () => {} // ignore scan failures
   ).then(() => {
     scannerRunning = true;
+    // Apply advanced camera settings for better focus
+    try {
+      const videoEl = document.querySelector('#scanner-reader video');
+      if (videoEl && videoEl.srcObject) {
+        const track = videoEl.srcObject.getVideoTracks()[0];
+        const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+        const advanced = {};
+        // Continuous autofocus
+        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+          advanced.focusMode = 'continuous';
+        }
+        // Zoom 2x for closer barcode reading
+        if (capabilities.zoom) {
+          advanced.zoom = Math.min(2.0, capabilities.zoom.max);
+        }
+        // Torch support - save track for later
+        if (capabilities.torch) {
+          window._cameraTrack = track;
+          var torchBtn = document.getElementById('torchBtn');
+          if (torchBtn) torchBtn.style.display = 'flex';
+        }
+        if (Object.keys(advanced).length > 0) {
+          track.applyConstraints({ advanced: [advanced] });
+        }
+      }
+    } catch(e) { console.warn('Camera settings:', e); }
   }).catch(err => {
     console.warn('Camera error:', err);
     readerEl.innerHTML = '<div style="color:#666;text-align:center;padding:60px 20px;font-size:14px;">' +
@@ -1780,6 +1813,17 @@ function stopScanner() {
     }).catch(() => {
       scannerRunning = false;
     });
+  }
+}
+
+let torchOn = false;
+function toggleTorch() {
+  if (!window._cameraTrack) return;
+  torchOn = !torchOn;
+  window._cameraTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+  var btn = document.getElementById('torchBtn');
+  if (btn) {
+    btn.style.background = torchOn ? 'rgba(255,200,0,0.4)' : 'rgba(255,255,255,0.15)';
   }
 }
 
