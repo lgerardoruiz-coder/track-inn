@@ -1460,11 +1460,11 @@ function displayProduct(rows, scannedCode) {
   const precioActual = getField('Precio Actual') || getField('PrecioActual') || '';
   const imageUrl = getField('Imagen') || getField('Foto') || '';
 
-  // Debug - remove later
   // Build price HTML
   let priceHTML = '';
   const formatPrice = (n) => {
     const num = Math.round(Number(n));
+    if (isNaN(num) || num === 0) return '$0';
     const str = String(num);
     let result = '';
     for (let i = 0; i < str.length; i++) {
@@ -1473,6 +1473,13 @@ function displayProduct(rows, scannedCode) {
     }
     return '$' + result;
   };
+
+  // Debug: show all keys and price values found
+  const allKeys = Object.keys(first).join(' | ');
+  const rawOrig = first['Precio Original'];
+  const rawActual = first['Precio Actual'];
+  const debugInfo = `Keys: ${allKeys} /// PO raw="${rawOrig}" PA raw="${rawActual}" getField PO="${precioOriginal}" PA="${precioActual}"`;
+
   const origNum = Number(precioOriginal);
   const actualNum = Number(precioActual);
 
@@ -1488,6 +1495,8 @@ function displayProduct(rows, scannedCode) {
     priceHTML = `<div class="price-section"><span class="current-price">${formatPrice(actualNum)}</span></div>`;
   } else if (origNum > 0) {
     priceHTML = `<div class="price-section"><span class="current-price">${formatPrice(origNum)}</span></div>`;
+  } else {
+    priceHTML = `<div class="price-section"><span class="current-price" style="font-size:14px;color:red">Sin precio - ${debugInfo}</span></div>`;
   }
 
   // Build stores/inventory HTML from all matching rows (same UPC across sucursales)
