@@ -1612,7 +1612,9 @@ function displayProduct(rows, scannedCode) {
       <div class="product-info">
         ${displayBrand ? `<div class="product-brand">${displayBrand}</div>` : ''}
         <div class="product-name">${displayName}</div>
-        <div id="priceSlot"></div>
+        <div style="background:#FFEB3B;padding:12px;margin:8px 0;border-radius:8px;font-size:14px;color:#000;word-break:break-all">DEBUG KEYS: ${keys.join(', ')}</div>
+        <div style="background:#E63946;padding:12px;margin:8px 0;border-radius:8px;font-size:18px;color:#fff;font-weight:800">PRECIO HARDCODED: $1,099</div>
+        <div id="priceSlot" style="background:#4CAF50;padding:12px;margin:8px 0;border-radius:8px;min-height:40px"></div>
         ${estilo && estilo !== '(Sin valor)' ? `<div class="product-sku">Estilo: ${estilo}</div>` : ''}
         ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
         <div class="product-barcode-label">UPC: ${scannedCode}</div>
@@ -1636,7 +1638,8 @@ function displayProduct(rows, scannedCode) {
   // Insert price separately to avoid template literal issues
   var priceSlot = document.getElementById('priceSlot');
   if (priceSlot) {
-    priceSlot.innerHTML = priceHTML;
+    var debugPrice = 'origNum=' + origNum + ' actualNum=' + actualNum + ' raw PO=' + String(precioOriginal) + ' raw PA=' + String(precioActual);
+    priceSlot.innerHTML = '<div style="color:#fff;font-size:12px;margin-bottom:4px">' + debugPrice + '</div>' + priceHTML;
   }
 
   // Async: fetch image from Algolia if no image yet
