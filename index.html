@@ -329,8 +329,8 @@ html, body {
 .scanner-frame {
   position: relative;
   width: 100%;
-  max-width: 320px;
-  aspect-ratio: 4/3;
+  max-width: 340px;
+  aspect-ratio: 3/3.5;
   border-radius: 20px;
   overflow: hidden;
   background: #0d0d0d;
@@ -406,6 +406,7 @@ html, body {
 
 .manual-input-row {
   display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
@@ -1020,7 +1021,7 @@ html, body {
         <div class="manual-input-section">
           <div class="manual-label">o ingresa el codigo manualmente</div>
           <div class="manual-input-row">
-            <input type="text" id="manualBarcode" placeholder="Codigo de barras..." inputmode="numeric">
+            <input type="text" id="manualBarcode" placeholder="UPC o Estilo del producto...">
             <button onclick="manualSearch()">Buscar</button>
           </div>
         </div>
@@ -1417,15 +1418,20 @@ function lookupBarcode(code) {
 
   // Find ALL rows matching this UPC
   const matchingRows = productData.filter(r => String(r.UPC).trim() === normalizedCode);
-
   if (matchingRows.length > 0) return matchingRows;
 
-  // Fallback: search in Estilo or any other column
-  const fallbackRows = productData.filter(r => {
-    return Object.values(r).some(v => String(v).trim() === normalizedCode);
-  });
+  // Fallback: search by Estilo
+  const estiloRows = productData.filter(r => String(r['Estilo'] || '').trim() === normalizedCode);
+  if (estiloRows.length > 0) return estiloRows;
 
-  return fallbackRows.length > 0 ? fallbackRows : null;
+  // Fallback: partial match on Estilo (e.g. user types "FQ1833" matches "FQ1833-001")
+  const partialEstilo = productData.filter(r => {
+    const est = String(r['Estilo'] || '').trim();
+    return est && normalizedCode.length >= 4 && (est.includes(normalizedCode) || normalizedCode.includes(est));
+  });
+  if (partialEstilo.length > 0) return partialEstilo;
+
+  return null;
 }
 
 // Find related products (same Estilo = same model, different sizes)
@@ -1952,7 +1958,7 @@ function manualSearch() {
   const input = document.getElementById('manualBarcode');
   const code = input.value.trim();
   if (!code) {
-    showToast('Ingresa un codigo de barras');
+    showToast('Ingresa un UPC o Estilo');
     return;
   }
   processBarcode(code);
