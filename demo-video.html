@@ -752,28 +752,32 @@ function showTap(el, x, y) {
 function runDemo() {
   document.getElementById('playOverlay').style.display = 'none';
 
-  // Timeline (2 seconds total)
+  // Timeline (3 seconds total)
 
   // 0.0s - Scanner already showing
   goScene(1);
 
-  // 0.5s - Scan flash + success
+  // 1.0s - Scan flash + success
   setTimeout(function() {
     var flash = document.getElementById('scanFlash');
     flash.classList.add('flash');
     document.getElementById('scanLine').style.animationPlayState = 'paused';
-    document.getElementById('scanSuccess').classList.add('show');
-  }, 500);
+  }, 1000);
 
-  // 0.9s - Go to product result
+  // 1.2s - Checkmark
+  setTimeout(function() {
+    document.getElementById('scanSuccess').classList.add('show');
+  }, 1200);
+
+  // 1.7s - Go to product result
   setTimeout(function() {
     goScene(2);
-  }, 900);
+  }, 1700);
 
-  // 1.0s - Animate price box
+  // 1.9s - Animate price box
   setTimeout(function() {
     document.getElementById('priceBox').classList.add('show');
-  }, 1000);
+  }, 1900);
 
 }
 
