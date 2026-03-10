@@ -168,8 +168,26 @@ html, body {
 .fake-camera {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  opacity: 0.7;
+  background: linear-gradient(160deg, #2a2a3a 0%, #1a1a2e 30%, #16213e 60%, #1a2a3a 100%);
+  opacity: 0.85;
+}
+
+/* Blurred sneaker in background to simulate camera view */
+.fake-camera-product {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 50%;
+  opacity: 0.15;
+  filter: blur(3px);
+  z-index: 1;
+}
+
+.fake-camera-product img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Barcode image in camera */
@@ -351,14 +369,15 @@ html, body {
 
 .product-img-area {
   width: 100%;
-  height: 200px;
-  background: var(--white);
+  height: 220px;
+  background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
   position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
 
 .product-badge {
@@ -625,6 +644,9 @@ html, body {
     <div class="s1-body">
       <div class="scanner-frame" id="scannerFrame">
         <div class="fake-camera"></div>
+        <div class="fake-camera-product">
+          <img src="https://site-product.innovasport.com/img-test/IE2698/IE2698_1-1200x1200.jpg" alt="">
+        </div>
         <div class="fake-barcode">
           <div class="barcode-lines" id="barcodeLines"></div>
           <div class="barcode-num">4 065449 799621</div>
@@ -656,10 +678,10 @@ html, body {
     <div class="s2-body">
       <div class="product-img-area">
         <div class="product-badge">ADIDAS</div>
-        <div class="shoe-icon">👟</div>
+        <img src="https://site-product.innovasport.com/img-test/IE2698/IE2698_1-1200x1200.jpg" alt="Ultraboost" style="width:100%;height:100%;object-fit:contain;padding:8px;position:relative;z-index:1" onerror="this.outerHTML='<div class=shoe-icon>👟</div>'">
       </div>
       <div class="p-brand">ADIDAS</div>
-      <div class="p-name">Ultraboost Light 24</div>
+      <div class="p-name">Ultraboost Light</div>
       <div class="price-box" id="priceBox">
         <div class="price-label">Precio Original</div>
         <div class="price-original">$3,999</div>
@@ -669,7 +691,7 @@ html, body {
           <div class="discount-badge">-30%</div>
         </div>
       </div>
-      <div class="p-estilo">Estilo: HQ6339-001</div>
+      <div class="p-estilo">Estilo: IE2698</div>
       <div class="p-estilo">Talla: 27 MX</div>
       <span class="p-category">Running</span>
     </div>
