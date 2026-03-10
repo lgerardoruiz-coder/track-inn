@@ -752,32 +752,28 @@ function showTap(el, x, y) {
 function runDemo() {
   document.getElementById('playOverlay').style.display = 'none';
 
-  // Timeline (3 seconds total)
+  // Timeline (2 seconds total)
 
-  // 0.0s - Scanner already showing (skip store select)
+  // 0.0s - Scanner already showing
   goScene(1);
 
-  // 0.8s - Scan flash + success
+  // 0.5s - Scan flash + success
   setTimeout(function() {
     var flash = document.getElementById('scanFlash');
     flash.classList.add('flash');
     document.getElementById('scanLine').style.animationPlayState = 'paused';
-  }, 800);
-
-  // 1.0s - Show success checkmark
-  setTimeout(function() {
     document.getElementById('scanSuccess').classList.add('show');
-  }, 1000);
+  }, 500);
 
-  // 1.4s - Go to product result
+  // 0.9s - Go to product result
   setTimeout(function() {
     goScene(2);
-  }, 1400);
+  }, 900);
 
-  // 1.6s - Animate price box
+  // 1.0s - Animate price box
   setTimeout(function() {
     document.getElementById('priceBox').classList.add('show');
-  }, 1600);
+  }, 1000);
 
 }
 
