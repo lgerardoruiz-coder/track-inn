@@ -752,32 +752,46 @@ function showTap(el, x, y) {
 function runDemo() {
   document.getElementById('playOverlay').style.display = 'none';
 
-  // Timeline (3 seconds total)
+  // Timeline (~7 seconds total: 4s intro + 3s scan/result)
 
-  // 0.0s - Scanner already showing
-  goScene(1);
+  // 0.0s - Store selection visible
 
-  // 1.0s - Scan flash + success
+  // 1.5s - Highlight Innovasport + tap
+  setTimeout(function() {
+    var btn = document.getElementById('btnInnovasport');
+    btn.classList.add('highlight');
+    var tap = document.getElementById('tap0');
+    var rect = btn.getBoundingClientRect();
+    var phoneRect = document.getElementById('phone').getBoundingClientRect();
+    showTap(tap, rect.left - phoneRect.left + rect.width/2 - 25, rect.top - phoneRect.top + rect.height/2 - 25);
+  }, 1500);
+
+  // 2.2s - Go to scanner
+  setTimeout(function() {
+    goScene(1);
+  }, 2200);
+
+  // 4.0s - Scan flash
   setTimeout(function() {
     var flash = document.getElementById('scanFlash');
     flash.classList.add('flash');
     document.getElementById('scanLine').style.animationPlayState = 'paused';
-  }, 1000);
+  }, 4000);
 
-  // 1.2s - Checkmark
+  // 4.2s - Checkmark
   setTimeout(function() {
     document.getElementById('scanSuccess').classList.add('show');
-  }, 1200);
+  }, 4200);
 
-  // 1.7s - Go to product result
+  // 4.7s - Go to product result
   setTimeout(function() {
     goScene(2);
-  }, 1700);
+  }, 4700);
 
-  // 1.9s - Animate price box
+  // 4.9s - Animate price box
   setTimeout(function() {
     document.getElementById('priceBox').classList.add('show');
-  }, 1900);
+  }, 4900);
 
 }
 
