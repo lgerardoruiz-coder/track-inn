@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track INN - Presentación a Dirección</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red: #E63946;
+  --black: #1D1D1D;
+  --dark-gray: #2B2B2B;
+  --white: #FFFFFF;
+  --green: #2ECC71;
+  --gray: #95A5A6;
+  --light-bg: #F8F9FA;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #0a0a0a;
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+/* ========== NAVIGATION ========== */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.nav-logo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.nav-logo span { color: var(--red); }
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-links a {
+  color: var(--gray);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--white);
+  background: rgba(230,57,70,0.15);
+}
+
+/* ========== SLIDES / SECTIONS ========== */
+.slide {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 60px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide-number {
+  position: absolute;
+  top: 80px;
+  right: 40px;
+  font-size: 120px;
+  font-weight: 900;
+  color: rgba(230,57,70,0.06);
+  line-height: 1;
+}
+
+/* ========== SLIDE 1: PORTADA ========== */
+#portada {
+  background: radial-gradient(ellipse at 30% 50%, rgba(230,57,70,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(230,57,70,0.05) 0%, transparent 50%),
+              #0a0a0a;
+}
+
+.portada-content {
+  text-align: center;
+  max-width: 800px;
+}
+
+.portada-badge {
+  display: inline-block;
+  background: rgba(230,57,70,0.15);
+  color: var(--red);
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.portada-title {
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.portada-title span { color: var(--red); }
+
+.portada-subtitle {
+  font-size: 22px;
+  color: var(--gray);
+  font-weight: 300;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.portada-meta {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+}
+
+.portada-meta span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ========== SLIDE 2: EL PROBLEMA ========== */
+#problema {
+  background: #0a0a0a;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+  max-width: 700px;
+}
+
+.section-tag {
+  display: inline-block;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.section-desc {
+  font-size: 17px;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.problem-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.problem-card:hover {
+  background: rgba(230,57,70,0.05);
+  border-color: rgba(230,57,70,0.2);
+  transform: translateY(-4px);
+}
+
+.problem-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.problem-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.problem-text {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.6;
+}
+
+/* ========== SLIDE 3: LA SOLUCION ========== */
+#solucion {
+  background: linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%);
+}
+
+.solution-layout {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.solution-text {
+  flex: 1;
+}
+
+.solution-steps {
+  list-style: none;
+  margin-top: 32px;
+}
+
+.solution-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: var(--red);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.step-content h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.step-content p {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+.solution-visual {
+  flex: 0 0 380px;
+}
+
+.demo-frame {
+  width: 380px;
+  height: 760px;
+  border-radius: 30px;
+  border: 3px solid #333;
+  overflow: hidden;
+  box-shadow: 0 20px 80px rgba(230,57,70,0.15), 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.demo-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  transform-origin: top left;
+}
+
+/* ========== SLIDE 4: DEMO EN VIVO ========== */
+#demo-live {
+  background: var(--white);
+  color: var(--black);
+}
+
+#demo-live .section-tag { color: var(--red); }
+#demo-live .section-desc { color: #666; }
+
+.live-demo-container {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.live-frame {
+  width: 380px;
+  height: 760px;
+  border-radius: 30px;
+  border: 3px solid #ddd;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  flex-shrink: 0;
+}
+
+.live-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.live-features {
+  flex: 1;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--light-bg);
+  transition: all 0.3s;
+}
+
+.feature-item:hover {
+  background: #FFF3F3;
+  transform: translateX(4px);
+}
+
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background: var(--red);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.feature-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+
+.feature-desc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* ========== SLIDE 5: COMPARACION DE PRECIOS ========== */
+#comparacion {
+  background: #0a0a0a;
+}
+
+.stores-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 900px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.store-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.store-card:hover {
+  border-color: var(--red);
+  transform: translateY(-4px);
+}
+
+.store-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.store-method {
+  font-size: 11px;
+  color: var(--gray);
+  line-height: 1.4;
+}
+
+.store-status {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-active {
+  background: rgba(46,204,113,0.15);
+  color: var(--green);
+}
+
+.status-dev {
+  background: rgba(243,156,18,0.15);
+  color: var(--orange);
+}
+
+/* ========== SLIDE 6: IMPACTO ========== */
+#impacto {
+  background: linear-gradient(180deg, #0a0a0a 0%, #100a0a 100%);
+}
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.impact-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 36px 24px;
+  text-align: center;
+}
+
+.impact-number {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.impact-label {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.4;
+}
+
+.impact-sublabel {
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+  margin-top: 4px;
+}
+
+/* ========== SLIDE 7: ROADMAP ========== */
+#roadmap {
+  background: #0a0a0a;
+}
+
+.roadmap-timeline {
+  display: flex;
+  gap: 0;
+  max-width: 1000px;
+  width: 100%;
+  position: relative;
+}
+
+.roadmap-timeline::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(255,255,255,0.08);
+}
+
+.roadmap-item {
+  flex: 1;
+  text-align: center;
+  padding: 0 16px;
+  position: relative;
+}
+
+.roadmap-dot {
+  width: 16px;
+  height: 16px;
+  background: var(--red);
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 6px rgba(230,57,70,0.3);
+}
+
+.roadmap-dot.done {
+  background: var(--green);
+  box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 6px rgba(46,204,113,0.3);
+}
+
+.roadmap-dot.current {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 6px rgba(230,57,70,0.3); }
+  50% { box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 12px rgba(230,57,70,0.15); }
+}
+
+.roadmap-phase {
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.roadmap-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.roadmap-desc {
+  font-size: 13px;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+/* ========== SLIDE 8: CIERRE ========== */
+#cierre {
+  background: radial-gradient(ellipse at 50% 50%, rgba(230,57,70,0.1) 0%, transparent 60%),
+              #0a0a0a;
+}
+
+.cierre-logo {
+  font-size: 80px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  margin-bottom: 16px;
+}
+.cierre-logo span { color: var(--red); }
+
+.cierre-tagline {
+  font-size: 24px;
+  color: var(--gray);
+  font-weight: 300;
+  margin-bottom: 48px;
+}
+
+.cierre-cta {
+  display: inline-block;
+  background: var(--red);
+  color: white;
+  padding: 16px 48px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+  border: none;
+}
+
+.cierre-cta:hover {
+  background: #c0313e;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(230,57,70,0.4);
+}
+
+/* ========== ANIMATIONS ========== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .slide { padding: 100px 30px 60px; }
+  .solution-layout, .live-demo-container { flex-direction: column; }
+  .solution-visual { flex: none; }
+  .demo-frame, .live-frame { width: 320px; height: 640px; }
+  .problem-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .stores-grid { grid-template-columns: repeat(2, 1fr); }
+  .impact-grid { grid-template-columns: repeat(2, 1fr); }
+  .roadmap-timeline { flex-direction: column; gap: 24px; }
+  .roadmap-timeline::before { display: none; }
+  .portada-title { font-size: 48px; }
+  .portada-meta { flex-direction: column; gap: 8px; align-items: center; }
+  .nav-links { display: none; }
+}
+
+/* ========== FULLSCREEN BUTTON ========== */
+.fullscreen-hint {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(230,57,70,0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+.fullscreen-hint:hover {
+  background: var(--red);
+  transform: translateY(-2px);
+}
+
+/* ========== PROGRESS BAR ========== */
+.progress-bar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  height: 3px;
+  background: var(--red);
+  z-index: 999;
+  transition: width 0.3s ease;
+}
+
+/* ========== KEYBOARD NAV HINT ========== */
+.key-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.key-hint span {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--gray);
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-logo">TRACK <span>INN</span></div>
+  <div class="nav-links">
+    <a href="#portada">Inicio</a>
+    <a href="#problema">Problema</a>
+    <a href="#solucion">Solución</a>
+    <a href="#demo-live">App en Vivo</a>
+    <a href="#comparacion">Competencia</a>
+    <a href="#impacto">Impacto</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+</nav>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ==================== SLIDE 1: PORTADA ==================== -->
+<section class="slide" id="portada">
+  <div class="slide-number">01</div>
+  <div class="portada-content fade-in">
+    <div class="portada-badge">Presentación a Dirección</div>
+    <h1 class="portada-title">TRACK <span>INN</span></h1>
+    <p class="portada-subtitle">
+      El track que mueve tu tienda.<br>
+      Herramienta de escaneo que conecta al cliente con el precio real del producto.
+    </p>
+    <div class="portada-meta">
+      <span>Marzo 2026</span>
+      <span>Innovasport &amp; Innvictus</span>
+      <span>v1.0</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 2: EL PROBLEMA ==================== -->
+<section class="slide" id="problema">
+  <div class="slide-number">02</div>
+  <div class="section-header fade-in">
+    <div class="section-tag">El Problema</div>
+    <h2 class="section-title">El producto no se mueve si el cliente no conoce su precio</h2>
+    <p class="section-desc">
+      Miles de productos en tienda sin etiqueta de precio o con precios desactualizados.
+      El cliente no compra lo que no entiende.
+    </p>
+  </div>
+  <div class="problem-grid fade-in">
+    <div class="problem-card">
+      <div class="problem-icon">🏷️</div>
+      <h3 class="problem-title">Sin Etiqueta</h3>
+      <p class="problem-text">Producto en piso de venta sin precio visible. El cliente lo ve, lo toca, pero no sabe cuánto cuesta y lo deja.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">💰</div>
+      <h3 class="problem-title">Precio Alto Visible</h3>
+      <p class="problem-text">El producto muestra su precio original pero ya tiene promoción. El cliente ve $3,999 cuando en realidad está en $2,799.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🚶</div>
+      <h3 class="problem-title">Cliente Perdido</h3>
+      <p class="problem-text">Sin información clara, el cliente se va. Cada producto sin precio es una venta perdida que no se recupera.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 3: LA SOLUCIÓN ==================== -->
+<section class="slide" id="solucion">
+  <div class="slide-number">03</div>
+  <div class="solution-layout">
+    <div class="solution-text fade-in">
+      <div class="section-tag">La Solución</div>
+      <h2 class="section-title">Track INN: Escanea y conoce el precio real</h2>
+      <p class="section-desc">
+        Una aplicación web (PWA) que permite al asociado de tienda o al cliente
+        escanear el código de barras de cualquier producto y ver al instante su precio final,
+        promociones activas y descuentos aplicados.
+      </p>
+      <ul class="solution-steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Selecciona la tienda</h4>
+            <p>Innovasport o Innvictus. Cada una con su propia base de datos de precios.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Escanea el código de barras</h4>
+            <p>La cámara del celular lee el UPC del producto en tiempo real.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Ve el precio final</h4>
+            <p>Precio original, precio promocional, porcentaje de descuento y datos del producto.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Compara con competencia</h4>
+            <p>Consulta el precio del mismo producto en Martí, Liverpool, Nike, Adidas y más.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="solution-visual fade-in">
+      <div class="demo-frame">
+        <iframe src="demo-video.html" title="Demo Track INN"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 4: APP EN VIVO ==================== -->
+<section class="slide" id="demo-live">
+  <div class="slide-number">04</div>
+  <div class="live-demo-container">
+    <div class="live-frame fade-in">
+      <iframe src="index.html" title="Track INN App"></iframe>
+    </div>
+    <div class="live-features fade-in">
+      <div class="section-tag">App en Vivo</div>
+      <h2 class="section-title" style="color:var(--black)">Funcionalidades Principales</h2>
+      <div style="margin-top:28px">
+        <div class="feature-item">
+          <div class="feature-icon">📷</div>
+          <div>
+            <div class="feature-title">Escáner de Código de Barras</div>
+            <div class="feature-desc">Usa la cámara del celular para leer UPC en tiempo real con html5-qrcode.</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📊</div>
+          <div>
+            <div class="feature-title">Base de Datos Excel</div>
+            <div class="feature-desc">Lee directamente el archivo Track_INN.xlsx con estilos, UPCs, precios y marcas.</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔍</div>
+          <div>
+            <div class="feature-title">Comparación Multi-Tienda</div>
+            <div class="feature-desc">API conectada a Martí, Liverpool, Nike, Adidas, Palacio, Amazon y Deportenis.</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📱</div>
+          <div>
+            <div class="feature-title">PWA - Sin Instalación</div>
+            <div class="feature-desc">Funciona como app nativa desde el navegador. Se puede agregar a pantalla de inicio.</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <div>
+            <div class="feature-title">Funciona Offline</div>
+            <div class="feature-desc">Service Worker con cache v15 para funcionar sin conexión en piso de venta.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 5: COMPARACIÓN DE PRECIOS ==================== -->
+<section class="slide" id="comparacion">
+  <div class="slide-number">05</div>
+  <div class="section-header fade-in">
+    <div class="section-tag">Inteligencia Competitiva</div>
+    <h2 class="section-title">Comparación en Tiempo Real con 7 Tiendas</h2>
+    <p class="section-desc">
+      Track INN no solo muestra el precio interno. Compara automáticamente contra la competencia
+      para que el asociado tenga argumentos de venta reales.
+    </p>
+  </div>
+  <div class="stores-grid fade-in">
+    <div class="store-card">
+      <div class="store-name">Martí</div>
+      <div class="store-method">VTEX Intelligent Search API</div>
+      <div class="store-status status-active">Activo</div>
+    </div>
+    <div class="store-card">
+      <div class="store-name">Palacio de Hierro</div>
+      <div class="store-method">Constructor.io API</div>
+      <div class="store-status status-active">Activo</div>
+    </div>
+    <div class="store-card">
+      <div class="store-name">Nike MX</div>
+      <div class="store-method">Nike API Directa</div>
+      <div class="store-status status-active">Activo</div>
+    </div>
+    <div class="store-card">
+      <div class="store-name">Liverpool</div>
+      <div class="store-method">Web Scraping + JSON-LD</div>
+      <div class="store-status status-active">Activo</div>
+    </div>
+    <div class="store-card">
+      <div class="store-name">Amazon MX</div>
+      <div class="store-method">Web Scraping</div>
+      <div class="store-status status-active">Activo</div>
+    </div>
+    <div class="store-card">
+      <div class="store-name">Adidas MX</div>
+      <div class="store-method">Web Scraping</div>
+      <div class="store-status status-active">Activo</div>
+    </div>
+    <div class="store-card">
+      <div class="store-name">Deportenis</div>
+      <div class="store-method">Web Scraping</div>
+      <div class="store-status status-active">Activo</div>
+    </div>
+    <div class="store-card" style="border-style:dashed;opacity:0.6">
+      <div class="store-name">+ Próximas</div>
+      <div class="store-method">Puma, Under Armour, etc.</div>
+      <div class="store-status status-dev">Próximamente</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 6: IMPACTO ==================== -->
+<section class="slide" id="impacto">
+  <div class="slide-number">06</div>
+  <div class="section-header fade-in">
+    <div class="section-tag">Impacto Esperado</div>
+    <h2 class="section-title">Números que hablan</h2>
+    <p class="section-desc">
+      Darle al cliente la información correcta en el momento correcto se traduce directamente en ventas.
+    </p>
+  </div>
+  <div class="impact-grid fade-in">
+    <div class="impact-card">
+      <div class="impact-number">+30%</div>
+      <div class="impact-label">Conversión en piso</div>
+      <div class="impact-sublabel">Producto con precio visible vs sin precio</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-number">0</div>
+      <div class="impact-label">Costo de instalación</div>
+      <div class="impact-sublabel">PWA - funciona desde el navegador</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-number">2s</div>
+      <div class="impact-label">Tiempo de consulta</div>
+      <div class="impact-sublabel">Escanea y obtén precio al instante</div>
+    </div>
+    <div class="impact-card">
+      <div class="impact-number">7</div>
+      <div class="impact-label">Tiendas comparadas</div>
+      <div class="impact-sublabel">Inteligencia competitiva en la mano</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 7: ROADMAP ==================== -->
+<section class="slide" id="roadmap">
+  <div class="slide-number">07</div>
+  <div class="section-header fade-in">
+    <div class="section-tag">Siguiente Paso</div>
+    <h2 class="section-title">Roadmap de Implementación</h2>
+  </div>
+  <div class="roadmap-timeline fade-in">
+    <div class="roadmap-item">
+      <div class="roadmap-dot done"></div>
+      <div class="roadmap-phase">Fase 1</div>
+      <div class="roadmap-title">MVP Funcional</div>
+      <div class="roadmap-desc">App con escáner, base de datos Excel y consulta de precios internos. Completado.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot done"></div>
+      <div class="roadmap-phase">Fase 2</div>
+      <div class="roadmap-title">Comparación Competitiva</div>
+      <div class="roadmap-desc">API de precios conectada a 7 retailers. Búsqueda automática por estilo. Completado.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot current"></div>
+      <div class="roadmap-phase">Fase 3</div>
+      <div class="roadmap-title">Piloto en Tienda</div>
+      <div class="roadmap-desc">Implementación en tiendas piloto. Feedback de asociados. Ajustes en campo.</div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot"></div>
+      <div class="roadmap-phase">Fase 4</div>
+      <div class="roadmap-title">Rollout Nacional</div>
+      <div class="roadmap-desc">Despliegue en todas las tiendas. Dashboard de analytics. Reportes de uso.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SLIDE 8: CIERRE ==================== -->
+<section class="slide" id="cierre">
+  <div class="slide-number">08</div>
+  <div class="portada-content fade-in">
+    <h1 class="cierre-logo">TRACK <span>INN</span></h1>
+    <p class="cierre-tagline">El track que mueve tu tienda</p>
+    <button class="cierre-cta" onclick="document.getElementById('portada').scrollIntoView({behavior:'smooth'})">
+      Volver al Inicio
+    </button>
+  </div>
+</section>
+
+<!-- Keyboard nav hints -->
+<div class="key-hint">
+  <span>↑↓ Navegar</span>
+  <span>F11 Pantalla completa</span>
+</div>
+
+<!-- Fullscreen button -->
+<button class="fullscreen-hint" onclick="toggleFullscreen()">
+  Pantalla Completa
+</button>
+
+<script>
+// Intersection Observer for fade-in animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  // Update active nav link
+  const sections = document.querySelectorAll('.slide');
+  let current = '';
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - 100;
+    if (scrollTop >= sectionTop) {
+      current = section.getAttribute('id');
+    }
+  });
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + current) {
+      a.classList.add('active');
+    }
+  });
+});
+
+// Fullscreen toggle
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+// Keyboard navigation
+const slides = document.querySelectorAll('.slide');
+let currentSlide = 0;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+    e.preventDefault();
+    currentSlide = Math.min(currentSlide + 1, slides.length - 1);
+    slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+  }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+    e.preventDefault();
+    currentSlide = Math.max(currentSlide - 1, 0);
+    slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+  }
+  if (e.key === 'Home') {
+    e.preventDefault();
+    currentSlide = 0;
+    slides[0].scrollIntoView({ behavior: 'smooth' });
+  }
+  if (e.key === 'End') {
+    e.preventDefault();
+    currentSlide = slides.length - 1;
+    slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+  }
+  if (e.key === 'F11') {
+    e.preventDefault();
+    toggleFullscreen();
+  }
+});
+
+// Update currentSlide on scroll
+window.addEventListener('scroll', () => {
+  slides.forEach((slide, i) => {
+    const rect = slide.getBoundingClientRect();
+    if (rect.top >= -100 && rect.top < window.innerHeight / 2) {
+      currentSlide = i;
+    }
+  });
+});
+</script>
+
+</body>
+</html>
