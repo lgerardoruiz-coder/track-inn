@@ -248,7 +248,7 @@ html, body {
   box-shadow: 0 0 15px var(--red), 0 0 40px rgba(230, 57, 70, 0.4);
   z-index: 6;
   top: 45px;
-  animation: scanAnim 2s ease-in-out infinite;
+  animation: scanAnim 1s ease-in-out infinite;
 }
 
 @keyframes scanAnim {
@@ -752,58 +752,33 @@ function showTap(el, x, y) {
 function runDemo() {
   document.getElementById('playOverlay').style.display = 'none';
 
-  // Timeline (8 seconds total)
+  // Timeline (3 seconds total)
 
-  // 0.0s - Show store selection (already visible)
+  // 0.0s - Scanner already showing (skip store select)
+  goScene(1);
 
-  // 1.0s - Highlight Innovasport button + tap
-  setTimeout(function() {
-    var btn = document.getElementById('btnInnovasport');
-    btn.classList.add('highlight');
-    var tap = document.getElementById('tap0');
-    var rect = btn.getBoundingClientRect();
-    var phoneRect = document.getElementById('phone').getBoundingClientRect();
-    showTap(tap, rect.left - phoneRect.left + rect.width/2 - 25, rect.top - phoneRect.top + rect.height/2 - 25);
-  }, 1000);
-
-  // 1.6s - Go to scanner
-  setTimeout(function() {
-    goScene(1);
-  }, 1600);
-
-  // 3.8s - Scan flash + success
+  // 0.8s - Scan flash + success
   setTimeout(function() {
     var flash = document.getElementById('scanFlash');
     flash.classList.add('flash');
     document.getElementById('scanLine').style.animationPlayState = 'paused';
-  }, 3800);
+  }, 800);
 
-  // 4.0s - Show success checkmark
+  // 1.0s - Show success checkmark
   setTimeout(function() {
     document.getElementById('scanSuccess').classList.add('show');
-  }, 4000);
+  }, 1000);
 
-  // 4.6s - Go to product result
+  // 1.4s - Go to product result
   setTimeout(function() {
     goScene(2);
-  }, 4600);
+  }, 1400);
 
-  // 5.0s - Animate price box
+  // 1.6s - Animate price box
   setTimeout(function() {
     document.getElementById('priceBox').classList.add('show');
-  }, 5000);
+  }, 1600);
 
-  // 7.0s - Go to final screen
-  setTimeout(function() {
-    goScene(3);
-  }, 7000);
-
-  // 7.1s - Animate final logo
-  setTimeout(function() {
-    document.getElementById('finalLogo').classList.add('show');
-    document.getElementById('finalLine').classList.add('show');
-    document.getElementById('finalTagline').classList.add('show');
-  }, 7200);
 }
 
 document.getElementById('playOverlay').addEventListener('click', runDemo);
