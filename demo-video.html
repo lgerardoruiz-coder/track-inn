@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Track INN - Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red: #E63946;
+  --black: #1D1D1D;
+  --dark-gray: #2B2B2B;
+  --white: #FFFFFF;
+  --green: #2ECC71;
+  --gray: #95A5A6;
+}
+
+html, body {
+  font-family: 'Poppins', sans-serif;
+  background: #000;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone {
+  width: 100%;
+  max-width: 390px;
+  height: 100vh;
+  max-height: 844px;
+  background: var(--black);
+  position: relative;
+  overflow: hidden;
+}
+
+/* All scenes */
+.scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 40px 24px;
+}
+
+.scene.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scene.exit-left {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+/* ========== SCENE 0: STORE SELECT ========== */
+.s0-logo {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.s0-logo span { color: var(--red); }
+
+.s0-subtitle {
+  font-size: 14px;
+  color: var(--gray);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.s0-btn {
+  width: 100%;
+  max-width: 320px;
+  background: var(--dark-gray);
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 28px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.s0-btn.highlight {
+  border-color: var(--red);
+  background: #3a2a2a;
+  transform: scale(1.03);
+}
+
+.s0-btn-text {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: 2px;
+}
+
+.s0-hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 8px;
+}
+
+/* ========== SCENE 1: SCANNER ========== */
+.s1 {
+  padding: 0;
+  background: var(--black);
+}
+
+.s1-header {
+  width: 100%;
+  padding: 56px 20px 16px;
+  display: flex;
+  align-items: center;
+}
+
+.s1-back {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--dark-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s1-title {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+  margin-right: 40px;
+}
+
+.s1-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 16px;
+}
+
+.scanner-frame {
+  width: 100%;
+  max-width: 320px;
+  height: 380px;
+  border-radius: 20px;
+  background: #0a0a0a;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fake camera feed */
+.fake-camera {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  opacity: 0.7;
+}
+
+/* Barcode image in camera */
+.fake-barcode {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.barcode-lines {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 50px;
+}
+
+.barcode-lines div {
+  width: 3px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 1px;
+}
+
+.barcode-num {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+
+.corner {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  border-color: var(--red);
+  border-style: solid;
+  border-width: 0;
+  z-index: 5;
+}
+
+.c-tl { top: 35px; left: 35px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 10px; }
+.c-tr { top: 35px; right: 35px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 10px; }
+.c-bl { bottom: 35px; left: 35px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 10px; }
+.c-br { bottom: 35px; right: 35px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 10px; }
+
+.scan-line {
+  position: absolute;
+  left: 45px;
+  right: 45px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), var(--red), transparent);
+  box-shadow: 0 0 15px var(--red), 0 0 40px rgba(230, 57, 70, 0.4);
+  z-index: 6;
+  top: 45px;
+  animation: scanAnim 2s ease-in-out infinite;
+}
+
+@keyframes scanAnim {
+  0%, 100% { top: 45px; }
+  50% { top: calc(100% - 45px); }
+}
+
+.s1-instruction {
+  color: var(--gray);
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.s1-instruction strong { color: var(--white); }
+
+/* Scan flash */
+.scan-flash {
+  position: absolute;
+  inset: 0;
+  background: rgba(230, 57, 70, 0.3);
+  z-index: 10;
+  opacity: 0;
+  border-radius: 20px;
+}
+
+.scan-flash.flash {
+  animation: flashAnim 0.4s ease-out;
+}
+
+@keyframes flashAnim {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Success indicator */
+.scan-success {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 70px;
+  height: 70px;
+  background: var(--green);
+  border-radius: 50%;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-success.show {
+  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes popIn {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.scan-success svg {
+  width: 36px;
+  height: 36px;
+  stroke: white;
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+}
+
+.scan-success.show svg {
+  animation: drawCheck 0.4s 0.2s ease forwards;
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ========== SCENE 2: PRODUCT RESULT ========== */
+.s2 {
+  padding: 0;
+  background: var(--white);
+  justify-content: flex-start;
+}
+
+.s2-header {
+  width: 100%;
+  padding: 56px 20px 16px;
+  display: flex;
+  align-items: center;
+  background: var(--white);
+}
+
+.s2-back {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s2-title {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--black);
+  margin-right: 40px;
+}
+
+.s2-body {
+  width: 100%;
+  padding: 0 20px;
+  overflow: hidden;
+}
+
+.product-img-area {
+  width: 100%;
+  height: 200px;
+  background: var(--white);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.product-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--red);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.shoe-icon {
+  font-size: 100px;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.1));
+}
+
+.p-brand {
+  font-size: 13px;
+  color: var(--gray);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.p-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 12px;
+}
+
+.price-box {
+  background: #FFF3F3;
+  border: 1px solid #FFD6D6;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.price-box.show {
+  animation: slideUp 0.5s ease forwards;
+}
+
+@keyframes slideUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.price-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.price-original {
+  font-size: 16px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.price-promo-label {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.price-promo {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--red);
+}
+
+.discount-badge {
+  background: var(--green);
+  color: white;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.p-estilo {
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.p-category {
+  display: inline-block;
+  background: #f0f0f0;
+  color: var(--dark-gray);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* ========== SCENE 3: FINAL ========== */
+.s3 {
+  background: var(--black);
+  gap: 20px;
+}
+
+.s3-logo {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: 4px;
+  opacity: 0;
+}
+
+.s3-logo span { color: var(--red); }
+
+.s3-logo.show {
+  animation: fadeInScale 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeInScale {
+  0% { opacity: 0; transform: scale(0.7); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.s3-tagline {
+  font-size: 16px;
+  color: var(--gray);
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-align: center;
+  opacity: 0;
+}
+
+.s3-tagline.show {
+  animation: fadeIn 0.8s 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.s3-line {
+  width: 60px;
+  height: 3px;
+  background: var(--red);
+  border-radius: 2px;
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.s3-line.show {
+  animation: lineGrow 0.6s 0.2s ease forwards;
+}
+
+@keyframes lineGrow {
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+/* Tap indicator */
+.tap-indicator {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(230, 57, 70, 0.3);
+  border: 2px solid rgba(230, 57, 70, 0.6);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tap-indicator.show {
+  animation: tapAnim 0.6s ease forwards;
+}
+
+@keyframes tapAnim {
+  0% { opacity: 0; transform: scale(0.5); }
+  30% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Play button overlay */
+.play-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.play-btn {
+  width: 80px;
+  height: 80px;
+  background: var(--red);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.5); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(230, 57, 70, 0); }
+}
+
+.play-btn svg {
+  width: 32px;
+  height: 32px;
+  fill: white;
+  margin-left: 4px;
+}
+
+.play-text {
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <!-- SCENE 0: Store Selection -->
+  <div class="scene active" id="scene0">
+    <div class="s0-logo">TRACK <span>INN</span></div>
+    <div class="s0-subtitle">Selecciona tu tienda</div>
+    <div class="s0-btn" id="btnInnovasport">
+      <span class="s0-btn-text">INNOVASPORT</span>
+    </div>
+    <div class="s0-btn" id="btnInnvictus">
+      <span class="s0-btn-text">INNVICTUS</span>
+    </div>
+    <div class="s0-hint">Cada tienda usa su propio Excel</div>
+    <div class="tap-indicator" id="tap0"></div>
+  </div>
+
+  <!-- SCENE 1: Scanner -->
+  <div class="scene s1" id="scene1">
+    <div class="s1-header">
+      <div class="s1-back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </div>
+      <div class="s1-title">Escaner</div>
+    </div>
+    <div class="s1-body">
+      <div class="scanner-frame" id="scannerFrame">
+        <div class="fake-camera"></div>
+        <div class="fake-barcode">
+          <div class="barcode-lines" id="barcodeLines"></div>
+          <div class="barcode-num">4 065449 799621</div>
+        </div>
+        <div class="corner c-tl"></div>
+        <div class="corner c-tr"></div>
+        <div class="corner c-bl"></div>
+        <div class="corner c-br"></div>
+        <div class="scan-line" id="scanLine"></div>
+        <div class="scan-flash" id="scanFlash"></div>
+        <div class="scan-success" id="scanSuccess">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      </div>
+      <div class="s1-instruction">
+        <strong>Apunta al codigo de barras</strong><br>del producto para obtener precio
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 2: Product Result -->
+  <div class="scene s2" id="scene2">
+    <div class="s2-header">
+      <div class="s2-back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D1D1D" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </div>
+      <div class="s2-title">Resultado</div>
+    </div>
+    <div class="s2-body">
+      <div class="product-img-area">
+        <div class="product-badge">ADIDAS</div>
+        <div class="shoe-icon">👟</div>
+      </div>
+      <div class="p-brand">ADIDAS</div>
+      <div class="p-name">Ultraboost Light 24</div>
+      <div class="price-box" id="priceBox">
+        <div class="price-label">Precio Original</div>
+        <div class="price-original">$3,999</div>
+        <div class="price-promo-label">Precio Actual</div>
+        <div class="price-row">
+          <div class="price-promo">$2,799</div>
+          <div class="discount-badge">-30%</div>
+        </div>
+      </div>
+      <div class="p-estilo">Estilo: HQ6339-001</div>
+      <div class="p-estilo">Talla: 27 MX</div>
+      <span class="p-category">Running</span>
+    </div>
+  </div>
+
+  <!-- SCENE 3: Final -->
+  <div class="scene s3" id="scene3">
+    <div class="s3-logo" id="finalLogo">TRACK <span>INN</span></div>
+    <div class="s3-line" id="finalLine"></div>
+    <div class="s3-tagline" id="finalTagline">El track que mueve tu tienda</div>
+  </div>
+</div>
+
+<!-- Play overlay -->
+<div class="play-overlay" id="playOverlay">
+  <div class="play-btn">
+    <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+  </div>
+  <div class="play-text">TOCA PARA INICIAR DEMO</div>
+</div>
+
+<script>
+// Generate barcode lines
+(function() {
+  var container = document.getElementById('barcodeLines');
+  var heights = [35,45,35,50,30,45,40,50,35,45,30,50,40,35,50,45,30,40,50,35,45,40,30,50,35,45,50,30,40,35];
+  heights.forEach(function(h) {
+    var d = document.createElement('div');
+    d.style.height = h + 'px';
+    container.appendChild(d);
+  });
+})();
+
+var scenes = [
+  document.getElementById('scene0'),
+  document.getElementById('scene1'),
+  document.getElementById('scene2'),
+  document.getElementById('scene3')
+];
+var currentScene = 0;
+
+function goScene(index) {
+  scenes[currentScene].classList.remove('active');
+  scenes[currentScene].classList.add('exit-left');
+  scenes[index].classList.remove('exit-left');
+  scenes[index].classList.add('active');
+  currentScene = index;
+}
+
+function showTap(el, x, y) {
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+
+function runDemo() {
+  document.getElementById('playOverlay').style.display = 'none';
+
+  // Timeline (8 seconds total)
+
+  // 0.0s - Show store selection (already visible)
+
+  // 1.0s - Highlight Innovasport button + tap
+  setTimeout(function() {
+    var btn = document.getElementById('btnInnovasport');
+    btn.classList.add('highlight');
+    var tap = document.getElementById('tap0');
+    var rect = btn.getBoundingClientRect();
+    var phoneRect = document.getElementById('phone').getBoundingClientRect();
+    showTap(tap, rect.left - phoneRect.left + rect.width/2 - 25, rect.top - phoneRect.top + rect.height/2 - 25);
+  }, 1000);
+
+  // 1.6s - Go to scanner
+  setTimeout(function() {
+    goScene(1);
+  }, 1600);
+
+  // 3.8s - Scan flash + success
+  setTimeout(function() {
+    var flash = document.getElementById('scanFlash');
+    flash.classList.add('flash');
+    document.getElementById('scanLine').style.animationPlayState = 'paused';
+  }, 3800);
+
+  // 4.0s - Show success checkmark
+  setTimeout(function() {
+    document.getElementById('scanSuccess').classList.add('show');
+  }, 4000);
+
+  // 4.6s - Go to product result
+  setTimeout(function() {
+    goScene(2);
+  }, 4600);
+
+  // 5.0s - Animate price box
+  setTimeout(function() {
+    document.getElementById('priceBox').classList.add('show');
+  }, 5000);
+
+  // 7.0s - Go to final screen
+  setTimeout(function() {
+    goScene(3);
+  }, 7000);
+
+  // 7.1s - Animate final logo
+  setTimeout(function() {
+    document.getElementById('finalLogo').classList.add('show');
+    document.getElementById('finalLine').classList.add('show');
+    document.getElementById('finalTagline').classList.add('show');
+  }, 7200);
+}
+
+document.getElementById('playOverlay').addEventListener('click', runDemo);
+</script>
+</body>
+</html>
