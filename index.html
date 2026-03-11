@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#E63946">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +37,13 @@ html, body {
   background: #111;
   overflow: hidden;
   height: 100%;
+  height: 100dvh;
   width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, .store-select-btn, .size-btn {
+  touch-action: manipulation;
 }
 
 /* Phone Frame */
@@ -45,6 +52,7 @@ html, body {
   width: 100%;
   max-width: 430px;
   height: 100vh;
+  height: 100dvh;
   max-height: 932px;
   margin: 0 auto;
   background: var(--black);
@@ -122,6 +130,7 @@ html, body {
   transition: transform 0.45s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.45s ease;
   will-change: transform, opacity;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
 }
 
 .screen.active { transform: translateX(0); opacity: 1; z-index: 10; }
@@ -216,6 +225,7 @@ html, body {
   color: var(--white);
   text-transform: uppercase;
   animation: pulse 2.5s ease-in-out infinite;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -1052,7 +1062,7 @@ html, body {
           <button class="btn-secondary" id="btnLoadData" onclick="document.getElementById('excelInput').click()">
             CARGAR DATOS (EXCEL)
           </button>
-          <input type="file" id="excelInput" class="file-input-hidden" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(event)">
+          <input type="file" id="excelInput" class="file-input-hidden" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" onchange="handleFileUpload(event)">
           <div id="dataStatus" class="data-status">Sin datos cargados</div>
           <button onclick="goToScreen(0)" style="background:none;border:none;color:var(--gray);font-size:13px;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:8px;padding:8px 16px">&#8592; Cambiar tienda</button>
         </div>
@@ -2099,6 +2109,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('manualBarcode').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') manualSearch();
   });
+  // Enable :active states on iOS Safari
+  document.body.addEventListener('touchstart', function(){}, { passive: true });
 });
 </script>
 </body>
