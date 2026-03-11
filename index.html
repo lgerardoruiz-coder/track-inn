@@ -515,6 +515,7 @@ button, .store-select-btn, .size-btn {
   text-align: center;
 }
 
+
 /* SCREEN 3 - PRODUCT RESULT */
 .screen-product { background: var(--white); }
 
@@ -1096,7 +1097,7 @@ button, .store-select-btn, .size-btn {
         <div class="manual-input-section">
           <div class="manual-label">o ingresa el codigo manualmente</div>
           <div class="manual-input-row">
-            <input type="text" id="manualBarcode" placeholder="UPC o Estilo del producto...">
+            <input type="text" id="manualBarcode" placeholder="UPC, Estilo o Material..." inputmode="text">
             <button onclick="manualSearch()">Buscar</button>
           </div>
         </div>
@@ -1530,20 +1531,31 @@ function lookupBarcode(code) {
   if (!code) return null;
   const normalizedCode = String(code).trim();
 
-  // Find ALL rows matching this UPC
-  const matchingRows = productData.filter(r => String(r.UPC).trim() === normalizedCode);
-  if (matchingRows.length > 0) return matchingRows;
+  // 1. Exact match on UPC
+  const upcRows = productData.filter(r => String(r.UPC).trim() === normalizedCode);
+  if (upcRows.length > 0) return upcRows;
 
-  // Fallback: search by Estilo
+  // 2. Exact match on Material
+  const materialRows = productData.filter(r => String(r['Material'] || '').trim() === normalizedCode);
+  if (materialRows.length > 0) return materialRows;
+
+  // 3. Exact match on Estilo
   const estiloRows = productData.filter(r => String(r['Estilo'] || '').trim() === normalizedCode);
   if (estiloRows.length > 0) return estiloRows;
 
-  // Fallback: partial match on Estilo (e.g. user types "FQ1833" matches "FQ1833-001")
+  // 4. Partial match on Estilo
   const partialEstilo = productData.filter(r => {
     const est = String(r['Estilo'] || '').trim();
     return est && normalizedCode.length >= 4 && (est.includes(normalizedCode) || normalizedCode.includes(est));
   });
   if (partialEstilo.length > 0) return partialEstilo;
+
+  // 5. Partial match on Material
+  const partialMaterial = productData.filter(r => {
+    const mat = String(r['Material'] || '').trim();
+    return mat && normalizedCode.length >= 4 && (mat.includes(normalizedCode) || normalizedCode.includes(mat));
+  });
+  if (partialMaterial.length > 0) return partialMaterial;
 
   return null;
 }
@@ -1760,7 +1772,8 @@ function displayProduct(rows, scannedCode) {
         <div id="priceSlot"></div>
         ${estilo && estilo !== '(Sin valor)' ? `<div class="product-sku">Estilo: ${estilo}</div>` : ''}
         ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
-        <div class="product-barcode-label">UPC: ${scannedCode}</div>
+        <div class="product-barcode-label">UPC: ${String(first['UPC'] || scannedCode).trim()}</div>
+        ${getField('Material') ? `<div class="product-barcode-label">Material: ${getField('Material')}</div>` : ''}
         ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
       </div>
       ${storeHTML}
@@ -2072,7 +2085,7 @@ function manualSearch() {
   const input = document.getElementById('manualBarcode');
   const code = input.value.trim();
   if (!code) {
-    showToast('Ingresa un UPC o Estilo');
+    showToast('Ingresa un UPC, Estilo o Material');
     return;
   }
   processBarcode(code);
