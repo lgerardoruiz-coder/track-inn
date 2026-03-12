@@ -1864,17 +1864,23 @@ function lookupBarcode(code) {
   const estiloRows = productData.filter(r => String(r['Estilo'] || '').trim() === normalizedCode);
   if (estiloRows.length > 0) return estiloRows;
 
-  // 4. Partial match on Estilo
+  // 4. Partial match on Estilo (only if estilo is long enough to be meaningful)
   const partialEstilo = productData.filter(r => {
     const est = String(r['Estilo'] || '').trim();
-    return est && normalizedCode.length >= 4 && (est.includes(normalizedCode) || normalizedCode.includes(est));
+    if (!est || est.length < 5) return false; // Skip short estilos like "10" to avoid false matches
+    if (normalizedCode.length >= 5 && est.includes(normalizedCode)) return true;
+    if (normalizedCode.length >= 5 && normalizedCode.length <= est.length + 4 && normalizedCode.includes(est)) return true;
+    return false;
   });
   if (partialEstilo.length > 0) return partialEstilo;
 
-  // 5. Partial match on Genérico Talla (Material)
+  // 5. Partial match on Genérico Talla (Material) — only same-length proximity
   const partialMaterial = productData.filter(r => {
     const mat = String(r['Genérico Talla'] || r['Generico Talla'] || '').trim();
-    return mat && normalizedCode.length >= 4 && (mat.includes(normalizedCode) || normalizedCode.includes(mat));
+    if (!mat || mat.length < 6) return false;
+    // Only match if lengths are similar (within 4 chars) to avoid short codes matching inside long ones
+    if (Math.abs(normalizedCode.length - mat.length) > 4) return false;
+    return mat.includes(normalizedCode) || normalizedCode.includes(mat);
   });
   if (partialMaterial.length > 0) return partialMaterial;
 
