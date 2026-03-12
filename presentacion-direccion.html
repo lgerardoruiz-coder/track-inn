@@ -436,6 +436,165 @@ body {
   background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
   padding:4px 10px; border-radius:6px; font-size:11px; color:var(--gray); font-family:'Poppins',sans-serif;
 }
+
+/* ============ MOBILE RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .nav {
+    height: 48px;
+    padding: 0 12px;
+  }
+  .nav-logo { font-size: 16px; letter-spacing: 1px; }
+  .nav-links { display: none; }
+  .nav-counter { font-size: 12px; }
+
+  .slide {
+    padding: 56px 16px 60px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .slide-number {
+    font-size: 50px;
+    top: 52px;
+    right: 12px;
+  }
+  .progress-bar { top: 48px; }
+
+  /* Portada */
+  .portada-title { font-size: 36px; letter-spacing: 3px; }
+  .portada-subtitle { font-size: 14px; margin-bottom: 20px; }
+  .portada-badge { font-size: 10px; padding: 5px 14px; margin-bottom: 16px; }
+  .portada-divider { margin: 12px auto; }
+  .portada-meta { gap: 16px; }
+  .portada-meta-item .value { font-size: 12px; }
+  .portada-meta-item .label { font-size: 9px; }
+
+  /* Section headers */
+  .section-tag { font-size: 10px; letter-spacing: 2px; }
+  .section-title { font-size: 22px; }
+  .section-desc { font-size: 13px; }
+  .section-header { margin-bottom: 20px; }
+
+  /* Problem grid */
+  .problem-grid { grid-template-columns: 1fr; gap: 12px; max-width: 100%; }
+  .problem-card { padding: 20px 16px; }
+  .problem-icon { font-size: 32px; margin-bottom: 8px; }
+  .problem-title { font-size: 15px; }
+  .problem-text { font-size: 12px; }
+  .problema-stat { padding: 10px 16px; margin-top: 14px; }
+  .problema-stat p { font-size: 12px; }
+
+  /* Mundo grid */
+  .mundo-grid { grid-template-columns: 1fr 1fr; gap: 10px; max-width: 100%; }
+  .mundo-card { padding: 16px 12px; }
+  .mundo-emoji { font-size: 24px; margin-bottom: 6px; }
+  .mundo-brand { font-size: 14px; }
+  .mundo-feature { font-size: 9px; }
+  .mundo-desc { font-size: 11px; }
+  .mundo-conclusion { padding: 10px 16px; margin-top: 14px; }
+  .mundo-conclusion p { font-size: 12px; }
+
+  /* Solucion */
+  .solucion-layout { grid-template-columns: 1fr; gap: 20px; max-width: 100%; }
+  .solucion-left p { font-size: 13px; margin-bottom: 14px; }
+  .solution-steps li { padding: 10px 12px; }
+  .step-num { width: 28px; height: 28px; min-width: 28px; font-size: 13px; }
+  .step-content h4 { font-size: 12px; }
+  .step-content p { font-size: 11px; }
+  .solucion-right { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .feature-chip { padding: 12px 10px; }
+  .feature-chip .icon { font-size: 20px; margin-bottom: 4px; }
+  .feature-chip h4 { font-size: 11px; }
+  .feature-chip p { font-size: 10px; }
+
+  /* Stores */
+  .stores-grid { grid-template-columns: 1fr 1fr; gap: 10px; max-width: 100%; }
+  .store-card { padding: 16px 12px; }
+  .store-name { font-size: 13px; }
+  .store-method { font-size: 10px; }
+  .comp-footer { padding: 10px 16px; margin-top: 12px; }
+  .comp-footer p { font-size: 12px; }
+
+  /* Estado */
+  .estado-layout { grid-template-columns: 1fr; gap: 20px; max-width: 100%; }
+  .estado-col h3 { font-size: 15px; }
+  .estado-item { padding: 8px 10px; }
+  .estado-text h4 { font-size: 12px; }
+  .estado-text p { font-size: 10px; }
+
+  /* IT */
+  .it-grid { grid-template-columns: 1fr; gap: 12px; max-width: 100%; }
+  .it-card { padding: 18px 16px; }
+  .it-card h3 { font-size: 15px; margin-bottom: 10px; }
+  .it-card p { font-size: 12px; }
+  .it-intro p { font-size: 13px; }
+
+  /* Impacto */
+  .impacto-context { flex-direction: column; gap: 14px; }
+  .impacto-context-stat { padding: 12px 16px; }
+  .impacto-context-stat .big { font-size: 24px; }
+  .impacto-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .impacto-table { min-width: 600px; }
+  .impacto-table thead th { padding: 8px 10px; font-size: 10px; }
+  .impacto-table tbody td { padding: 8px 10px; font-size: 11px; }
+  .impacto-footer { flex-direction: column; padding: 10px 16px; gap: 8px; }
+  .impacto-footer p { font-size: 12px; }
+
+  /* Roadmap */
+  .roadmap-timeline {
+    flex-direction: column;
+    gap: 16px;
+    max-width: 100%;
+  }
+  .roadmap-timeline::before,
+  .roadmap-timeline::after { display: none; }
+  .roadmap-item { text-align: left; display: flex; align-items: flex-start; gap: 14px; padding: 0; }
+  .roadmap-dot { margin: 0; min-width: 40px; width: 40px; height: 40px; font-size: 14px; }
+  .roadmap-phase { font-size: 10px; }
+  .roadmap-title { font-size: 13px; }
+  .roadmap-desc { font-size: 11px; }
+  .roadmap-footer { padding: 10px 16px; margin-top: 16px; }
+  .roadmap-footer p { font-size: 12px; }
+
+  /* Cierre */
+  .cierre-logo { font-size: 36px; letter-spacing: 3px; }
+  .cierre-tagline { font-size: 16px; }
+  .cierre-sub { font-size: 13px; margin-bottom: 20px; }
+  .cierre-cta-group { flex-direction: column; gap: 10px; align-items: center; }
+  .btn-primary, .btn-secondary { padding: 12px 32px; font-size: 13px; width: 100%; max-width: 280px; text-align: center; }
+  .cierre-meta { gap: 20px; flex-wrap: wrap; }
+  .cierre-meta-item .value { font-size: 12px; }
+
+  /* Rotacion */
+  #slide-rotacion .problem-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  #slide-rotacion .problem-card { padding: 16px 12px !important; }
+
+  /* Controls */
+  .nav-arrow { width: 36px; height: 36px; bottom: 12px; font-size: 14px; }
+  .nav-arrow.prev { transform: translateX(-44px); }
+  .nav-arrow.next { transform: translateX(8px); }
+  .fs-btn { display: none; }
+  .key-hint { display: none; }
+
+  /* Videos */
+  #slide-video1, #slide-demo { padding: 0 !important; }
+  #v1_playBtn, #dm_playBtn { padding: 12px 32px; font-size: 15px; border-radius: 12px; }
+  #v1_btnBack, #dm_btnBack { bottom: 14px; padding: 8px 20px; font-size: 10px; }
+  .dm_phone { width: min(300px, 42vw) !important; height: min(650px, 75vh) !important; border-radius: 30px !important; }
+}
+
+/* Landscape on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .nav { height: 36px; padding: 0 10px; }
+  .nav-logo { font-size: 14px; }
+  .progress-bar { top: 36px; }
+  .slide { padding: 42px 16px 40px; }
+  .slide-number { font-size: 30px; top: 38px; }
+  .portada-title { font-size: 28px; }
+  .section-title { font-size: 18px; }
+  .dm_phone { width: min(200px, 25vw) !important; height: min(430px, 85vh) !important; border-radius: 20px !important; }
+  .nav-arrow { bottom: 6px; width: 32px; height: 32px; }
+  #v1_playBtn, #dm_playBtn { padding: 10px 24px; font-size: 13px; }
+}
 </style>
 </head>
 <body>
@@ -1543,6 +1702,29 @@ body {
   }
 
   goTo(0);
+
+  // Touch swipe support for mobile
+  (function() {
+    let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
+    const minSwipe = 50;
+
+    document.addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      const dx = touchEndX - touchStartX;
+      const dy = touchEndY - touchStartY;
+      // Only trigger if horizontal swipe is dominant
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipe) {
+        if (dx < 0) nextSlide(); // swipe left = next
+        else prevSlide(); // swipe right = prev
+      }
+    }, { passive: true });
+  })();
 </script>
 </body>
 </html>
