@@ -27,6 +27,9 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -34,10 +37,10 @@ body {
   background: var(--bg);
   color: var(--white);
   overflow: hidden;
-  height: 100vh;
-  height: 100dvh;
-  width: 100vw;
-  width: 100dvw;
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .nav {
@@ -1732,27 +1735,28 @@ body {
     }, { passive: true });
   })();
 
-  // Handle orientation changes — force layout recalculation
+  // Handle orientation changes — force Android Chrome to recalculate viewport
   function handleOrientationChange() {
-    // Force viewport recalculation
-    document.documentElement.style.height = '100%';
-    document.body.style.height = window.innerHeight + 'px';
-    document.body.style.width = window.innerWidth + 'px';
-    // Re-render current slide after a brief delay for the browser to settle
+    // Trick: toggle viewport meta to force browser recalculation
+    var vp = document.querySelector('meta[name=viewport]');
+    vp.setAttribute('content', 'width=device-width, initial-scale=0.99, viewport-fit=cover');
     setTimeout(function() {
-      document.body.style.height = '';
-      document.body.style.width = '';
-      // Force repaint
+      vp.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+      // Force repaint on all fixed elements
+      var sw = document.querySelector('.slides-wrapper');
+      if (sw) { sw.style.display = 'none'; sw.offsetHeight; sw.style.display = ''; }
       window.scrollTo(0, 0);
       goTo(cur);
-    }, 300);
+    }, 150);
   }
 
-  window.addEventListener('orientationchange', handleOrientationChange);
+  window.addEventListener('orientationchange', function() {
+    // Android needs a delay after orientationchange fires
+    setTimeout(handleOrientationChange, 200);
+  });
   window.addEventListener('resize', function() {
-    // Debounce resize to avoid excessive recalculations
     clearTimeout(window._resizeTimer);
-    window._resizeTimer = setTimeout(handleOrientationChange, 200);
+    window._resizeTimer = setTimeout(handleOrientationChange, 300);
   });
 </script>
 </body>
