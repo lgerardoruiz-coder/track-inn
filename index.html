@@ -1535,8 +1535,8 @@ function lookupBarcode(code) {
   const upcRows = productData.filter(r => String(r.UPC).trim() === normalizedCode);
   if (upcRows.length > 0) return upcRows;
 
-  // 2. Exact match on Material
-  const materialRows = productData.filter(r => String(r['Material'] || '').trim() === normalizedCode);
+  // 2. Exact match on Genérico Talla (Material)
+  const materialRows = productData.filter(r => String(r['Genérico Talla'] || r['Generico Talla'] || '').trim() === normalizedCode);
   if (materialRows.length > 0) return materialRows;
 
   // 3. Exact match on Estilo
@@ -1550,9 +1550,9 @@ function lookupBarcode(code) {
   });
   if (partialEstilo.length > 0) return partialEstilo;
 
-  // 5. Partial match on Material
+  // 5. Partial match on Genérico Talla (Material)
   const partialMaterial = productData.filter(r => {
-    const mat = String(r['Material'] || '').trim();
+    const mat = String(r['Genérico Talla'] || r['Generico Talla'] || '').trim();
     return mat && normalizedCode.length >= 4 && (mat.includes(normalizedCode) || normalizedCode.includes(mat));
   });
   if (partialMaterial.length > 0) return partialMaterial;
@@ -1601,11 +1601,9 @@ function displayProduct(rows, scannedCode) {
   const talla = getField('Talla') || '';
   const silueta = getField('Silueta') || '';
   const proveedor = getField('Proveedor') || '';
-  const precioOriginal = getField('Precio Original') || getField('PrecioOriginal') || '';
-  const precioActual = getField('Precio Promo') || getField('Precio Actual') || getField('PrecioActual') || '';
   const imageUrl = getField('Imagen') || getField('Foto') || '';
 
-  // Build price HTML
+  // Build price HTML - 3 level pricing system
   let priceHTML = '';
   const formatPrice = (n) => {
     const num = Math.round(Number(n));
@@ -1620,35 +1618,97 @@ function displayProduct(rows, scannedCode) {
   };
 
   const cleanPrice = (v) => Number(String(v).replace(/[$,\s]/g, '')) || 0;
-  const origNum = cleanPrice(precioOriginal);
-  const actualNum = cleanPrice(precioActual);
 
-  if (actualNum > 0 && origNum > 0 && actualNum < origNum) {
-    const savings = Math.round((1 - actualNum / origNum) * 100);
-    const origP = formatPrice(origNum);
-    const actualP = formatPrice(actualNum);
-    priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:12px;padding:14px 16px;margin:12px 0">'
-      + '<div style="font-size:13px;color:#999;margin-bottom:4px">Precio Original</div>'
-      + '<span style="font-size:16px;color:#999;text-decoration:line-through">' + origP + '</span>'
-      + '<div style="font-size:13px;color:#E63946;margin-bottom:4px;margin-top:8px">Precio Actual</div>'
-      + '<div style="display:flex;align-items:center;gap:10px">'
-      + '<span style="font-size:32px;font-weight:800;color:#E63946">' + actualP + '</span>'
-      + '<span style="background:#2ECC71;color:#fff;padding:4px 10px;border-radius:8px;font-size:13px;font-weight:700">-' + savings + '%</span>'
-      + '</div></div>';
-  } else if (origNum > 0 && actualNum > 0) {
-    priceHTML = '<div style="background:#EAEAEA;border-radius:12px;padding:14px 16px;margin:12px 0">'
-      + '<div style="font-size:13px;color:#666;margin-bottom:4px">Precio</div>'
-      + '<span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(actualNum) + '</span></div>';
-  } else if (actualNum > 0) {
-    priceHTML = '<div style="background:#EAEAEA;border-radius:12px;padding:14px 16px;margin:12px 0">'
-      + '<div style="font-size:13px;color:#666;margin-bottom:4px">Precio Actual</div>'
-      + '<span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(actualNum) + '</span></div>';
-  } else if (origNum > 0) {
-    priceHTML = '<div style="background:#EAEAEA;border-radius:12px;padding:14px 16px;margin:12px 0">'
-      + '<div style="font-size:13px;color:#666;margin-bottom:4px">Precio Original</div>'
-      + '<span style="font-size:32px;font-weight:800;color:#1D1D1D">' + formatPrice(origNum) + '</span></div>';
+  // 3-level pricing
+  const n1 = cleanPrice(getField('Precio Nivel 1'));
+  const n2 = cleanPrice(getField('Precio Nivel 2'));
+  const n3 = cleanPrice(getField('Precio Final a público - Nivel 3') || getField('Precio Final a publico - Nivel 3'));
+  const impulso = String(getField('IMPULSO') || '').trim();
+
+  // Determine scenario from actual prices
+  const hasCP = n1 > 0 && n2 > 0 && n1 > n2;
+  const hasPromo = n2 > 0 && n3 > 0 && n3 < n2;
+  const pctCP = hasCP ? Math.round((1 - n2 / n1) * 100) : 0;
+  const pctPromo = hasPromo ? Math.round((1 - n3 / n2) * 100) : 0;
+
+  // Fallback to old columns if new ones are empty
+  const precioOriginal = getField('Precio Original') || getField('PrecioOriginal') || '';
+  const precioActual = getField('Precio Promo') || getField('Precio Actual') || getField('PrecioActual') || '';
+  const origFallback = cleanPrice(precioOriginal);
+  const actualFallback = cleanPrice(precioActual);
+
+  if (n1 > 0) {
+    // New 3-level system
+    if (hasCP && hasPromo) {
+      // PROMO + CP: show all 3 levels
+      var impulsoLabel = (impulso && impulso !== 'SIN PROMO') ? impulso : '';
+      priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
+        // Badges row
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
+        + '<span style="background:#E63946;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.5px">REBAJA</span>'
+        + '<span style="background:#E63946;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700">OFF</span>'
+        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctCP + '%</span>'
+        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctPromo + '%</span>'
+        + '</div>'
+        // Impulso text
+        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:600;margin-bottom:10px">' + impulsoLabel + '</div>' : '')
+        // Price levels
+        + '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
+        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
+        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n2) + '</span>'
+        + '<span style="font-size:30px;font-weight:800;color:#E63946">' + formatPrice(n3) + '</span>'
+        + '</div>'
+        + '</div>';
+    } else if (hasCP) {
+      // Solo CP (rebaja): N1 tachado, N2 como actual
+      priceHTML = '<div style="background:#FFF8E1;border:1px solid #FFE082;border-radius:16px;padding:16px 18px;margin:12px 0">'
+        + '<div style="display:flex;gap:6px;margin-bottom:12px">'
+        + '<span style="background:#F39C12;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.5px">REBAJA</span>'
+        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctCP + '%</span>'
+        + '</div>'
+        + '<div style="display:flex;align-items:baseline;gap:10px">'
+        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
+        + '<span style="font-size:30px;font-weight:800;color:#1D1D1D">' + formatPrice(n2) + '</span>'
+        + '</div>'
+        + '</div>';
+    } else if (hasPromo) {
+      // Solo PROMO: N1 tachado, N3 en rojo
+      var impulsoLabel = (impulso && impulso !== 'SIN PROMO') ? impulso : '';
+      priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
+        + '<span style="background:#E63946;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700">OFF</span>'
+        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctPromo + '%</span>'
+        + '</div>'
+        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:600;margin-bottom:10px">' + impulsoLabel + '</div>' : '')
+        + '<div style="display:flex;align-items:baseline;gap:10px">'
+        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
+        + '<span style="font-size:30px;font-weight:800;color:#E63946">' + formatPrice(n3) + '</span>'
+        + '</div>'
+        + '</div>';
+    } else {
+      // FULL PRICE
+      priceHTML = '<div style="background:#F5F5F5;border-radius:16px;padding:16px 18px;margin:12px 0">'
+        + '<div style="font-size:12px;color:#999;margin-bottom:4px;font-weight:500">Precio</div>'
+        + '<span style="font-size:30px;font-weight:800;color:#1D1D1D">' + formatPrice(n1) + '</span>'
+        + '</div>';
+    }
+  } else if (origFallback > 0 || actualFallback > 0) {
+    // Fallback to old 2-column pricing
+    var finalP = actualFallback || origFallback;
+    if (actualFallback > 0 && origFallback > 0 && actualFallback < origFallback) {
+      var sav = Math.round((1 - actualFallback / origFallback) * 100);
+      priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
+        + '<div style="display:flex;align-items:baseline;gap:10px">'
+        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(origFallback) + '</span>'
+        + '<span style="font-size:30px;font-weight:800;color:#E63946">' + formatPrice(actualFallback) + '</span>'
+        + '<span style="background:#2ECC71;color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + sav + '%</span>'
+        + '</div></div>';
+    } else {
+      priceHTML = '<div style="background:#F5F5F5;border-radius:16px;padding:16px 18px;margin:12px 0">'
+        + '<span style="font-size:30px;font-weight:800;color:#1D1D1D">' + formatPrice(finalP) + '</span></div>';
+    }
   } else {
-    priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:12px;padding:14px 16px;margin:12px 0"><span style="font-size:16px;font-weight:700;color:#E63946">Precio no disponible</span></div>';
+    priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0"><span style="font-size:15px;font-weight:700;color:#E63946">Precio no disponible</span></div>';
   }
 
   // Build stores/inventory HTML from all matching rows (same UPC across sucursales)
@@ -1773,7 +1833,7 @@ function displayProduct(rows, scannedCode) {
         ${estilo && estilo !== '(Sin valor)' ? `<div class="product-sku">Estilo: ${estilo}</div>` : ''}
         ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
         <div class="product-barcode-label">UPC: ${String(first['UPC'] || scannedCode).trim()}</div>
-        ${getField('Material') ? `<div class="product-barcode-label">Material: ${getField('Material')}</div>` : ''}
+        ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="product-barcode-label">Material: ${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
         ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
       </div>
       ${storeHTML}
@@ -1835,7 +1895,7 @@ function displayProduct(rows, scannedCode) {
   const compareEstilo = estilo && estilo !== '(Sin valor)' ? estilo : '';
   const compareName = (brand + ' ' + description).trim();
   if (compareName || compareEstilo) {
-    fetchCompetitorPrices(compareName, compareEstilo, actualNum || origNum);
+    fetchCompetitorPrices(compareName, compareEstilo, n3 || n2 || n1 || actualFallback || origFallback);
   }
 }
 
