@@ -425,14 +425,14 @@ button, .store-select-btn, .size-btn {
   border-width: 0;
 }
 
-.corner-tl { top: 40px; left: 40px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 12px; }
-.corner-tr { top: 40px; right: 40px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 12px; }
-.corner-bl { bottom: 40px; left: 40px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 12px; }
-.corner-br { bottom: 40px; right: 40px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 12px; }
+.corner-tl { top: 25px; left: 20px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 12px; }
+.corner-tr { top: 25px; right: 20px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 12px; }
+.corner-bl { bottom: 25px; left: 20px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 12px; }
+.corner-br { bottom: 25px; right: 20px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 12px; }
 
 .scan-line {
   position: absolute;
-  left: 50px; right: 50px;
+  left: 30px; right: 30px;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--red), var(--red), transparent);
   box-shadow: 0 0 12px var(--red), 0 0 30px rgba(230, 57, 70, 0.3);
@@ -442,8 +442,8 @@ button, .store-select-btn, .size-btn {
 }
 
 @keyframes scanLine {
-  0%, 100% { top: 50px; }
-  50% { top: calc(100% - 50px); }
+  0%, 100% { top: 35px; }
+  50% { top: calc(100% - 35px); }
 }
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -2570,7 +2570,7 @@ function startScanner() {
   const isMaterial = scanMode === 'material';
   const config = {
     fps: isMaterial ? 25 : 15,
-    qrbox: isMaterial ? { width: 340, height: 160 } : { width: 300, height: 120 },
+    qrbox: isMaterial ? { width: 340, height: 160 } : { width: 340, height: 160 },
     aspectRatio: 1.0,
     disableFlip: false,
     formatsToSupport: getFormatsForMode(scanMode),
