@@ -922,6 +922,258 @@ button, .store-select-btn, .size-btn {
   opacity: 1;
 }
 
+/* Result Tabs */
+.result-tabs {
+  display: flex;
+  background: var(--white);
+  border-bottom: 2px solid #f0f0f0;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.result-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border: none;
+  background: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.result-tab.active {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+
+.result-tab:active { transform: scale(0.97); }
+
+.result-tab svg { opacity: 0.5; }
+.result-tab.active svg { opacity: 1; stroke: var(--red); }
+
+.tab-badge {
+  background: var(--red);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Competencia Screen */
+.competencia-body {
+  padding: 20px;
+  padding-bottom: 140px;
+}
+
+.comp-our-price {
+  background: linear-gradient(135deg, #1D1D1D 0%, #2B2B2B 100%);
+  border-radius: 16px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.comp-our-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+}
+
+.comp-our-product {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comp-our-estilo {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  font-family: monospace;
+  margin-bottom: 8px;
+}
+
+.comp-our-amount {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.comp-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+  color: #ccc;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.comp-divider::before, .comp-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e8e8e8;
+}
+
+.comp-card {
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: 1.5px solid #e8e8e8;
+  background: white;
+  cursor: pointer;
+}
+
+.comp-card:active { transform: scale(0.98); }
+
+.comp-card.cheapest {
+  border-color: #2ECC71;
+  background: #f0fdf4;
+}
+
+.comp-card.expensive {
+  border-color: #e8e8e8;
+  background: white;
+}
+
+.comp-store-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+
+.comp-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.comp-store-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 1px;
+}
+
+.comp-product-name {
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.comp-card-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.comp-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--black);
+}
+
+.comp-diff {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.comp-diff.cheaper { color: #2ECC71; }
+.comp-diff.same { color: #999; }
+.comp-diff.more-expensive { color: #E63946; }
+
+.comp-best-tag {
+  font-size: 9px;
+  font-weight: 700;
+  color: #2ECC71;
+  background: rgba(46, 204, 113, 0.12);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.comp-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+  color: #999;
+}
+
+.comp-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f0f0f0;
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.comp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 20px;
+  text-align: center;
+  gap: 12px;
+  color: #999;
+}
+
+.comp-empty-icon { font-size: 48px; opacity: 0.4; }
+
+.comp-timestamp {
+  text-align: center;
+  font-size: 11px;
+  color: #ccc;
+  margin-top: 16px;
+}
+
 .screen::-webkit-scrollbar { width: 0px; }
 
 /* File input hidden */
@@ -1119,7 +1371,22 @@ button, .store-select-btn, .size-btn {
         </button>
         <div class="header-title">Resultado</div>
       </div>
-      <div id="productContent"></div>
+      <!-- Tabs -->
+      <div class="result-tabs">
+        <button class="result-tab active" id="tabProducto" onclick="switchTab('producto')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Producto
+        </button>
+        <button class="result-tab" id="tabCompetencia" onclick="switchTab('competencia')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          Competencia
+          <span class="tab-badge" id="tabBadge" style="display:none">0</span>
+        </button>
+      </div>
+      <!-- Tab Content: Producto -->
+      <div id="productContent" class="tab-content active"></div>
+      <!-- Tab Content: Competencia -->
+      <div id="competenciaContent" class="tab-content" style="display:none"></div>
     </div>
 
     <!-- SCREEN 4: NOT FOUND -->
@@ -1838,7 +2105,6 @@ function displayProduct(rows, scannedCode) {
       </div>
       ${storeHTML}
       ${sizesHTML}
-      <div id="priceCompareSection"></div>
       ${detailsHTML}
     </div>
     <template id="noImgTemplate">
@@ -1891,97 +2157,171 @@ function displayProduct(rows, scannedCode) {
     });
   }
 
-  // Async: fetch competitor prices
+  // Reset to Producto tab
+  switchTab('producto');
+
+  // Async: fetch competitor prices for Tab 2
   const compareEstilo = estilo && estilo !== '(Sin valor)' ? estilo : '';
   const compareName = (brand + ' ' + description).trim();
+  const ourFinalPrice = n3 || n2 || n1 || actualFallback || origFallback;
   if (compareName || compareEstilo) {
-    fetchCompetitorPrices(compareName, compareEstilo, n3 || n2 || n1 || actualFallback || origFallback);
+    fetchCompetitorPrices(compareName, compareEstilo, brand, ourFinalPrice);
   }
 }
 
-// ============ PRICE COMPARISON ============
+// ============ TABS ============
+function switchTab(tab) {
+  var tabProd = document.getElementById('tabProducto');
+  var tabComp = document.getElementById('tabCompetencia');
+  var contentProd = document.getElementById('productContent');
+  var contentComp = document.getElementById('competenciaContent');
+
+  if (tab === 'producto') {
+    tabProd.classList.add('active');
+    tabComp.classList.remove('active');
+    contentProd.style.display = 'block';
+    contentProd.classList.add('active');
+    contentComp.style.display = 'none';
+    contentComp.classList.remove('active');
+  } else {
+    tabComp.classList.add('active');
+    tabProd.classList.remove('active');
+    contentComp.style.display = 'block';
+    contentComp.classList.add('active');
+    contentProd.style.display = 'none';
+    contentProd.classList.remove('active');
+  }
+}
+
+// ============ PRICE COMPARISON (Tab 2) ============
 const PRICE_API = 'https://trackinn-price-api.vercel.app/api/prices';
 
-function fetchCompetitorPrices(name, estilo, ourPrice) {
-  var section = document.getElementById('priceCompareSection');
+const STORE_COLORS = {
+  'Dportenis': '#0066CC',
+  'Martí': '#FF6B00',
+  'Liverpool': '#E91E8C',
+  'Nike': '#111111'
+};
+
+function fetchCompetitorPrices(productName, estilo, brand, ourPrice) {
+  var section = document.getElementById('competenciaContent');
+  var badge = document.getElementById('tabBadge');
   if (!section) return;
 
-  section.innerHTML = '<div style="padding:16px 0">'
-    + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
-    + '<div id="compareLoader" style="display:flex;align-items:center;gap:8px;color:#999;font-size:13px">'
-    + '<div style="width:16px;height:16px;border:2px solid #E63946;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></div>'
-    + 'Buscando en otras tiendas...</div>'
+  // Reset tab badge
+  badge.style.display = 'none';
+
+  // Show loading state
+  section.innerHTML = '<div class="competencia-body">'
+    + '<div class="comp-our-price">'
+    + '<div class="comp-our-label">Nuestro precio</div>'
+    + '<div class="comp-our-product">' + productName + '</div>'
+    + (estilo ? '<div class="comp-our-estilo">' + estilo + '</div>' : '')
+    + '<div class="comp-our-amount">' + formatPriceGlobal(ourPrice) + '</div>'
+    + '</div>'
+    + '<div class="comp-loading"><div class="comp-spinner"></div><div style="font-size:13px;font-weight:500">Buscando en 4 tiendas...</div></div>'
     + '</div>';
 
-  var params = '?name=' + encodeURIComponent(name);
+  var params = '?name=' + encodeURIComponent(productName);
   if (estilo) params += '&estilo=' + encodeURIComponent(estilo);
+  if (brand) params += '&brand=' + encodeURIComponent(brand);
+
   fetch(PRICE_API + params)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var results = data.results || [];
-      var found = results.filter(function(r) { return r.price > 0 && !r.error; });
+      var found = results.filter(function(r) { return r.price > 0; });
+
+      // Update badge
+      if (found.length > 0) {
+        badge.textContent = found.length;
+        badge.style.display = 'inline-flex';
+      }
 
       if (!found.length) {
-        section.innerHTML = '<div style="padding:16px 0">'
-          + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
-          + '<div style="color:#999;font-size:13px">No se encontraron precios en otras tiendas</div></div>';
+        section.innerHTML = '<div class="competencia-body">'
+          + '<div class="comp-our-price">'
+          + '<div class="comp-our-label">Nuestro precio</div>'
+          + '<div class="comp-our-product">' + productName + '</div>'
+          + (estilo ? '<div class="comp-our-estilo">' + estilo + '</div>' : '')
+          + '<div class="comp-our-amount">' + formatPriceGlobal(ourPrice) + '</div>'
+          + '</div>'
+          + '<div class="comp-empty"><div class="comp-empty-icon">&#128270;</div>'
+          + '<div style="font-size:15px;font-weight:600;color:#666">Sin resultados</div>'
+          + '<div style="font-size:13px">No se encontro este producto en otras tiendas</div></div>'
+          + '</div>';
         return;
       }
 
       found.sort(function(a, b) { return a.price - b.price; });
-
-      var cardsHTML = '';
       var cheapest = found[0].price;
 
+      var cardsHTML = '';
       found.forEach(function(r) {
-        var diff = '';
-        var diffColor = '#999';
-        if (ourPrice > 0) {
-          var pct = Math.round(((r.price - ourPrice) / ourPrice) * 100);
-          if (pct > 0) {
-            diff = '+' + pct + '% mas caro';
-            diffColor = '#E63946';
-          } else if (pct < 0) {
-            diff = pct + '% mas barato';
-            diffColor = '#2ECC71';
-          } else {
-            diff = 'Mismo precio';
-            diffColor = '#999';
-          }
-        }
+        var pct = ourPrice > 0 ? Math.round(((r.price - ourPrice) / ourPrice) * 100) : 0;
+        var diffText = '', diffClass = 'same';
+        if (pct < 0) { diffText = pct + '% mas barato'; diffClass = 'cheaper'; }
+        else if (pct > 0) { diffText = '+' + pct + '% mas caro'; diffClass = 'more-expensive'; }
+        else { diffText = 'Mismo precio'; }
 
         var isCheapest = r.price === cheapest && found.length > 1;
-        var borderStyle = isCheapest ? 'border:2px solid #2ECC71' : 'border:1px solid #E8E8E8';
+        var cardClass = isCheapest ? 'comp-card cheapest' : 'comp-card';
+        var storeColor = STORE_COLORS[r.store] || '#666';
+        var storeInitial = r.store.charAt(0);
 
-        var priceNum = Math.round(r.price);
-        var priceStr = '';
-        var s = String(priceNum);
-        for (var i = 0; i < s.length; i++) {
-          if (i > 0 && (s.length - i) % 3 === 0) priceStr += ',';
-          priceStr += s[i];
-        }
-
-        cardsHTML += '<a href="' + (r.url || '#') + '" target="_blank" rel="noopener" style="text-decoration:none;display:block">'
-          + '<div style="' + borderStyle + ';border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;background:#fff">'
-          + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:14px;font-weight:700;color:#1D1D1D">' + r.store + (isCheapest ? ' <span style="background:#2ECC71;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600">Mejor precio</span>' : '') + '</div>'
-          + '<div style="font-size:11px;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">' + (r.name || '') + '</div>'
-          + (diff ? '<div style="font-size:11px;color:' + diffColor + ';font-weight:600;margin-top:2px">' + diff + '</div>' : '')
+        cardsHTML += '<a href="' + (r.url || '#') + '" target="_blank" rel="noopener" style="text-decoration:none">'
+          + '<div class="' + cardClass + '">'
+          + '<div class="comp-store-logo" style="background:' + storeColor + '">' + storeInitial + '</div>'
+          + '<div class="comp-card-info">'
+          + '<div class="comp-store-name">' + r.store + '</div>'
+          + '<div class="comp-product-name">' + (r.name || '') + '</div>'
           + '</div>'
-          + '<div style="font-size:22px;font-weight:800;color:#1D1D1D;margin-left:12px">\u0024' + priceStr + '</div>'
+          + '<div class="comp-card-right">'
+          + '<div class="comp-price">' + formatPriceGlobal(r.price) + '</div>'
+          + '<div class="comp-diff ' + diffClass + '">' + diffText + '</div>'
+          + (isCheapest ? '<div class="comp-best-tag">Mejor precio</div>' : '')
+          + '</div>'
           + '</div></a>';
       });
 
-      section.innerHTML = '<div style="padding:16px 0">'
-        + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
+      var now = new Date();
+      var timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+
+      section.innerHTML = '<div class="competencia-body">'
+        + '<div class="comp-our-price">'
+        + '<div class="comp-our-label">Nuestro precio</div>'
+        + '<div class="comp-our-product">' + productName + '</div>'
+        + (estilo ? '<div class="comp-our-estilo">' + estilo + '</div>' : '')
+        + '<div class="comp-our-amount">' + formatPriceGlobal(ourPrice) + '</div>'
+        + '</div>'
+        + '<div class="comp-divider">' + found.length + ' tienda' + (found.length > 1 ? 's' : '') + ' encontrada' + (found.length > 1 ? 's' : '') + '</div>'
         + cardsHTML
+        + '<div class="comp-timestamp">Actualizado a las ' + timeStr + '</div>'
         + '</div>';
     })
     .catch(function(err) {
-      section.innerHTML = '<div style="padding:16px 0">'
-        + '<div style="font-size:16px;font-weight:700;color:#1D1D1D;margin-bottom:12px">Comparador de precios</div>'
-        + '<div style="color:#999;font-size:13px">Error al buscar precios: ' + err.message + '</div></div>';
+      section.innerHTML = '<div class="competencia-body">'
+        + '<div class="comp-our-price">'
+        + '<div class="comp-our-label">Nuestro precio</div>'
+        + '<div class="comp-our-product">' + productName + '</div>'
+        + '<div class="comp-our-amount">' + formatPriceGlobal(ourPrice) + '</div>'
+        + '</div>'
+        + '<div class="comp-empty"><div style="font-size:13px;color:#E63946">Error: ' + err.message + '</div></div>'
+        + '</div>';
     });
+}
+
+// Global price formatter
+function formatPriceGlobal(n) {
+  var num = Math.round(Number(n));
+  if (isNaN(num) || num === 0) return '$0';
+  var str = String(num);
+  var result = '';
+  for (var i = 0; i < str.length; i++) {
+    if (i > 0 && (str.length - i) % 3 === 0) result += ',';
+    result += str[i];
+  }
+  return '$' + result;
 }
 
 // ============ SIZE SELECTION ============
