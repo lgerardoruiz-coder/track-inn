@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Track INN - Presentación a Dirección v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -23,7 +23,11 @@
   --card-border: rgba(255,255,255,0.06);
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 
 body {
   font-family: 'Poppins', sans-serif;
@@ -31,7 +35,9 @@ body {
   color: var(--white);
   overflow: hidden;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  width: 100dvw;
 }
 
 .nav {
@@ -1725,6 +1731,29 @@ body {
       }
     }, { passive: true });
   })();
+
+  // Handle orientation changes — force layout recalculation
+  function handleOrientationChange() {
+    // Force viewport recalculation
+    document.documentElement.style.height = '100%';
+    document.body.style.height = window.innerHeight + 'px';
+    document.body.style.width = window.innerWidth + 'px';
+    // Re-render current slide after a brief delay for the browser to settle
+    setTimeout(function() {
+      document.body.style.height = '';
+      document.body.style.width = '';
+      // Force repaint
+      window.scrollTo(0, 0);
+      goTo(cur);
+    }, 300);
+  }
+
+  window.addEventListener('orientationchange', handleOrientationChange);
+  window.addEventListener('resize', function() {
+    // Debounce resize to avoid excessive recalculations
+    clearTimeout(window._resizeTimer);
+    window._resizeTimer = setTimeout(handleOrientationChange, 200);
+  });
 </script>
 </body>
 </html>
