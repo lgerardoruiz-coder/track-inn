@@ -2532,14 +2532,26 @@ function setScanMode(mode) {
   if (mode === 'upc') {
     instr.innerHTML = '<strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca';
     if (captureBtn) captureBtn.style.display = 'none';
-    // Switch to video scanner
+    // Switch to video scanner — stop material camera first, wait, then start
     stopMaterialCamera();
-    if (!scannerRunning) setTimeout(() => startScanner(), 300);
+    stopScanner();
+    setTimeout(() => startScanner(), 600);
   } else {
     instr.innerHTML = '<strong>Modo Material</strong> — Apunta a la sticker y toca Capturar';
-    // Switch to photo capture mode
-    stopScanner();
-    setTimeout(() => startMaterialCamera(), 300);
+    if (captureBtn) captureBtn.style.display = 'flex';
+    // Switch to photo capture — stop video scanner first, wait for camera release, then start
+    if (scannerRunning) {
+      html5QrCode.stop().then(() => {
+        scannerRunning = false;
+        html5QrCode.clear();
+        startMaterialCamera();
+      }).catch(() => {
+        scannerRunning = false;
+        startMaterialCamera();
+      });
+    } else {
+      startMaterialCamera();
+    }
   }
 }
 
