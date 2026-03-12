@@ -3,36 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Track INN - Presentación a Dirección</title>
+<title>Track INN - Presentación a Dirección v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --red: #E63946;
+  --red-dim: rgba(230,57,70,0.12);
+  --red-border: rgba(230,57,70,0.25);
   --black: #1D1D1D;
   --dark-gray: #2B2B2B;
   --white: #FFFFFF;
   --green: #2ECC71;
+  --orange: #F39C12;
   --gray: #95A5A6;
-  --light-bg: #F8F9FA;
+  --bg: #0a0a0a;
+  --card-bg: rgba(255,255,255,0.03);
+  --card-border: rgba(255,255,255,0.06);
 }
 
 html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: #0a0a0a;
+  background: var(--bg);
   color: var(--white);
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
 }
 
-/* ========== NAVIGATION ========== */
 .nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 60px;
   background: rgba(10,10,10,0.95);
   backdrop-filter: blur(20px);
@@ -43,1040 +47,1502 @@ body {
   z-index: 1000;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
-
-.nav-logo {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
+.nav-logo { font-size: 20px; font-weight: 800; letter-spacing: 2px; }
 .nav-logo span { color: var(--red); }
-
-.nav-links {
-  display: flex;
-  gap: 8px;
-}
-
+.nav-links { display: flex; gap: 4px; }
 .nav-links a {
   color: var(--gray);
   text-decoration: none;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
-  padding: 6px 14px;
+  padding: 5px 10px;
   border-radius: 8px;
   transition: all 0.3s;
+  cursor: pointer;
 }
-
 .nav-links a:hover, .nav-links a.active {
   color: var(--white);
-  background: rgba(230,57,70,0.15);
+  background: var(--red-dim);
+}
+.nav-counter { font-size: 13px; color: var(--gray); font-weight: 600; }
+.nav-counter span { color: var(--red); }
+
+.progress-bar {
+  position: fixed;
+  top: 60px; left: 0;
+  height: 3px;
+  background: var(--red);
+  z-index: 999;
+  transition: width 0.4s ease;
 }
 
-/* ========== SLIDES / SECTIONS ========== */
+.slides-wrapper { position: fixed; inset: 0; overflow: hidden; }
+
 .slide {
-  min-height: 100vh;
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100px 60px 60px;
-  position: relative;
+  padding: 80px 60px 50px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
   overflow: hidden;
 }
+.slide.active { opacity: 1; transform: translateY(0); pointer-events: all; }
 
 .slide-number {
   position: absolute;
-  top: 80px;
-  right: 40px;
-  font-size: 120px;
+  top: 70px; right: 40px;
+  font-size: 110px;
   font-weight: 900;
-  color: rgba(230,57,70,0.06);
+  color: rgba(230,57,70,0.05);
   line-height: 1;
-}
-
-/* ========== SLIDE 1: PORTADA ========== */
-#portada {
-  background: radial-gradient(ellipse at 30% 50%, rgba(230,57,70,0.08) 0%, transparent 60%),
-              radial-gradient(ellipse at 70% 80%, rgba(230,57,70,0.05) 0%, transparent 50%),
-              #0a0a0a;
-}
-
-.portada-content {
-  text-align: center;
-  max-width: 800px;
-}
-
-.portada-badge {
-  display: inline-block;
-  background: rgba(230,57,70,0.15);
-  color: var(--red);
-  padding: 6px 20px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 24px;
-}
-
-.portada-title {
-  font-size: 72px;
-  font-weight: 900;
-  letter-spacing: 6px;
-  line-height: 1.1;
-  margin-bottom: 16px;
-}
-.portada-title span { color: var(--red); }
-
-.portada-subtitle {
-  font-size: 22px;
-  color: var(--gray);
-  font-weight: 300;
-  margin-bottom: 40px;
-  line-height: 1.6;
-}
-
-.portada-meta {
-  display: flex;
-  gap: 40px;
-  justify-content: center;
-  color: rgba(255,255,255,0.4);
-  font-size: 13px;
-}
-
-.portada-meta span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ========== SLIDE 2: EL PROBLEMA ========== */
-#problema {
-  background: #0a0a0a;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 60px;
-  max-width: 700px;
+  pointer-events: none;
+  user-select: none;
 }
 
 .section-tag {
   display: inline-block;
   color: var(--red);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.section-title {
-  font-size: 42px;
-  font-weight: 800;
-  line-height: 1.2;
-  margin-bottom: 16px;
-}
-
-.section-desc {
-  font-size: 17px;
-  color: var(--gray);
-  line-height: 1.7;
-}
-
-.problem-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  max-width: 1000px;
-  width: 100%;
-}
-
-.problem-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  padding: 36px 28px;
-  text-align: center;
-  transition: all 0.3s;
-}
-
-.problem-card:hover {
-  background: rgba(230,57,70,0.05);
-  border-color: rgba(230,57,70,0.2);
-  transform: translateY(-4px);
-}
-
-.problem-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.problem-title {
-  font-size: 18px;
-  font-weight: 700;
   margin-bottom: 10px;
 }
+.section-title { font-size: 36px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+.section-desc { font-size: 15px; color: var(--gray); line-height: 1.7; }
+.section-header { text-align: center; margin-bottom: 36px; max-width: 700px; }
 
-.problem-text {
-  font-size: 14px;
-  color: var(--gray);
-  line-height: 1.6;
-}
-
-/* ========== SLIDE 3: LA SOLUCION ========== */
-#solucion {
-  background: linear-gradient(180deg, #0a0a0a 0%, #0f0f0f 100%);
-}
-
-.solution-layout {
-  display: flex;
-  align-items: center;
-  gap: 80px;
-  max-width: 1100px;
-  width: 100%;
-}
-
-.solution-text {
-  flex: 1;
-}
-
-.solution-steps {
-  list-style: none;
-  margin-top: 32px;
-}
-
-.solution-steps li {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.step-num {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  background: var(--red);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 16px;
-}
-
-.step-content h4 {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.step-content p {
-  font-size: 14px;
-  color: var(--gray);
-  line-height: 1.5;
-}
-
-.solution-visual {
-  flex: 0 0 380px;
-}
-
-.demo-frame {
-  width: 380px;
-  height: 760px;
-  border-radius: 30px;
-  border: 3px solid #333;
-  overflow: hidden;
-  box-shadow: 0 20px 80px rgba(230,57,70,0.15), 0 0 0 1px rgba(255,255,255,0.05);
-}
-
-.demo-frame iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  transform-origin: top left;
-}
-
-/* ========== SLIDE 4: DEMO EN VIVO ========== */
-#demo-live {
-  background: var(--white);
-  color: var(--black);
-}
-
-#demo-live .section-tag { color: var(--red); }
-#demo-live .section-desc { color: #666; }
-
-.live-demo-container {
-  display: flex;
-  align-items: center;
-  gap: 60px;
-  max-width: 1100px;
-  width: 100%;
-}
-
-.live-frame {
-  width: 380px;
-  height: 760px;
-  border-radius: 30px;
-  border: 3px solid #ddd;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-  flex-shrink: 0;
-}
-
-.live-frame iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-.live-features {
-  flex: 1;
-}
-
-.feature-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 28px;
-  padding: 20px;
-  border-radius: 16px;
-  background: var(--light-bg);
-  transition: all 0.3s;
-}
-
-.feature-item:hover {
-  background: #FFF3F3;
-  transform: translateX(4px);
-}
-
-.feature-icon {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  background: var(--red);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.feature-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--black);
-  margin-bottom: 4px;
-}
-
-.feature-desc {
-  font-size: 13px;
-  color: #666;
-  line-height: 1.5;
-}
-
-/* ========== SLIDE 5: COMPARACION DE PRECIOS ========== */
-#comparacion {
-  background: #0a0a0a;
-}
-
-.stores-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  max-width: 900px;
-  width: 100%;
-  margin-top: 20px;
-}
-
-.store-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
-  padding: 28px 20px;
-  text-align: center;
-  transition: all 0.3s;
-}
-
-.store-card:hover {
-  border-color: var(--red);
-  transform: translateY(-4px);
-}
-
-.store-name {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.store-method {
-  font-size: 11px;
-  color: var(--gray);
-  line-height: 1.4;
-}
-
-.store-status {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.status-active {
-  background: rgba(46,204,113,0.15);
-  color: var(--green);
-}
-
-.status-dev {
-  background: rgba(243,156,18,0.15);
-  color: var(--orange);
-}
-
-/* ========== SLIDE 6: IMPACTO ========== */
-#impacto {
-  background: linear-gradient(180deg, #0a0a0a 0%, #100a0a 100%);
-}
-
-.impact-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  max-width: 1000px;
-  width: 100%;
-}
-
-.impact-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  padding: 36px 24px;
+/* PORTADA */
+#slide-0 {
+  background: radial-gradient(ellipse at 30% 50%, rgba(230,57,70,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(230,57,70,0.05) 0%, transparent 50%), var(--bg);
   text-align: center;
 }
-
-.impact-number {
-  font-size: 48px;
-  font-weight: 900;
-  color: var(--red);
-  line-height: 1;
-  margin-bottom: 8px;
-}
-
-.impact-label {
-  font-size: 14px;
-  color: var(--gray);
-  line-height: 1.4;
-}
-
-.impact-sublabel {
-  font-size: 12px;
-  color: rgba(255,255,255,0.25);
-  margin-top: 4px;
-}
-
-/* ========== SLIDE 7: ROADMAP ========== */
-#roadmap {
-  background: #0a0a0a;
-}
-
-.roadmap-timeline {
-  display: flex;
-  gap: 0;
-  max-width: 1000px;
-  width: 100%;
-  position: relative;
-}
-
-.roadmap-timeline::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: rgba(255,255,255,0.08);
-}
-
-.roadmap-item {
-  flex: 1;
-  text-align: center;
-  padding: 0 16px;
-  position: relative;
-}
-
-.roadmap-dot {
-  width: 16px;
-  height: 16px;
-  background: var(--red);
-  border-radius: 50%;
-  margin: 0 auto 20px;
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 6px rgba(230,57,70,0.3);
-}
-
-.roadmap-dot.done {
-  background: var(--green);
-  box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 6px rgba(46,204,113,0.3);
-}
-
-.roadmap-dot.current {
-  animation: pulseDot 2s ease-in-out infinite;
-}
-
-@keyframes pulseDot {
-  0%, 100% { box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 6px rgba(230,57,70,0.3); }
-  50% { box-shadow: 0 0 0 4px #0a0a0a, 0 0 0 12px rgba(230,57,70,0.15); }
-}
-
-.roadmap-phase {
-  font-size: 12px;
-  color: var(--red);
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.roadmap-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.roadmap-desc {
-  font-size: 13px;
-  color: var(--gray);
-  line-height: 1.5;
-}
-
-/* ========== SLIDE 8: CIERRE ========== */
-#cierre {
-  background: radial-gradient(ellipse at 50% 50%, rgba(230,57,70,0.1) 0%, transparent 60%),
-              #0a0a0a;
-}
-
-.cierre-logo {
-  font-size: 80px;
-  font-weight: 900;
-  letter-spacing: 8px;
-  margin-bottom: 16px;
-}
-.cierre-logo span { color: var(--red); }
-
-.cierre-tagline {
-  font-size: 24px;
-  color: var(--gray);
-  font-weight: 300;
-  margin-bottom: 48px;
-}
-
-.cierre-cta {
-  display: inline-block;
-  background: var(--red);
-  color: white;
-  padding: 16px 48px;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-decoration: none;
-  transition: all 0.3s;
-  cursor: pointer;
-  border: none;
-}
-
-.cierre-cta:hover {
-  background: #c0313e;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(230,57,70,0.4);
-}
-
-/* ========== ANIMATIONS ========== */
-.fade-in {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.fade-in.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ========== RESPONSIVE ========== */
-@media (max-width: 1024px) {
-  .slide { padding: 100px 30px 60px; }
-  .solution-layout, .live-demo-container { flex-direction: column; }
-  .solution-visual { flex: none; }
-  .demo-frame, .live-frame { width: 320px; height: 640px; }
-  .problem-grid { grid-template-columns: 1fr; max-width: 400px; }
-  .stores-grid { grid-template-columns: repeat(2, 1fr); }
-  .impact-grid { grid-template-columns: repeat(2, 1fr); }
-  .roadmap-timeline { flex-direction: column; gap: 24px; }
-  .roadmap-timeline::before { display: none; }
-  .portada-title { font-size: 48px; }
-  .portada-meta { flex-direction: column; gap: 8px; align-items: center; }
-  .nav-links { display: none; }
-}
-
-/* ========== FULLSCREEN BUTTON ========== */
-.fullscreen-hint {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(230,57,70,0.9);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  z-index: 1000;
-  transition: all 0.3s;
-  border: none;
-  font-family: 'Poppins', sans-serif;
-}
-
-.fullscreen-hint:hover {
-  background: var(--red);
-  transform: translateY(-2px);
-}
-
-/* ========== PROGRESS BAR ========== */
-.progress-bar {
-  position: fixed;
-  top: 60px;
-  left: 0;
-  height: 3px;
-  background: var(--red);
-  z-index: 999;
-  transition: width 0.3s ease;
-}
-
-/* ========== KEYBOARD NAV HINT ========== */
-.key-hint {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  display: flex;
+.portada-badge {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  z-index: 1000;
+  background: var(--red-dim);
+  color: var(--red);
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  border: 1px solid var(--red-border);
 }
+.portada-badge::before {
+  content:''; width:7px; height:7px; border-radius:50%;
+  background: var(--green); animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.portada-title { font-size: 80px; font-weight: 900; letter-spacing: 8px; line-height: 1.0; margin-bottom: 16px; }
+.portada-title span { color: var(--red); }
+.portada-divider { width:60px; height:2px; background:var(--red); margin:20px auto; border-radius:2px; }
+.portada-subtitle { font-size: 17px; color: var(--gray); font-weight: 300; margin-bottom: 36px; line-height: 1.7; }
+.portada-meta { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+.portada-meta-item .label { font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+.portada-meta-item .value { font-size:14px; color:rgba(255,255,255,0.7); font-weight:500; }
 
+/* PROBLEMA */
+#slide-1 { background: var(--bg); }
+.problem-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:960px; width:100%; }
+.problem-card {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:20px; padding:30px 24px; text-align:center; transition:all 0.3s;
+}
+.problem-card:hover { background:rgba(230,57,70,0.05); border-color:var(--red-border); transform:translateY(-4px); }
+.problem-icon { font-size:44px; margin-bottom:14px; }
+.problem-title { font-size:17px; font-weight:700; margin-bottom:10px; }
+.problem-text { font-size:13px; color:var(--gray); line-height:1.6; }
+.problema-stat {
+  margin-top:22px; padding:14px 36px;
+  background:rgba(230,57,70,0.06); border:1px solid var(--red-border);
+  border-radius:12px; max-width:700px; text-align:center;
+}
+.problema-stat p { font-size:13px; color:var(--gray); line-height:1.7; }
+.problema-stat strong { color:var(--red); }
+
+/* MUNDO */
+#slide-2 { background: linear-gradient(180deg,#0a0a0a 0%,#0c0a0a 100%); }
+.mundo-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; max-width:1020px; width:100%; }
+.mundo-card {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:18px; padding:24px 18px; text-align:center; transition:all 0.3s;
+  position:relative; overflow:hidden;
+}
+.mundo-card::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+  background:var(--red); transform:scaleX(0); transition:transform 0.3s;
+}
+.mundo-card:hover { border-color:var(--red-border); transform:translateY(-4px); }
+.mundo-card:hover::after { transform:scaleX(1); }
+.mundo-emoji { font-size:32px; margin-bottom:10px; }
+.mundo-brand { font-size:17px; font-weight:800; color:var(--white); margin-bottom:4px; letter-spacing:1px; }
+.mundo-feature { font-size:11px; color:var(--red); font-weight:600; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+.mundo-desc { font-size:12px; color:var(--gray); line-height:1.6; }
+.mundo-conclusion {
+  margin-top:24px; text-align:center; max-width:750px;
+  padding:14px 32px; background:var(--red-dim); border:1px solid var(--red-border); border-radius:12px;
+}
+.mundo-conclusion p { font-size:14px; color:rgba(255,255,255,0.75); line-height:1.7; }
+.mundo-conclusion strong { color:var(--red); }
+
+/* SOLUCIÓN */
+#slide-3 { background: linear-gradient(180deg,#0a0a0a 0%,#0f0a0a 100%); }
+.solucion-layout { display:grid; grid-template-columns:1fr 1fr; gap:50px; max-width:1020px; width:100%; align-items:center; }
+.solucion-left p { font-size:14px; color:var(--gray); line-height:1.8; margin-bottom:22px; font-weight:300; }
+.solution-steps { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.solution-steps li {
+  display:flex; align-items:flex-start; gap:14px;
+  padding:13px 16px; background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:12px; transition:all 0.3s;
+}
+.solution-steps li:hover { border-color:var(--red-border); background:rgba(230,57,70,0.05); }
+.step-num {
+  width:32px; height:32px; min-width:32px; background:var(--red);
+  border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px;
+}
+.step-content h4 { font-size:13px; font-weight:700; margin-bottom:3px; }
+.step-content p { font-size:12px; color:var(--gray); line-height:1.5; }
+.solucion-right { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.feature-chip {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:14px; padding:18px 14px; text-align:center; transition:all 0.3s;
+}
+.feature-chip:hover { border-color:var(--red-border); transform:scale(1.03); }
+.feature-chip .icon { font-size:26px; margin-bottom:8px; }
+.feature-chip h4 { font-size:12px; font-weight:700; margin-bottom:4px; }
+.feature-chip p { font-size:11px; color:var(--gray); line-height:1.5; }
+
+/* COMPETENCIA */
+#slide-4 { background: var(--bg); }
+.stores-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; max-width:1000px; width:100%; }
+.store-card {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:16px; padding:22px 16px; text-align:center; transition:all 0.3s;
+}
+.store-card:hover { border-color:var(--red); transform:translateY(-4px); }
+.store-name { font-size:14px; font-weight:700; margin-bottom:6px; }
+.store-method { font-size:11px; color:var(--gray); line-height:1.4; margin-bottom:10px; }
+.store-status { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.status-active { background:rgba(46,204,113,0.15); color:var(--green); }
+.status-dev { background:rgba(243,156,18,0.15); color:var(--orange); }
+.comp-footer {
+  margin-top:18px; padding:14px 36px; background:rgba(46,204,113,0.06);
+  border:1px solid rgba(46,204,113,0.2); border-radius:10px; max-width:600px; text-align:center;
+}
+.comp-footer p { font-size:13px; color:var(--gray); }
+.comp-footer strong { color:var(--green); font-size:16px; }
+
+/* ESTADO */
+#slide-5 { background: linear-gradient(180deg,#0a0a0a 0%,#0a0c0a 100%); }
+.estado-layout { display:grid; grid-template-columns:1fr 1fr; gap:36px; max-width:1020px; width:100%; align-items:start; }
+.estado-col h3 { font-size:17px; font-weight:800; letter-spacing:1px; margin-bottom:16px; padding-bottom:10px; }
+.estado-col.listo h3 { color:var(--green); border-bottom:2px solid rgba(46,204,113,0.3); }
+.estado-col.pendiente h3 { color:var(--orange); border-bottom:2px solid rgba(243,156,18,0.3); }
+.estado-item { display:flex; align-items:flex-start; gap:12px; padding:11px 14px; border-radius:10px; margin-bottom:6px; transition:all 0.2s; }
+.estado-item:hover { background:var(--card-bg); }
+.estado-icon { font-size:15px; margin-top:2px; min-width:20px; }
+.estado-text h4 { font-size:13px; font-weight:600; margin-bottom:2px; }
+.estado-text p { font-size:11px; color:var(--gray); line-height:1.5; }
+.estado-bar { width:100%; height:4px; background:rgba(255,255,255,0.06); border-radius:2px; margin-top:16px; overflow:hidden; }
+.estado-bar-fill { height:100%; border-radius:2px; }
+.estado-bar-fill.listo { background:var(--green); width:70%; }
+.estado-bar-fill.pendiente { background:var(--orange); width:30%; }
+.estado-label { display:flex; justify-content:space-between; margin-top:5px; font-size:10px; color:var(--gray); }
+
+/* IT */
+#slide-6 { background: var(--bg); }
+.it-intro { text-align:center; max-width:700px; margin-bottom:26px; }
+.it-intro p { font-size:14px; color:var(--gray); line-height:1.7; }
+.it-intro strong { color:var(--white); }
+.it-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; max-width:1020px; width:100%; }
+.it-card {
+  background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:18px; padding:26px 22px; transition:all 0.3s; position:relative; overflow:hidden;
+}
+.it-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--red); }
+.it-card:hover { transform:translateY(-5px); border-color:var(--red-border); }
+.it-icon { font-size:28px; margin-bottom:12px; }
+.it-card h3 { font-size:17px; font-weight:800; color:var(--white); margin-bottom:16px; }
+.it-arrow { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+.it-arrow .from { font-size:11px; color:var(--red); background:rgba(230,57,70,0.1); border:1px solid rgba(230,57,70,0.2); padding:3px 10px; border-radius:6px; font-weight:600; }
+.it-arrow .arrow { color:var(--gray); font-size:16px; }
+.it-arrow .to { font-size:11px; color:var(--green); background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.2); padding:3px 10px; border-radius:6px; font-weight:600; }
+.it-card p { font-size:13px; color:var(--gray); line-height:1.6; }
+
+/* IMPACTO */
+#slide-7 { background: linear-gradient(180deg,#0a0a0a 0%,#100a0a 100%); }
+
+.impacto-context {
+  display: flex; gap: 32px; align-items: center;
+  margin-bottom: 24px; max-width: 1020px; width: 100%;
+}
+.impacto-context-stat {
+  background: var(--red-dim); border: 1px solid var(--red-border);
+  border-radius: 14px; padding: 18px 28px; text-align: center; white-space: nowrap;
+}
+.impacto-context-stat .big { font-size: 32px; font-weight: 900; color: var(--red); line-height: 1; }
+.impacto-context-stat .lbl { font-size: 11px; color: var(--gray); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+.impacto-context-desc { font-size: 13px; color: var(--gray); line-height: 1.8; }
+.impacto-context-desc strong { color: var(--white); }
+
+.impacto-table-wrap { max-width: 1020px; width: 100%; }
+.impacto-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card-bg); border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+.impacto-table thead tr {
+  background: rgba(230,57,70,0.12);
+  border-bottom: 1px solid var(--red-border);
+}
+.impacto-table thead th {
+  padding: 12px 20px; font-size: 12px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; text-align: center;
+  color: var(--red);
+}
+.impacto-table thead th:first-child { text-align: left; color: var(--gray); }
+.impacto-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.2s; }
+.impacto-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+.impacto-table tbody tr:last-child { border-bottom: none; }
+.impacto-table tbody td {
+  padding: 11px 20px; font-size: 13px; text-align: center; color: var(--gray);
+}
+.impacto-table tbody td:first-child { text-align: left; color: rgba(255,255,255,0.6); font-weight: 500; font-size: 12px; }
+.impacto-table .row-total td {
+  background: rgba(230,57,70,0.08); font-weight: 800; font-size: 14px;
+  color: var(--white); border-top: 1px solid var(--red-border);
+}
+.impacto-table .row-total td:first-child { color: var(--red); }
+.impacto-table .row-pct td {
+  background: rgba(46,204,113,0.06); font-weight: 700; font-size: 13px;
+  color: var(--green); border-top: 1px solid rgba(46,204,113,0.2);
+}
+.impacto-table .row-pct td:first-child { color: var(--gray); }
+
+.col-highlight { color: var(--white) !important; font-weight: 600 !important; }
+.col-best { color: var(--green) !important; font-weight: 700 !important; }
+
+.impacto-footer {
+  margin-top: 16px; max-width: 1020px; width: 100%;
+  padding: 14px 28px; background: var(--red-dim); border: 1px solid var(--red-border);
+  border-radius: 10px; display: flex; align-items: center; gap: 16px;
+}
+.impacto-footer p { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+.impacto-footer strong { color: var(--white); }
+
+/* ROADMAP */
+#slide-8 { background: var(--bg); }
+.roadmap-timeline {
+  display:flex; max-width:1000px; width:100%; position:relative; margin-top:16px;
+}
+.roadmap-timeline::before {
+  content:''; position:absolute; top:24px; left:24px; right:24px;
+  height:2px; background:rgba(255,255,255,0.08);
+}
+.roadmap-timeline::after {
+  content:''; position:absolute; top:24px; left:24px;
+  width:40%; height:2px; background:var(--green);
+}
+.roadmap-item { flex:1; text-align:center; padding:0 12px; position:relative; }
+.roadmap-dot {
+  width:48px; height:48px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:16px;
+  margin:0 auto 16px; position:relative; z-index:2; transition:all 0.3s;
+}
+.roadmap-dot.done { background:var(--green); color:#0a0a0a; box-shadow:0 0 0 4px var(--bg),0 0 0 6px rgba(46,204,113,0.3); }
+.roadmap-dot.current {
+  background:var(--red); color:var(--white);
+  box-shadow:0 0 0 4px var(--bg),0 0 0 6px rgba(230,57,70,0.3);
+  animation:pulseDot 2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%,100% { box-shadow:0 0 0 4px var(--bg),0 0 0 6px rgba(230,57,70,0.3); }
+  50% { box-shadow:0 0 0 4px var(--bg),0 0 0 14px rgba(230,57,70,0.12); }
+}
+.roadmap-dot.pending { background:#1a1a1a; color:var(--gray); border:2px solid rgba(255,255,255,0.1); box-shadow:0 0 0 4px var(--bg); }
+.roadmap-phase { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+.roadmap-phase.done { color:var(--green); }
+.roadmap-phase.current { color:var(--red); }
+.roadmap-phase.pending { color:var(--gray); }
+.roadmap-title { font-size:14px; font-weight:700; margin-bottom:6px; }
+.roadmap-desc { font-size:12px; color:var(--gray); line-height:1.5; }
+.roadmap-footer {
+  margin-top:30px; text-align:center; max-width:700px;
+  padding:14px 32px; background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px;
+}
+.roadmap-footer p { font-size:13px; color:var(--gray); line-height:1.7; }
+.roadmap-footer strong { color:var(--red); }
+
+/* CIERRE */
+#slide-9 {
+  background: radial-gradient(ellipse at 50% 50%, rgba(230,57,70,0.1) 0%, transparent 60%), var(--bg);
+  text-align:center;
+}
+.cierre-logo { font-size:80px; font-weight:900; letter-spacing:8px; margin-bottom:8px; }
+.cierre-logo span { color:var(--red); }
+.cierre-divider { width:60px; height:3px; background:var(--red); margin:18px auto; border-radius:2px; }
+.cierre-tagline { font-size:22px; color:var(--gray); font-weight:300; margin-bottom:10px; }
+.cierre-sub { font-size:15px; color:rgba(255,255,255,0.4); max-width:600px; margin:0 auto 36px; line-height:1.8; }
+.cierre-sub strong { color:var(--red); }
+.cierre-cta-group { display:flex; gap:16px; justify-content:center; margin-bottom:44px; }
+.btn-primary {
+  background:var(--red); color:white; padding:14px 40px; border-radius:12px;
+  font-size:14px; font-weight:700; letter-spacing:1px; border:none; cursor:pointer;
+  font-family:'Poppins',sans-serif; transition:all 0.3s;
+}
+.btn-primary:hover { background:#c0313e; transform:translateY(-2px); box-shadow:0 8px 30px rgba(230,57,70,0.4); }
+.btn-secondary {
+  background:transparent; color:var(--white); padding:14px 40px; border-radius:12px;
+  font-size:14px; font-weight:600; letter-spacing:1px; border:1px solid rgba(255,255,255,0.15);
+  cursor:pointer; font-family:'Poppins',sans-serif; transition:all 0.3s;
+}
+.btn-secondary:hover { border-color:var(--red); color:var(--red); transform:translateY(-2px); }
+.cierre-meta { display:flex; gap:48px; justify-content:center; }
+.cierre-meta-item .label { font-size:10px; color:rgba(255,255,255,0.25); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+.cierre-meta-item .value { font-size:13px; color:rgba(255,255,255,0.55); font-weight:500; }
+
+/* CONTROLS */
+.nav-arrow {
+  position:fixed; bottom:28px; z-index:200;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  color:var(--gray); width:42px; height:42px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all 0.2s; font-size:16px;
+}
+.nav-arrow:hover { color:var(--red); border-color:var(--red); background:var(--red-dim); }
+.nav-arrow.prev { left:50%; transform:translateX(-56px); }
+.nav-arrow.next { left:50%; transform:translateX(14px); }
+.fs-btn {
+  position:fixed; bottom:22px; right:24px;
+  background:var(--red); color:white; padding:8px 18px; border-radius:10px;
+  font-size:12px; font-weight:600; cursor:pointer; border:none;
+  font-family:'Poppins',sans-serif; z-index:200; transition:all 0.2s;
+}
+.fs-btn:hover { background:#c0313e; transform:translateY(-2px); }
+.key-hint { position:fixed; bottom:30px; left:24px; display:flex; gap:8px; z-index:200; }
 .key-hint span {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  color: var(--gray);
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+  padding:4px 10px; border-radius:6px; font-size:11px; color:var(--gray); font-family:'Poppins',sans-serif;
 }
 </style>
 </head>
 <body>
 
-<!-- Navigation -->
 <nav class="nav">
   <div class="nav-logo">TRACK <span>INN</span></div>
   <div class="nav-links">
-    <a href="#portada">Inicio</a>
-    <a href="#problema">Problema</a>
-    <a href="#solucion">Solución</a>
-    <a href="#demo-live">App en Vivo</a>
-    <a href="#comparacion">Competencia</a>
-    <a href="#impacto">Impacto</a>
-    <a href="#roadmap">Roadmap</a>
+    <a onclick="goTo(0)">Inicio</a>
+    <a onclick="goTo(1)">Problema</a>
+    <a onclick="goTo(2)">Video 1</a>
+    <a onclick="goTo(3)">Video 2</a>
+    <a onclick="goTo(4)">Mercado</a>
+    <a onclick="goTo(5)">Solución</a>
+    <a onclick="goTo(6)">Competencia</a>
+    <a onclick="goTo(7)">Rotación</a>
+    <a onclick="goTo(8)">Impacto</a>
+    <a onclick="goTo(9)">Estado</a>
+    <a onclick="goTo(10)">IT</a>
+    <a onclick="goTo(11)">Roadmap</a>
+    <a onclick="goTo(12)">Cierre</a>
   </div>
+  <div class="nav-counter"><span id="curNum">01</span> / 13</div>
 </nav>
 
-<!-- Progress Bar -->
 <div class="progress-bar" id="progressBar"></div>
 
-<!-- ==================== SLIDE 1: PORTADA ==================== -->
-<section class="slide" id="portada">
-  <div class="slide-number">01</div>
-  <div class="portada-content fade-in">
-    <div class="portada-badge">Presentación a Dirección</div>
+<div class="slides-wrapper">
+
+  <!-- 00 PORTADA -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-number">01</div>
+    <div class="portada-badge">App en funcionamiento · Marzo 2026</div>
     <h1 class="portada-title">TRACK <span>INN</span></h1>
-    <p class="portada-subtitle">
-      El track que mueve tu tienda.<br>
-      Herramienta de escaneo que conecta al cliente con el precio real del producto.
-    </p>
+    <div class="portada-divider"></div>
+    <p class="portada-subtitle">El track que mueve tu tienda.<br>Herramienta de escaneo que conecta al cliente con el precio real del producto.</p>
     <div class="portada-meta">
-      <span>Marzo 2026</span>
-      <span>Innovasport &amp; Innvictus</span>
-      <span>v1.0</span>
+      <div class="portada-meta-item">
+        <div class="label">Empresa</div>
+        <div class="value">Innovasport & Innvictus</div>
+      </div>
+      <div class="portada-meta-item">
+        <div class="label">Versión</div>
+        <div class="value">v1.0 — MVP Funcional</div>
+      </div>
+      <div class="portada-meta-item">
+        <div class="label">Fecha</div>
+        <div class="value">Marzo 2026</div>
+      </div>
+      <div class="portada-meta-item">
+        <div class="label">Status</div>
+        <div class="value" style="color:var(--green)">● App en vivo</div>
+      </div>
     </div>
   </div>
-</section>
 
-<!-- ==================== SLIDE 2: EL PROBLEMA ==================== -->
-<section class="slide" id="problema">
-  <div class="slide-number">02</div>
-  <div class="section-header fade-in">
-    <div class="section-tag">El Problema</div>
-    <h2 class="section-title">El producto no se mueve si el cliente no conoce su precio</h2>
-    <p class="section-desc">
-      Miles de productos en tienda sin etiqueta de precio o con precios desactualizados.
-      El cliente no compra lo que no entiende.
-    </p>
+  <!-- 01 PROBLEMA -->
+  <div class="slide" id="slide-1">
+    <div class="slide-number">02</div>
+    <div class="section-header">
+      <div class="section-tag">El Problema</div>
+      <h2 class="section-title">El producto no se mueve si el cliente<br>no conoce su precio real</h2>
+      <p class="section-desc">Miles de SKUs en piso con precios desactualizados o sin etiqueta. El cliente no compra lo que no entiende.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">🏷️</div>
+        <h3 class="problem-title">Sin Etiqueta</h3>
+        <p class="problem-text">Producto en piso sin precio visible. El cliente lo ve, lo toca, pero no sabe cuánto cuesta — y lo deja.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">💰</div>
+        <h3 class="problem-title">Precio Desactualizado</h3>
+        <p class="problem-text">El producto muestra precio original pero ya tiene promoción activa. El cliente ve $3,999 cuando cuesta $2,799.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🚶</div>
+        <h3 class="problem-title">Venta Perdida</h3>
+        <p class="problem-text">Sin información clara, el cliente se va. Cada producto sin precio es una venta que no se recupera.</p>
+      </div>
+    </div>
+    <div class="problema-stat">
+      <p>Estudios de retail demuestran que <strong>un producto sin precio visible pierde hasta 40% de su probabilidad de venta</strong>. En un piso con miles de SKUs en promoción activa, el problema se multiplica.</p>
+    </div>
   </div>
-  <div class="problem-grid fade-in">
-    <div class="problem-card">
-      <div class="problem-icon">🏷️</div>
-      <h3 class="problem-title">Sin Etiqueta</h3>
-      <p class="problem-text">Producto en piso de venta sin precio visible. El cliente lo ve, lo toca, pero no sabe cuánto cuesta y lo deja.</p>
-    </div>
-    <div class="problem-card">
-      <div class="problem-icon">💰</div>
-      <h3 class="problem-title">Precio Alto Visible</h3>
-      <p class="problem-text">El producto muestra su precio original pero ya tiene promoción. El cliente ve $3,999 cuando en realidad está en $2,799.</p>
-    </div>
-    <div class="problem-card">
-      <div class="problem-icon">🚶</div>
-      <h3 class="problem-title">Cliente Perdido</h3>
-      <p class="problem-text">Sin información clara, el cliente se va. Cada producto sin precio es una venta perdida que no se recupera.</p>
-    </div>
-  </div>
-</section>
 
-<!-- ==================== SLIDE 3: LA SOLUCIÓN ==================== -->
-<section class="slide" id="solucion">
-  <div class="slide-number">03</div>
-  <div class="solution-layout">
-    <div class="solution-text fade-in">
-      <div class="section-tag">La Solución</div>
-      <h2 class="section-title">Track INN: Escanea y conoce el precio real</h2>
-      <p class="section-desc">
-        Una aplicación web (PWA) que permite al asociado de tienda o al cliente
-        escanear el código de barras de cualquier producto y ver al instante su precio final,
-        promociones activas y descuentos aplicados.
+  <!-- 02 VIDEO 1 — TRACK INN -->
+  <div class="slide" id="slide-video1" style="padding:0;overflow:hidden;">
+
+    <style>
+    /* ── Video 1 slide: scope con prefijo v1_ ── */
+    #slide-video1 { background:#000; }
+    #v1_scene {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      background:#000; overflow:hidden;
+    }
+    #v1_bgVideo {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:fill; display:block;
+      transition:transform 1.0s cubic-bezier(0.4,0,0.2,1), filter 1.0s ease;
+      transform-origin:41.14% 38.05%;
+    }
+    #v1_bgVideo.zooming { transform:scale(5.5); filter:brightness(0); }
+    #v1_appOverlay {
+      position:absolute; inset:0; z-index:20;
+      opacity:0; pointer-events:none;
+      transition:opacity 0.3s ease;
+      display:flex; align-items:center; justify-content:center;
+      background:#0a0a0a;
+    }
+    #v1_appOverlay.visible { opacity:1; pointer-events:all; }
+    #v1_progress {
+      position:absolute; bottom:0; left:0;
+      height:3px; background:#E63946; width:0%; z-index:5;
+    }
+    /* Play btn */
+    #v1_playBtn {
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background:#E63946; color:#fff; border:none;
+      padding:16px 44px; border-radius:16px;
+      font-size:18px; font-weight:700; cursor:pointer;
+      font-family:'Poppins',sans-serif; z-index:50;
+      box-shadow:0 8px 30px rgba(230,57,70,0.5); letter-spacing:1px;
+    }
+    #v1_btnBack {
+      position:absolute; bottom:28px; left:50%;
+      transform:translateX(-50%);
+      background:rgba(230,57,70,0.88); color:#fff; border:none;
+      padding:10px 28px; border-radius:30px;
+      font-size:11px; font-weight:700; cursor:pointer;
+      font-family:'Poppins',sans-serif; letter-spacing:1.5px; text-transform:uppercase;
+      z-index:40; opacity:0; pointer-events:none; transition:opacity 0.3s;
+    }
+    #v1_btnBack.visible { opacity:1; pointer-events:all; }
+    </style>
+
+    <div id="v1_scene">
+      <video id="v1_bgVideo" src="track_inn_video1.mp4" playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;transition:transform 1.0s cubic-bezier(0.4,0,0.2,1),filter 1.0s ease;transform-origin:41.14% 38.05%;"></video>
+      <div id="v1_progress"></div>
+
+      <div id="v1_appOverlay">
+        <div class="dm_phone">
+          <div class="dm_statusbar">
+            <div class="t">9:41</div>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="8" width="12" height="8" rx="1"/><rect x="21" y="10" width="2" height="4" rx="0.5"/></svg>
+            </div>
+          </div>
+          <div class="dm_vp">
+            <!-- S0: Store Select -->
+            <div class="dm_screen dm_s0 active" id="v1_s0">
+              <div class="dm_logo">TRACK <span>INN</span></div>
+              <div class="dm_stitle">Selecciona tu tienda</div>
+              <div class="dm_sbtn" id="v1_btnInnova"><span>INNOVASPORT</span></div>
+              <div class="dm_sbtn"><span>INNVICTUS</span></div>
+              <div class="dm_slabel">Cada tienda usa su propio Excel</div>
+            </div>
+            <!-- S1: Splash -->
+            <div class="dm_screen dm_s1" id="v1_s1">
+              <div class="dm_splcontent">
+                <div class="dm_logoicon">
+                  <svg viewBox="0 0 80 80" fill="none">
+                    <rect x="10" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+                    <rect x="18" y="18" width="3" height="44" rx="1.5" fill="white" opacity="0.8"/>
+                    <rect x="24" y="22" width="5" height="36" rx="2" fill="white"/>
+                    <rect x="33" y="18" width="3" height="44" rx="1.5" fill="#E63946"/>
+                    <rect x="40" y="22" width="6" height="36" rx="2" fill="white"/>
+                    <rect x="50" y="18" width="3" height="44" rx="1.5" fill="#E63946" opacity="0.8"/>
+                    <rect x="57" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+                    <rect x="65" y="26" width="5" height="28" rx="2" fill="white" opacity="0.4"/>
+                  </svg>
+                </div>
+                <div class="dm_logotext">TRACK <span>INN</span></div>
+                <div class="dm_tagline">Escanea. Compara. Ahorra.</div>
+              </div>
+              <div class="dm_splbottom">
+                <button class="dm_btnprimary">ESCANEAR AHORA</button>
+              </div>
+            </div>
+            <!-- S2: Scanner -->
+            <div class="dm_screen dm_s2" id="v1_s2">
+              <div class="dm_hdr">
+                <div class="dm_back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+                <div class="dm_hdrtitle">Escaner</div>
+              </div>
+              <div class="dm_scanbody">
+                <div class="dm_frame">
+                  <div class="dm_corner tl"></div><div class="dm_corner tr"></div>
+                  <div class="dm_corner bl"></div><div class="dm_corner br"></div>
+                  <div id="v1_barcodeBg">
+                    <div class="dm_bbar" style="height:55%;width:2px"></div><div class="dm_bbar" style="height:70%;width:1px"></div>
+                    <div class="dm_bbar" style="height:60%;width:2px"></div><div class="dm_bbar" style="height:45%;width:3px"></div>
+                    <div class="dm_bbar" style="height:70%;width:2px"></div><div class="dm_bbar" style="height:60%;width:1px"></div>
+                    <div class="dm_bbar" style="height:50%;width:2px"></div><div class="dm_bbar" style="height:70%;width:2px"></div>
+                    <div class="dm_bbar" style="height:65%;width:2px"></div><div class="dm_bbar" style="height:55%;width:1px"></div>
+                    <div class="dm_bbar" style="height:70%;width:2px"></div><div class="dm_bbar" style="height:40%;width:3px"></div>
+                  </div>
+                  <div id="v1_scanLine"></div>
+                  <div id="v1_scanFlash"></div>
+                </div>
+                <div class="dm_scaninstr"><strong>Apunta al codigo de barras</strong> del producto<br>(UPC o Material) para obtener precio e inventario</div>
+              </div>
+            </div>
+            <!-- S3: Resultado -->
+            <div class="dm_screen dm_s3" id="v1_s3">
+              <div class="dm_hdr dm_hdrl">
+                <div class="dm_back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+                <div class="dm_hdrtitle">Resultado</div>
+              </div>
+              <div class="dm_prodbody">
+                <div class="dm_imgarea"><div class="dm_prodbadge">NIKE</div><div class="dm_prodicon">👟</div></div>
+                <div class="dm_prodbrand">NIKE</div>
+                <div class="dm_prodname">Nike Air Max 270 React</div>
+                <div class="dm_prodsku">Estilo: AO4971-001 · Talla: 27</div>
+                <div class="dm_prodsku">UPC: 195244332817</div>
+                <span class="dm_catbadge">Footwear</span>
+                <div id="v1_priceBlock">
+                  <div class="dm_pbadges"><span class="dm_pred">REBAJA</span><span class="dm_pred">OFF</span><span class="dm_pout">-20%</span><span class="dm_pout">-10%</span></div>
+                  <div class="dm_pricerow"><span class="dm_origprice">$2,999</span><span class="dm_origprice">$2,399</span><span class="dm_promo">$2,159</span></div>
+                </div>
+                <div class="dm_sectitle">Otras tallas del mismo modelo</div>
+                <div id="v1_sizeGrid">
+                  <div class="dm_sizebtn out">25</div><div class="dm_sizebtn">25.5</div><div class="dm_sizebtn">26</div>
+                  <div class="dm_sizebtn">26.5</div><div class="dm_sizebtn sel">27</div><div class="dm_sizebtn">27.5</div>
+                  <div class="dm_sizebtn">28</div><div class="dm_sizebtn out">28.5</div><div class="dm_sizebtn">29</div>
+                </div>
+                <div id="v1_compareBlock">
+                  <div class="dm_sectitle">Comparador de precios</div>
+                  <div class="dm_cmpcard"><div><div class="dm_cmpstore">Martí</div><div class="dm_cmpdiff">+16% más caro</div></div><div class="dm_cmpprice">$2,499</div></div>
+                  <div class="dm_cmpcard"><div><div class="dm_cmpstore">Nike.com</div><div class="dm_cmpdiff">+39% más caro</div></div><div class="dm_cmpprice">$2,999</div></div>
+                  <div class="dm_cmpcard"><div><div class="dm_cmpstore">Liverpool</div><div class="dm_cmpdiff">+29% más caro</div></div><div class="dm_cmpprice">$2,799</div></div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /dm_vp -->
+        </div><!-- /dm_phone -->
+      </div><!-- /v1_appOverlay -->
+
+      <button id="v1_playBtn">▶  Ver Video 1</button>
+      <button id="v1_btnBack" onclick="v1_goBack()">← Volver al video</button>
+    </div><!-- /v1_scene -->
+
+    <script>
+    (function(){
+      const video   = document.getElementById('v1_bgVideo');
+      const overlay = document.getElementById('v1_appOverlay');
+      const btnBack = document.getElementById('v1_btnBack');
+      const prog    = document.getElementById('v1_progress');
+      const DURATION = 10.042, ZOOM_AT = 6.5;
+      let v1State = 'idle', v1AppStarted = false;
+
+      function v1_goToScreen(id) {
+        document.querySelectorAll('#v1_scene .dm_screen').forEach(s => {
+          s.classList.remove('active','left'); s.classList.add('left');
+        });
+        const t = document.getElementById('v1_s' + id);
+        t.classList.remove('left'); t.classList.add('active');
+      }
+
+      function v1_runAppFlow() {
+        if (v1AppStarted) return; v1AppStarted = true;
+        setTimeout(() => document.getElementById('v1_btnInnova').classList.add('selected'), 300);
+        setTimeout(() => v1_goToScreen(1), 900);
+        setTimeout(() => {
+          v1_goToScreen(2);
+          setTimeout(() => document.getElementById('v1_barcodeBg').classList.add('show'), 250);
+          setTimeout(() => document.getElementById('v1_scanLine').classList.add('scanning'), 350);
+        }, 1500);
+        setTimeout(() => {
+          document.getElementById('v1_scanLine').classList.remove('scanning');
+          const sf = document.getElementById('v1_scanFlash');
+          sf.classList.add('flash'); setTimeout(() => sf.classList.remove('flash'), 120);
+          setTimeout(() => { sf.classList.add('flash'); setTimeout(() => sf.classList.remove('flash'), 100); }, 200);
+        }, 2500);
+        setTimeout(() => v1_goToScreen(3), 2900);
+        setTimeout(() => document.getElementById('v1_priceBlock').classList.add('show'), 3200);
+        setTimeout(() => document.getElementById('v1_sizeGrid').classList.add('show'), 3600);
+        setTimeout(() => document.getElementById('v1_compareBlock').classList.add('show'), 4000);
+      }
+
+      video.addEventListener('timeupdate', () => {
+        const t = video.currentTime;
+        prog.style.width = (t / DURATION * 100) + '%';
+        if (v1State === 'video' && t >= ZOOM_AT) {
+          v1State = 'zooming';
+          video.style.transform = 'scale(5.5)'; video.style.filter = 'brightness(0)';
+          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); v1State = 'app'; v1_runAppFlow(); }, 900);
+        }
+      });
+
+      function v1_resetApp() {
+        v1AppStarted = false;
+        document.getElementById('v1_btnInnova').classList.remove('selected');
+        document.getElementById('v1_barcodeBg').classList.remove('show');
+        document.getElementById('v1_scanLine').classList.remove('scanning');
+        document.getElementById('v1_priceBlock').classList.remove('show');
+        document.getElementById('v1_sizeGrid').classList.remove('show');
+        document.getElementById('v1_compareBlock').classList.remove('show');
+        v1_goToScreen(0);
+      }
+
+      window.v1_goBack = function() {
+        overlay.classList.remove('visible'); btnBack.classList.remove('visible');
+        video.style.transform = ''; video.style.filter = '';
+        v1State = 'idle'; v1_resetApp();
+        setTimeout(() => { video.currentTime = 0; video.play(); }, 400);
+      };
+
+      document.getElementById('v1_playBtn').onclick = function() {
+        video.currentTime = 0;
+        video.play(); v1State = 'video'; this.style.display = 'none';
+      };
+
+      window.v1_reset = function() {
+        if (v1State !== 'idle') {
+          overlay.classList.remove('visible'); btnBack.classList.remove('visible');
+          video.style.transform = ''; video.style.filter = '';
+          video.pause(); video.currentTime = 0;
+          v1State = 'idle'; v1_resetApp();
+        }
+        document.getElementById('v1_playBtn').style.display = '';
+      };
+    })();
+    </script>
+  </div>
+
+  <!-- 03 VIDEO 2 — DEMO TRACK INN -->
+  <div class="slide" id="slide-demo" style="padding:0;overflow:hidden;">
+
+    <style>
+    /* ── Demo slide: scope con prefijo dm_ ── */
+    #slide-demo { background:#000; }
+    #dm_scene {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      background:#000; overflow:hidden;
+    }
+    #dm_bgVideo {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:fill; display:block;
+      transition:transform 1.0s cubic-bezier(0.4,0,0.2,1), filter 1.0s ease;
+      transform-origin:50.68% 49.54%;
+    }
+    #dm_bgVideo.zooming { transform:scale(5.5); filter:brightness(0); }
+    #dm_appOverlay {
+      position:absolute; inset:0; z-index:20;
+      opacity:0; pointer-events:none;
+      transition:opacity 0.3s ease;
+      display:flex; align-items:center; justify-content:center;
+      background:#0a0a0a;
+    }
+    #dm_appOverlay.visible { opacity:1; pointer-events:all; }
+    #dm_progress {
+      position:absolute; bottom:0; left:0;
+      height:3px; background:#E63946; width:0%; z-index:5;
+    }
+    .dm_phone {
+      position:relative;
+      width:min(390px,37vh); height:min(844px,79vh);
+      background:#1D1D1D; border-radius:40px;
+      border:3px solid #333; overflow:hidden;
+      box-shadow:0 0 0 6px #111, 0 40px 120px rgba(0,0,0,0.95);
+    }
+    .dm_statusbar {
+      position:absolute; top:0; left:0; right:0; height:50px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:8px 24px 0; z-index:100;
+      font-size:14px; font-weight:600; color:#fff; font-family:'Poppins',sans-serif;
+    }
+    .dm_statusbar .t { font-weight:700; font-size:15px; letter-spacing:0.5px; }
+    .dm_statusbar .icons { display:flex; align-items:center; gap:6px; }
+    .dm_statusbar svg { width:16px; height:16px; }
+    .dm_vp { position:relative; width:100%; height:100%; overflow:hidden; }
+    .dm_screen {
+      position:absolute; top:0; left:0; width:100%; height:100%;
+      overflow:hidden; opacity:0; transform:translateX(100%);
+      transition:transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease;
+    }
+    .dm_screen.active { opacity:1; transform:translateX(0); z-index:10; }
+    .dm_screen.left   { opacity:0; transform:translateX(-100%); }
+    /* Store select */
+    .dm_s0 {
+      background:#1D1D1D; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; height:100%; gap:24px; padding:40px 24px;
+      font-family:'Poppins',sans-serif;
+    }
+    .dm_logo { font-size:36px; font-weight:900; letter-spacing:3px; color:#fff; text-transform:uppercase; }
+    .dm_logo span { color:#E63946; }
+    .dm_stitle { font-size:14px; font-weight:500; color:#95A5A6; letter-spacing:2px; text-transform:uppercase; }
+    .dm_sbtn {
+      width:85%; max-width:340px; background:#2B2B2B;
+      border:2px solid transparent; border-radius:20px; padding:24px 20px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .dm_sbtn.selected { border-color:#E63946; background:rgba(230,57,70,0.08); }
+    .dm_sbtn span { color:#fff; font-size:22px; font-weight:800; letter-spacing:1px; font-family:'Poppins',sans-serif; }
+    .dm_slabel { font-size:13px; color:#95A5A6; font-weight:400; font-family:'Poppins',sans-serif; }
+    /* Splash */
+    .dm_s1 {
+      background:#1D1D1D; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; height:100%; gap:0; padding:40px 30px;
+      font-family:'Poppins',sans-serif;
+    }
+    .dm_splcontent { display:flex; flex-direction:column; align-items:center; gap:12px; margin-bottom:40px; }
+    .dm_logoicon { width:80px; height:80px; margin-bottom:16px; }
+    .dm_logoicon svg { width:100%; height:100%; }
+    .dm_logotext { font-size:48px; font-weight:900; letter-spacing:4px; color:#fff; text-transform:uppercase; font-family:'Poppins',sans-serif; }
+    .dm_logotext span { color:#E63946; }
+    .dm_tagline { font-size:16px; color:#95A5A6; font-weight:300; letter-spacing:2px; margin-top:4px; font-family:'Poppins',sans-serif; }
+    .dm_splbottom { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; }
+    .dm_btnprimary {
+      width:100%; max-width:320px; padding:18px 40px;
+      background:#E63946; color:#fff; border:none; border-radius:16px;
+      font-family:'Poppins',sans-serif; font-size:16px; font-weight:700;
+    }
+    /* Scanner */
+    .dm_s2 { background:#1D1D1D; display:flex; flex-direction:column; height:100%; font-family:'Poppins',sans-serif; }
+    .dm_hdr { display:flex; align-items:center; padding:56px 20px 16px; background:#1D1D1D; color:#fff; }
+    .dm_back {
+      width:40px; height:40px; border-radius:12px; background:#2B2B2B;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .dm_back svg { width:20px; height:20px; stroke:#fff; }
+    .dm_hdrtitle { flex:1; text-align:center; font-size:18px; font-weight:600; margin-right:40px; font-family:'Poppins',sans-serif; }
+    .dm_scanbody { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 20px 20px; gap:14px; overflow:hidden; }
+    .dm_frame { width:calc(100% + 40px); margin-left:-20px; margin-right:-20px; height:55%; position:relative; background:#0d0d0d; overflow:hidden; flex-shrink:0; }
+    .dm_corner { position:absolute; width:40px; height:40px; border-color:#E63946; border-style:solid; border-width:0; }
+    .dm_corner.tl { top:40px; left:40px; border-top-width:3px; border-left-width:3px; border-top-left-radius:12px; }
+    .dm_corner.tr { top:40px; right:40px; border-top-width:3px; border-right-width:3px; border-top-right-radius:12px; }
+    .dm_corner.bl { bottom:40px; left:40px; border-bottom-width:3px; border-left-width:3px; border-bottom-left-radius:12px; }
+    .dm_corner.br { bottom:40px; right:40px; border-bottom-width:3px; border-right-width:3px; border-bottom-right-radius:12px; }
+    #dm_scanLine {
+      position:absolute; left:50px; right:50px; height:2px;
+      background:linear-gradient(90deg,transparent,#E63946,#E63946,transparent);
+      box-shadow:0 0 12px #E63946,0 0 30px rgba(230,57,70,0.3);
+      opacity:0.9; top:50px;
+    }
+    #dm_scanLine.scanning { animation:dm_scanAnim 0.5s ease-in-out infinite alternate; }
+    @keyframes dm_scanAnim { from{top:50px} to{top:calc(100% - 50px)} }
+    #dm_scanFlash { position:absolute; inset:0; background:rgba(230,57,70,0.3); opacity:0; pointer-events:none; transition:opacity 0.08s; z-index:5; }
+    #dm_scanFlash.flash { opacity:1; }
+    #dm_barcodeBg { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:2px; opacity:0; transition:opacity 0.3s; }
+    #dm_barcodeBg.show { opacity:0.1; }
+    .dm_bbar { background:#fff; }
+    .dm_scaninstr { color:#95A5A6; font-size:14px; text-align:center; font-weight:400; line-height:1.5; font-family:'Poppins',sans-serif; }
+    .dm_scaninstr strong { color:#fff; font-weight:600; }
+    /* Resultado */
+    .dm_s3 { background:#fff; display:flex; flex-direction:column; height:100%; overflow:hidden; font-family:'Poppins',sans-serif; }
+    .dm_hdrl { background:#fff; color:#1D1D1D; border-bottom:1px solid #f0f0f0; }
+    .dm_hdrl .dm_back { background:#F5F5F5; }
+    .dm_hdrl .dm_back svg { stroke:#1D1D1D; }
+    .dm_hdrl .dm_hdrtitle { color:#1D1D1D; }
+    .dm_prodbody { flex:1; padding:0 20px 20px; overflow-y:auto; }
+    .dm_prodbody::-webkit-scrollbar { width:0; }
+    .dm_imgarea { width:100%; height:180px; background:#fff; border-radius:20px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; position:relative; overflow:hidden; }
+    .dm_prodicon { font-size:80px; }
+    .dm_prodbadge { position:absolute; top:12px; left:12px; background:#E63946; color:#fff; padding:4px 12px; border-radius:8px; font-size:12px; font-weight:600; font-family:'Poppins',sans-serif; }
+    .dm_prodbrand { font-size:14px; color:#95A5A6; font-weight:500; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .dm_prodname { font-size:24px; font-weight:800; color:#1D1D1D; margin-bottom:4px; line-height:1.2; }
+    .dm_prodsku { font-size:13px; color:#95A5A6; font-weight:400; margin-bottom:10px; }
+    .dm_catbadge { display:inline-block; background:#F5F5F5; color:#2B2B2B; padding:4px 14px; border-radius:20px; font-size:12px; font-weight:600; margin-bottom:16px; font-family:'Poppins',sans-serif; }
+    #dm_priceBlock { background:#FFF3F3; border:1px solid #FFD6D6; border-radius:16px; padding:16px 18px; margin-bottom:20px; opacity:0; transform:translateY(10px); transition:all 0.4s ease; }
+    #dm_priceBlock.show { opacity:1; transform:translateY(0); }
+    .dm_pbadges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+    .dm_pred { background:#E63946; color:#fff; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:700; font-family:'Poppins',sans-serif; }
+    .dm_pout { border:1.5px solid #1D1D1D; color:#1D1D1D; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; font-family:'Poppins',sans-serif; }
+    .dm_pricerow { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+    .dm_origprice { font-size:18px; color:#95A5A6; text-decoration:line-through; font-weight:400; }
+    .dm_promo { font-size:34px; font-weight:800; color:#E63946; }
+    .dm_sectitle { font-size:16px; font-weight:700; color:#1D1D1D; margin-bottom:14px; font-family:'Poppins',sans-serif; }
+    #dm_sizeGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; opacity:0; transform:translateY(8px); transition:all 0.4s ease 0.1s; }
+    #dm_sizeGrid.show { opacity:1; transform:translateY(0); }
+    .dm_sizebtn { padding:14px 8px; border-radius:12px; border:2px solid #ddd; background:#fff; font-family:'Poppins',sans-serif; font-size:15px; font-weight:600; color:#1D1D1D; text-align:center; }
+    .dm_sizebtn.sel { background:#E63946; border-color:#E63946; color:#fff; }
+    .dm_sizebtn.out { background:#fdeaea; color:#E63946; border-color:#E63946; text-decoration:line-through; opacity:0.7; }
+    #dm_compareBlock { margin-top:16px; opacity:0; transform:translateY(8px); transition:all 0.4s ease 0.2s; }
+    #dm_compareBlock.show { opacity:1; transform:translateY(0); }
+    .dm_cmpcard { display:flex; align-items:center; justify-content:space-between; border:1px solid #E8E8E8; border-radius:12px; padding:12px 14px; margin-bottom:8px; background:#fff; }
+    .dm_cmpstore { font-size:14px; font-weight:700; color:#1D1D1D; font-family:'Poppins',sans-serif; }
+    .dm_cmpdiff { font-size:11px; font-weight:600; color:#E63946; font-family:'Poppins',sans-serif; }
+    .dm_cmpprice { font-size:22px; font-weight:800; color:#1D1D1D; font-family:'Poppins',sans-serif; }
+    /* Play btn */
+    #dm_playBtn {
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background:#E63946; color:#fff; border:none;
+      padding:16px 44px; border-radius:16px;
+      font-size:18px; font-weight:700; cursor:pointer;
+      font-family:'Poppins',sans-serif; z-index:50;
+      box-shadow:0 8px 30px rgba(230,57,70,0.5); letter-spacing:1px;
+    }
+    #dm_btnBack {
+      position:absolute; bottom:28px; left:50%;
+      transform:translateX(-50%);
+      background:rgba(230,57,70,0.88); color:#fff; border:none;
+      padding:10px 28px; border-radius:30px;
+      font-size:11px; font-weight:700; cursor:pointer;
+      font-family:'Poppins',sans-serif; letter-spacing:1.5px; text-transform:uppercase;
+      z-index:40; opacity:0; pointer-events:none; transition:opacity 0.3s;
+    }
+    #dm_btnBack.visible { opacity:1; pointer-events:all; }
+    </style>
+
+    <div id="dm_scene">
+      <video id="dm_bgVideo" src="track_inn_demo.mp4" playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;transition:transform 1.0s cubic-bezier(0.4,0,0.2,1),filter 1.0s ease;transform-origin:50.68% 49.54%;"></video>
+      <div id="dm_progress"></div>
+
+      <div id="dm_appOverlay">
+        <div class="dm_phone">
+          <div class="dm_statusbar">
+            <div class="t">9:41</div>
+            <div class="icons">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="1" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="8" width="12" height="8" rx="1"/><rect x="21" y="10" width="2" height="4" rx="0.5"/></svg>
+            </div>
+          </div>
+          <div class="dm_vp">
+            <!-- S0: Store Select -->
+            <div class="dm_screen dm_s0 active" id="dm_s0">
+              <div class="dm_logo">TRACK <span>INN</span></div>
+              <div class="dm_stitle">Selecciona tu tienda</div>
+              <div class="dm_sbtn" id="dm_btnInnova"><span>INNOVASPORT</span></div>
+              <div class="dm_sbtn"><span>INNVICTUS</span></div>
+              <div class="dm_slabel">Cada tienda usa su propio Excel</div>
+            </div>
+            <!-- S1: Splash -->
+            <div class="dm_screen dm_s1" id="dm_s1">
+              <div class="dm_splcontent">
+                <div class="dm_logoicon">
+                  <svg viewBox="0 0 80 80" fill="none">
+                    <rect x="10" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+                    <rect x="18" y="18" width="3" height="44" rx="1.5" fill="white" opacity="0.8"/>
+                    <rect x="24" y="22" width="5" height="36" rx="2" fill="white"/>
+                    <rect x="33" y="18" width="3" height="44" rx="1.5" fill="#E63946"/>
+                    <rect x="40" y="22" width="6" height="36" rx="2" fill="white"/>
+                    <rect x="50" y="18" width="3" height="44" rx="1.5" fill="#E63946" opacity="0.8"/>
+                    <rect x="57" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+                    <rect x="65" y="26" width="5" height="28" rx="2" fill="white" opacity="0.4"/>
+                  </svg>
+                </div>
+                <div class="dm_logotext">TRACK <span>INN</span></div>
+                <div class="dm_tagline">Escanea. Compara. Ahorra.</div>
+              </div>
+              <div class="dm_splbottom">
+                <button class="dm_btnprimary">ESCANEAR AHORA</button>
+              </div>
+            </div>
+            <!-- S2: Scanner -->
+            <div class="dm_screen dm_s2" id="dm_s2">
+              <div class="dm_hdr">
+                <div class="dm_back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+                <div class="dm_hdrtitle">Escaner</div>
+              </div>
+              <div class="dm_scanbody">
+                <div class="dm_frame">
+                  <div class="dm_corner tl"></div><div class="dm_corner tr"></div>
+                  <div class="dm_corner bl"></div><div class="dm_corner br"></div>
+                  <div id="dm_barcodeBg">
+                    <div class="dm_bbar" style="height:55%;width:2px"></div><div class="dm_bbar" style="height:70%;width:1px"></div>
+                    <div class="dm_bbar" style="height:60%;width:2px"></div><div class="dm_bbar" style="height:45%;width:3px"></div>
+                    <div class="dm_bbar" style="height:70%;width:2px"></div><div class="dm_bbar" style="height:60%;width:1px"></div>
+                    <div class="dm_bbar" style="height:50%;width:2px"></div><div class="dm_bbar" style="height:70%;width:2px"></div>
+                    <div class="dm_bbar" style="height:65%;width:2px"></div><div class="dm_bbar" style="height:55%;width:1px"></div>
+                    <div class="dm_bbar" style="height:70%;width:2px"></div><div class="dm_bbar" style="height:40%;width:3px"></div>
+                  </div>
+                  <div id="dm_scanLine"></div>
+                  <div id="dm_scanFlash"></div>
+                </div>
+                <div class="dm_scaninstr"><strong>Apunta al codigo de barras</strong> del producto<br>(UPC o Material) para obtener precio e inventario</div>
+              </div>
+            </div>
+            <!-- S3: Resultado -->
+            <div class="dm_screen dm_s3" id="dm_s3">
+              <div class="dm_hdr dm_hdrl">
+                <div class="dm_back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>
+                <div class="dm_hdrtitle">Resultado</div>
+              </div>
+              <div class="dm_prodbody">
+                <div class="dm_imgarea"><div class="dm_prodbadge">NIKE</div><div class="dm_prodicon">👟</div></div>
+                <div class="dm_prodbrand">NIKE</div>
+                <div class="dm_prodname">Nike Air Max 270 React</div>
+                <div class="dm_prodsku">Estilo: AO4971-001 · Talla: 27</div>
+                <div class="dm_prodsku">UPC: 195244332817</div>
+                <span class="dm_catbadge">Footwear</span>
+                <div id="dm_priceBlock">
+                  <div class="dm_pbadges"><span class="dm_pred">REBAJA</span><span class="dm_pred">OFF</span><span class="dm_pout">-20%</span><span class="dm_pout">-10%</span></div>
+                  <div class="dm_pricerow"><span class="dm_origprice">$2,999</span><span class="dm_origprice">$2,399</span><span class="dm_promo">$2,159</span></div>
+                </div>
+                <div class="dm_sectitle">Otras tallas del mismo modelo</div>
+                <div id="dm_sizeGrid">
+                  <div class="dm_sizebtn out">25</div><div class="dm_sizebtn">25.5</div><div class="dm_sizebtn">26</div>
+                  <div class="dm_sizebtn">26.5</div><div class="dm_sizebtn sel">27</div><div class="dm_sizebtn">27.5</div>
+                  <div class="dm_sizebtn">28</div><div class="dm_sizebtn out">28.5</div><div class="dm_sizebtn">29</div>
+                </div>
+                <div id="dm_compareBlock">
+                  <div class="dm_sectitle">Comparador de precios</div>
+                  <div class="dm_cmpcard"><div><div class="dm_cmpstore">Martí</div><div class="dm_cmpdiff">+16% más caro</div></div><div class="dm_cmpprice">$2,499</div></div>
+                  <div class="dm_cmpcard"><div><div class="dm_cmpstore">Nike.com</div><div class="dm_cmpdiff">+39% más caro</div></div><div class="dm_cmpprice">$2,999</div></div>
+                  <div class="dm_cmpcard"><div><div class="dm_cmpstore">Liverpool</div><div class="dm_cmpdiff">+29% más caro</div></div><div class="dm_cmpprice">$2,799</div></div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /dm_vp -->
+        </div><!-- /dm_phone -->
+      </div><!-- /dm_appOverlay -->
+
+      <button id="dm_playBtn">▶  Ver Video 2</button>
+      <button id="dm_btnBack" onclick="dm_goBack()">← Volver al video</button>
+    </div><!-- /dm_scene -->
+
+    <script>
+    (function(){
+      const video   = document.getElementById('dm_bgVideo');
+      const overlay = document.getElementById('dm_appOverlay');
+      const btnBack = document.getElementById('dm_btnBack');
+      const prog    = document.getElementById('dm_progress');
+      const DURATION = 8.041, ZOOM_AT = 4.0;
+      let dmState = 'idle', appStarted = false;
+
+      function dm_goToScreen(id) {
+        document.querySelectorAll('#dm_scene .dm_screen').forEach(s => {
+          s.classList.remove('active','left'); s.classList.add('left');
+        });
+        const t = document.getElementById('dm_s' + id);
+        t.classList.remove('left'); t.classList.add('active');
+      }
+
+      function dm_runAppFlow() {
+        if (appStarted) return; appStarted = true;
+        setTimeout(() => document.getElementById('dm_btnInnova').classList.add('selected'), 300);
+        setTimeout(() => dm_goToScreen(1), 900);
+        setTimeout(() => {
+          dm_goToScreen(2);
+          setTimeout(() => document.getElementById('dm_barcodeBg').classList.add('show'), 250);
+          setTimeout(() => document.getElementById('dm_scanLine').classList.add('scanning'), 350);
+        }, 1500);
+        setTimeout(() => {
+          document.getElementById('dm_scanLine').classList.remove('scanning');
+          const sf = document.getElementById('dm_scanFlash');
+          sf.classList.add('flash'); setTimeout(() => sf.classList.remove('flash'), 120);
+          setTimeout(() => { sf.classList.add('flash'); setTimeout(() => sf.classList.remove('flash'), 100); }, 200);
+        }, 2500);
+        setTimeout(() => dm_goToScreen(3), 2900);
+        setTimeout(() => document.getElementById('dm_priceBlock').classList.add('show'), 3200);
+        setTimeout(() => document.getElementById('dm_sizeGrid').classList.add('show'), 3600);
+        setTimeout(() => document.getElementById('dm_compareBlock').classList.add('show'), 4000);
+      }
+
+      video.addEventListener('timeupdate', () => {
+        const t = video.currentTime;
+        prog.style.width = (t / DURATION * 100) + '%';
+        if (dmState === 'video' && t >= ZOOM_AT) {
+          dmState = 'zooming';
+          video.style.transform = 'scale(5.5)'; video.style.filter = 'brightness(0)';
+          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); dmState = 'app'; dm_runAppFlow(); }, 900);
+        }
+      });
+
+      function dm_resetApp() {
+        appStarted = false;
+        document.getElementById('dm_btnInnova').classList.remove('selected');
+        document.getElementById('dm_barcodeBg').classList.remove('show');
+        document.getElementById('dm_scanLine').classList.remove('scanning');
+        document.getElementById('dm_priceBlock').classList.remove('show');
+        document.getElementById('dm_sizeGrid').classList.remove('show');
+        document.getElementById('dm_compareBlock').classList.remove('show');
+        dm_goToScreen(0);
+      }
+
+      window.dm_goBack = function() {
+        overlay.classList.remove('visible'); btnBack.classList.remove('visible');
+        video.style.transform = ''; video.style.filter = '';
+        dmState = 'idle'; dm_resetApp();
+        setTimeout(() => { video.currentTime = 0; video.play(); }, 400);
+      };
+
+      document.getElementById('dm_playBtn').onclick = function() {
+        video.currentTime = 0;
+        video.play(); dmState = 'video'; this.style.display = 'none';
+      };
+
+      window.dm_reset = function() {
+        if (dmState !== 'idle') {
+          overlay.classList.remove('visible'); btnBack.classList.remove('visible');
+          video.style.transform = ''; video.style.filter = '';
+          video.pause(); video.currentTime = 0;
+          dmState = 'idle'; dm_resetApp();
+        }
+        document.getElementById('dm_playBtn').style.display = '';
+      };
+    })();
+    </script>
+  </div>
+
+  <!-- 04 MUNDO -->
+  <div class="slide" id="slide-2">
+    <div class="slide-number">05</div>
+    <div class="section-header">
+      <div class="section-tag">El Mercado Global</div>
+      <h2 class="section-title">Las marcas más grandes del mundo<br>ya lo resolvieron</h2>
+    </div>
+    <div class="mundo-grid">
+      <div class="mundo-card">
+        <div class="mundo-emoji">🛒</div>
+        <div class="mundo-brand">WALMART</div>
+        <div class="mundo-feature">Scan & Go</div>
+        <p class="mundo-desc">El cliente escanea productos con su app, paga en self-checkout. Elimina filas y acelera la decisión de compra.</p>
+      </div>
+      <div class="mundo-card">
+        <div class="mundo-emoji">👗</div>
+        <div class="mundo-brand">ZARA</div>
+        <div class="mundo-feature">App de Precios</div>
+        <p class="mundo-desc">El cliente escanea cualquier prenda en tienda para ver precio, tallas disponibles y stock en sucursales cercanas.</p>
+      </div>
+      <div class="mundo-card">
+        <div class="mundo-emoji">👟</div>
+        <div class="mundo-brand">NIKE</div>
+        <div class="mundo-feature">Nike Retail App</div>
+        <p class="mundo-desc">Los asociados usan la app para consultar inventario, disponibilidad por talla y precio final en cualquier producto.</p>
+      </div>
+      <div class="mundo-card">
+        <div class="mundo-emoji">📦</div>
+        <div class="mundo-brand">AMAZON GO</div>
+        <div class="mundo-feature">Just Walk Out</div>
+        <p class="mundo-desc">Tecnología de escaneo automático que registra cada producto que el cliente toma. Sin filas, sin fricción.</p>
+      </div>
+    </div>
+    <div class="mundo-conclusion">
+      <p>Estas empresas invierten millones en desarrollo. <strong>Track INN replica esa experiencia con tecnología web moderna, sin hardware adicional y a costo mínimo. Ya funciona.</strong></p>
+    </div>
+  </div>
+
+  <!-- 03 SOLUCIÓN -->
+  <div class="slide" id="slide-3">
+    <div class="slide-number">04</div>
+    <div class="solucion-layout">
+      <div class="solucion-left">
+        <div class="section-tag">La Solución</div>
+        <h2 class="section-title">Escanea. Precio real.<br>Venta cerrada.</h2>
+        <p>Una PWA que permite al asociado o al cliente escanear cualquier código de barras y ver al instante precio final, descuentos activos y comparativo de mercado — sin instalar nada.</p>
+        <ul class="solution-steps">
+          <li>
+            <div class="step-num">1</div>
+            <div class="step-content"><h4>Selecciona la tienda</h4><p>Innovasport o Innvictus. Cada cadena con su propia base de datos.</p></div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div class="step-content"><h4>Escanea el código de barras</h4><p>La cámara del celular lee el UPC del producto en tiempo real. Sin hardware extra.</p></div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div class="step-content"><h4>Ve el precio real</h4><p>Precio original, promocional, % descuento y datos del producto al instante.</p></div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div class="step-content"><h4>Compara con la competencia</h4><p>Precio del mismo estilo en Martí, Liverpool, Nike, Adidas y más.</p></div>
+          </li>
+          <li>
+            <div class="step-num">5</div>
+            <div class="step-content"><h4>Alerta de última pieza</h4><p>Si solo queda 1 unidad en todo el inventario, la app avisa al instante: "¡Última pieza!" para cerrar la venta.</p></div>
+          </li>
+        </ul>
+      </div>
+      <div class="solucion-right">
+        <div class="feature-chip"><div class="icon">📷</div><h4>Escáner Real</h4><p>html5-qrcode. Funciona con cualquier cámara de celular.</p></div>
+        <div class="feature-chip"><div class="icon">📱</div><h4>PWA — Sin Instalar</h4><p>Se abre desde el navegador. Se agrega como app nativa.</p></div>
+        <div class="feature-chip"><div class="icon">⚡</div><h4>Offline Ready</h4><p>Service Worker. Funciona en piso sin señal.</p></div>
+        <div class="feature-chip"><div class="icon">🔍</div><h4>Intel Competitiva</h4><p>7 retailers comparados en tiempo real.</p></div>
+        <div class="feature-chip"><div class="icon">🏪</div><h4>Multi-cadena</h4><p>Innovasport e Innvictus independientes.</p></div>
+        <div class="feature-chip"><div class="icon">🔥</div><h4>Última Pieza</h4><p>Alerta automática cuando queda 1 unidad. Cierra la venta.</p></div>
+        <div class="feature-chip"><div class="icon">🚀</div><h4>Costo $0</h4><p>Sin hardware. Sin app store. Acceso inmediato.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 COMPETENCIA -->
+  <div class="slide" id="slide-4">
+    <div class="slide-number">05</div>
+    <div class="section-header">
+      <div class="section-tag">Inteligencia Competitiva</div>
+      <h2 class="section-title">Comparación en tiempo real contra 7 competidores</h2>
+      <p class="section-desc">El asociado sabe en 2 segundos si estamos por arriba o por abajo del mercado — y cierra la venta con datos reales.</p>
+    </div>
+    <div class="stores-grid">
+      <div class="store-card"><div class="store-name">Martí</div><div class="store-method">VTEX Intelligent Search API</div><div class="store-status status-active">● Activo</div></div>
+      <div class="store-card"><div class="store-name">Palacio de Hierro</div><div class="store-method">Constructor.io API</div><div class="store-status status-active">● Activo</div></div>
+      <div class="store-card"><div class="store-name">Nike MX</div><div class="store-method">Nike API Directa</div><div class="store-status status-active">● Activo</div></div>
+      <div class="store-card"><div class="store-name">Liverpool</div><div class="store-method">Web Scraping + JSON-LD</div><div class="store-status status-active">● Activo</div></div>
+      <div class="store-card"><div class="store-name">Amazon MX</div><div class="store-method">Web Scraping</div><div class="store-status status-active">● Activo</div></div>
+      <div class="store-card"><div class="store-name">Adidas MX</div><div class="store-method">Web Scraping</div><div class="store-status status-active">● Activo</div></div>
+      <div class="store-card"><div class="store-name">Deportenis</div><div class="store-method">Web Scraping</div><div class="store-status status-active">● Activo</div></div>
+      <div class="store-card" style="border-style:dashed;opacity:0.6"><div class="store-name">+ Próximas</div><div class="store-method">Puma, Under Armour, Foot Locker</div><div class="store-status status-dev">Próximamente</div></div>
+    </div>
+    <div class="comp-footer">
+      <p>Ventaja competitiva en la mano del asociado. <strong>2 segundos</strong> para cerrar la venta.</p>
+    </div>
+  </div>
+
+  <!-- ROTACIÓN DE PRODUCTO -->
+  <div class="slide" id="slide-rotacion">
+    <div class="slide-number">08</div>
+    <div class="section-header">
+      <div class="section-tag">Rotación de Producto</div>
+      <h2 class="section-title">Tipos de producto que Track INN<br>ayuda a mover en piso</h2>
+      <p class="section-desc">Cada escenario tiene un producto que necesita señalización inmediata. Track INN lo resuelve en 2 segundos.</p>
+    </div>
+    <div class="problem-grid" style="grid-template-columns:repeat(5,1fr);gap:16px;max-width:1100px;">
+      <div class="problem-card" style="padding:28px 20px;">
+        <div class="problem-icon" style="font-size:36px;">🏷️</div>
+        <h3 class="problem-title" style="font-size:15px;">Actividades Promocionales</h3>
+        <p class="problem-text" style="font-size:12px;line-height:1.5;">Producto con promoción activa (OFF, 2x1, % descuento) que el cliente no ve si no hay señalización. Track INN muestra el precio final con badge de promo.</p>
+      </div>
+      <div class="problem-card" style="padding:28px 20px;">
+        <div class="problem-icon" style="font-size:36px;">💲</div>
+        <h3 class="problem-title" style="font-size:15px;">Rebajas / Cambios de Precio</h3>
+        <p class="problem-text" style="font-size:12px;line-height:1.5;">Producto cuyo precio bajó (CP) pero la etiqueta física aún muestra el precio anterior. El cliente ve $2,999 cuando ya cuesta $2,399.</p>
+      </div>
+      <div class="problem-card" style="padding:28px 20px;">
+        <div class="problem-icon" style="font-size:36px;">🔥</div>
+        <h3 class="problem-title" style="font-size:15px;">Liquidaciones</h3>
+        <p class="problem-text" style="font-size:12px;line-height:1.5;">Producto en liquidación con descuentos agresivos que necesita salir rápido. Sin señalización, se queda en piso ocupando espacio.</p>
+      </div>
+      <div class="problem-card" style="padding:28px 20px;">
+        <div class="problem-icon" style="font-size:36px;">1️⃣</div>
+        <h3 class="problem-title" style="font-size:15px;">Piezas Únicas</h3>
+        <p class="problem-text" style="font-size:12px;line-height:1.5;">Última pieza en tienda, talla o color específico. Track INN lo detecta y el asociado puede empujar la venta antes de que se pierda.</p>
+      </div>
+      <div class="problem-card" style="padding:28px 20px;border-color:var(--red-border);background:var(--red-dim);">
+        <div class="problem-icon" style="font-size:36px;">📊</div>
+        <h3 class="problem-title" style="font-size:15px;">Todos a la vez</h3>
+        <p class="problem-text" style="font-size:12px;line-height:1.5;">Un mismo producto puede tener rebaja + promo + ser pieza única. Track INN muestra todo en una sola pantalla: precio real, stock y competencia.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 ESTADO ACTUAL -->
+  <div class="slide" id="slide-5">
+    <div class="slide-number">06</div>
+    <div class="section-header">
+      <div class="section-tag">Estado Actual</div>
+      <h2 class="section-title">Dónde estamos parados hoy</h2>
+    </div>
+    <div class="estado-layout">
+      <div class="estado-col listo">
+        <h3>✅ Ya Funciona</h3>
+        <div class="estado-item"><div class="estado-icon">📷</div><div class="estado-text"><h4>Escáner de código de barras</h4><p>Funciona en cualquier celular. Lectura en tiempo real con html5-qrcode.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">💲</div><div class="estado-text"><h4>Consulta de precio real</h4><p>Precio original, promocional y % descuento al instante.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">🔍</div><div class="estado-text"><h4>Inteligencia competitiva</h4><p>Comparación en 7 retailers activos en tiempo real.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">📱</div><div class="estado-text"><h4>PWA desplegada en Vercel</h4><p>Accesible desde cualquier celular con URL. Sin instalar nada.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">⚡</div><div class="estado-text"><h4>Modo offline activo</h4><p>Cache con Service Worker v15. Funciona sin internet en piso.</p></div></div>
+        <div class="estado-bar"><div class="estado-bar-fill listo"></div></div>
+        <div class="estado-label"><span>Avance del MVP</span><span style="color:var(--green)">70% completo</span></div>
+      </div>
+      <div class="estado-col pendiente">
+        <h3>⚠️ Lo Que Falta</h3>
+        <div class="estado-item"><div class="estado-icon">📊</div><div class="estado-text"><h4>Base de datos en servidor</h4><p>Actualmente lee Excel local. Necesitamos conectar al servidor de datos de la empresa.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">🔄</div><div class="estado-text"><h4>Actualización automática de precios</h4><p>Cuando cambia una promoción, que se refleje sin actualizar el archivo manualmente.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">🏢</div><div class="estado-text"><h4>App en servidor interno</h4><p>Mover el hosting de Vercel a infraestructura de la empresa para mayor control.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">🔐</div><div class="estado-text"><h4>Autenticación por empleado</h4><p>Login con credenciales de empresa para rastrear uso por tienda y asociado.</p></div></div>
+        <div class="estado-item"><div class="estado-icon">📍</div><div class="estado-text"><h4>Stock por tienda</h4><p>Disponibilidad de tallas en la tienda actual y en sucursales cercanas.</p></div></div>
+        <div class="estado-bar"><div class="estado-bar-fill pendiente"></div></div>
+        <div class="estado-label"><span>Pendiente para producción</span><span style="color:var(--orange)">30% restante</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 IT -->
+  <div class="slide" id="slide-6">
+    <div class="slide-number">07</div>
+    <div class="section-header">
+      <div class="section-tag">Requerimientos IT</div>
+      <h2 class="section-title">3 puntos concretos para llevar esto a producción</h2>
+    </div>
+    <div class="it-intro">
+      <p>El desarrollo está avanzado. Lo que falta no es código — es <strong>infraestructura y acceso a datos</strong>. Esto es lo que necesitamos de IT.</p>
+    </div>
+    <div class="it-grid">
+      <div class="it-card">
+        <div class="it-icon">📊</div>
+        <h3>Datos en Tiempo Real</h3>
+        <div class="it-arrow"><span class="from">Excel manual</span><span class="arrow">→</span><span class="to">API / BD servidor</span></div>
+        <p>Hoy la app lee un archivo Excel que se actualiza manualmente. Necesitamos conexión directa al servidor de precios y promociones para que los datos siempre estén vigentes sin intervención humana.</p>
+      </div>
+      <div class="it-card">
+        <div class="it-icon">🏢</div>
+        <h3>Hosting Interno</h3>
+        <div class="it-arrow"><span class="from">Vercel externo</span><span class="arrow">→</span><span class="to">Servidor empresa</span></div>
+        <p>La app funciona en Vercel (cloud pública). Para producción empresarial necesitamos alojarla en los servidores internos — mayor control, seguridad y disponibilidad garantizada.</p>
+      </div>
+      <div class="it-card">
+        <div class="it-icon">🔐</div>
+        <h3>Acceso & Seguridad</h3>
+        <div class="it-arrow"><span class="from">URL pública</span><span class="arrow">→</span><span class="to">Login corporativo</span></div>
+        <p>Integrar autenticación con credenciales de empleado existentes (SSO o directorio activo) y definir roles: asociado, supervisor y administrador. Permite medir uso por tienda.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 07 IMPACTO -->
+  <div class="slide" id="slide-7">
+    <div class="slide-number">08</div>
+    <div class="section-header" style="margin-bottom:20px">
+      <div class="section-tag">Impacto en Ventas</div>
+      <h2 class="section-title">Piezas adicionales vendidas por semana<br>con Track INN activo</h2>
+    </div>
+
+    <div class="impacto-context">
+      <div class="impacto-context-stat">
+        <div class="big">$500M</div>
+        <div class="lbl">Venta Mensual Total</div>
+      </div>
+      <div class="impacto-context-stat">
+        <div class="big">120</div>
+        <div class="lbl">Tiendas</div>
+      </div>
+      <div class="impacto-context-stat">
+        <div class="big">$500</div>
+        <div class="lbl">Precio Promedio</div>
+      </div>
+      <p class="impacto-context-desc">
+        Si cada asociado logra cerrar <strong>entre 3 y 7 piezas adicionales por día</strong> gracias a tener el precio real y la promoción vigente en su celular, el impacto en ventas semanales va de <strong>$4.8M a $12M</strong> — sobre una base mensual de $500M.
       </p>
-      <ul class="solution-steps">
-        <li>
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <h4>Selecciona la tienda</h4>
-            <p>Innovasport o Innvictus. Cada una con su propia base de datos de precios.</p>
-          </div>
-        </li>
-        <li>
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <h4>Escanea el código de barras</h4>
-            <p>La cámara del celular lee el UPC del producto en tiempo real.</p>
-          </div>
-        </li>
-        <li>
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <h4>Ve el precio final</h4>
-            <p>Precio original, precio promocional, porcentaje de descuento y datos del producto.</p>
-          </div>
-        </li>
-        <li>
-          <div class="step-num">4</div>
-          <div class="step-content">
-            <h4>Compara con competencia</h4>
-            <p>Consulta el precio del mismo producto en Martí, Liverpool, Nike, Adidas y más.</p>
-          </div>
-        </li>
-      </ul>
     </div>
-    <div class="solution-visual fade-in">
-      <div class="demo-frame">
-        <iframe src="demo-video.html" title="Demo Track INN"></iframe>
+
+    <div class="impacto-table-wrap">
+      <table class="impacto-table">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Escenario 1</th>
+            <th>Escenario 2</th>
+            <th>Escenario 3</th>
+            <th>Escenario 4</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Precio promedio</td>
+            <td>$500</td>
+            <td>$500</td>
+            <td>$500</td>
+            <td>$500</td>
+          </tr>
+          <tr>
+            <td>Prom x día (por tienda)</td>
+            <td>3</td>
+            <td>4</td>
+            <td>6</td>
+            <td class="col-highlight">7</td>
+          </tr>
+          <tr>
+            <td>Piezas x semana (por tienda)</td>
+            <td>20</td>
+            <td>30</td>
+            <td>40</td>
+            <td class="col-highlight">50</td>
+          </tr>
+          <tr>
+            <td>Semanas</td>
+            <td>4</td>
+            <td>4</td>
+            <td>4</td>
+            <td>4</td>
+          </tr>
+          <tr>
+            <td>Tiendas</td>
+            <td>120</td>
+            <td>120</td>
+            <td>120</td>
+            <td>120</td>
+          </tr>
+          <tr class="row-total">
+            <td>Venta adicional mensual</td>
+            <td>$4,800,000</td>
+            <td>$7,200,000</td>
+            <td>$9,600,000</td>
+            <td class="col-best">$12,000,000</td>
+          </tr>
+          <tr class="row-pct">
+            <td>% / Venta mensual total</td>
+            <td>1.0%</td>
+            <td>1.4%</td>
+            <td>1.9%</td>
+            <td class="col-best">2.4%</td>
+          </tr>
+          <tr class="row-total">
+            <td>Venta adicional anual</td>
+            <td>$57,600,000</td>
+            <td>$86,400,000</td>
+            <td>$115,200,000</td>
+            <td class="col-best">$144,000,000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="impacto-footer">
+      <span style="font-size:22px">💡</span>
+      <p>Con tan solo <strong>3 piezas adicionales por día por tienda</strong>, Track INN genera <strong>$4.8M de venta incremental mensual</strong> — sin costo de instalación, sin hardware y sin cambiar el proceso de venta.</p>
+    </div>
+  </div>
+
+  <!-- 08 ROADMAP -->
+  <div class="slide" id="slide-8">
+    <div class="slide-number">09</div>
+    <div class="section-header">
+      <div class="section-tag">Roadmap</div>
+      <h2 class="section-title">De prototipo a despliegue nacional</h2>
+    </div>
+    <div class="roadmap-timeline">
+      <div class="roadmap-item">
+        <div class="roadmap-dot done">✓</div>
+        <div class="roadmap-phase done">Fase 1 · Completado</div>
+        <div class="roadmap-title">MVP Funcional</div>
+        <div class="roadmap-desc">App con escáner, base de datos Excel, consulta de precios internos y modo offline.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot done">✓</div>
+        <div class="roadmap-phase done">Fase 2 · Completado</div>
+        <div class="roadmap-title">Intel Competitiva</div>
+        <div class="roadmap-desc">API de precios conectada a 7 retailers. Búsqueda automática por estilo en tiempo real.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot current">3</div>
+        <div class="roadmap-phase current">→ Aquí estamos</div>
+        <div class="roadmap-title">Integración IT</div>
+        <div class="roadmap-desc">Conexión al servidor de datos, hosting interno y autenticación corporativa.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot pending">4</div>
+        <div class="roadmap-phase pending">Siguiente</div>
+        <div class="roadmap-title">Piloto en Tienda</div>
+        <div class="roadmap-desc">Implementación en 2-3 tiendas piloto. Feedback de asociados. Ajustes en campo.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-dot pending">5</div>
+        <div class="roadmap-phase pending">Final</div>
+        <div class="roadmap-title">Rollout Nacional</div>
+        <div class="roadmap-desc">Despliegue en todas las tiendas. Dashboard de analytics. Reportes por sucursal.</div>
       </div>
     </div>
+    <div class="roadmap-footer">
+      <p>Las fases 1 y 2 ya están completas. Solo necesitamos <strong>luz verde y acceso IT</strong> para arrancar la Fase 3 y llegar al piloto en semanas, no en meses.</p>
+    </div>
   </div>
-</section>
 
-<!-- ==================== SLIDE 4: APP EN VIVO ==================== -->
-<section class="slide" id="demo-live">
-  <div class="slide-number">04</div>
-  <div class="live-demo-container">
-    <div class="live-frame fade-in">
-      <iframe src="index.html" title="Track INN App"></iframe>
-    </div>
-    <div class="live-features fade-in">
-      <div class="section-tag">App en Vivo</div>
-      <h2 class="section-title" style="color:var(--black)">Funcionalidades Principales</h2>
-      <div style="margin-top:28px">
-        <div class="feature-item">
-          <div class="feature-icon">📷</div>
-          <div>
-            <div class="feature-title">Escáner de Código de Barras</div>
-            <div class="feature-desc">Usa la cámara del celular para leer UPC en tiempo real con html5-qrcode.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">📊</div>
-          <div>
-            <div class="feature-title">Base de Datos Excel</div>
-            <div class="feature-desc">Lee directamente el archivo Track_INN.xlsx con estilos, UPCs, precios y marcas.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🔍</div>
-          <div>
-            <div class="feature-title">Comparación Multi-Tienda</div>
-            <div class="feature-desc">API conectada a Martí, Liverpool, Nike, Adidas, Palacio, Amazon y Deportenis.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">📱</div>
-          <div>
-            <div class="feature-title">PWA - Sin Instalación</div>
-            <div class="feature-desc">Funciona como app nativa desde el navegador. Se puede agregar a pantalla de inicio.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">⚡</div>
-          <div>
-            <div class="feature-title">Funciona Offline</div>
-            <div class="feature-desc">Service Worker con cache v15 para funcionar sin conexión en piso de venta.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== SLIDE 5: COMPARACIÓN DE PRECIOS ==================== -->
-<section class="slide" id="comparacion">
-  <div class="slide-number">05</div>
-  <div class="section-header fade-in">
-    <div class="section-tag">Inteligencia Competitiva</div>
-    <h2 class="section-title">Comparación en Tiempo Real con 7 Tiendas</h2>
-    <p class="section-desc">
-      Track INN no solo muestra el precio interno. Compara automáticamente contra la competencia
-      para que el asociado tenga argumentos de venta reales.
-    </p>
-  </div>
-  <div class="stores-grid fade-in">
-    <div class="store-card">
-      <div class="store-name">Martí</div>
-      <div class="store-method">VTEX Intelligent Search API</div>
-      <div class="store-status status-active">Activo</div>
-    </div>
-    <div class="store-card">
-      <div class="store-name">Palacio de Hierro</div>
-      <div class="store-method">Constructor.io API</div>
-      <div class="store-status status-active">Activo</div>
-    </div>
-    <div class="store-card">
-      <div class="store-name">Nike MX</div>
-      <div class="store-method">Nike API Directa</div>
-      <div class="store-status status-active">Activo</div>
-    </div>
-    <div class="store-card">
-      <div class="store-name">Liverpool</div>
-      <div class="store-method">Web Scraping + JSON-LD</div>
-      <div class="store-status status-active">Activo</div>
-    </div>
-    <div class="store-card">
-      <div class="store-name">Amazon MX</div>
-      <div class="store-method">Web Scraping</div>
-      <div class="store-status status-active">Activo</div>
-    </div>
-    <div class="store-card">
-      <div class="store-name">Adidas MX</div>
-      <div class="store-method">Web Scraping</div>
-      <div class="store-status status-active">Activo</div>
-    </div>
-    <div class="store-card">
-      <div class="store-name">Deportenis</div>
-      <div class="store-method">Web Scraping</div>
-      <div class="store-status status-active">Activo</div>
-    </div>
-    <div class="store-card" style="border-style:dashed;opacity:0.6">
-      <div class="store-name">+ Próximas</div>
-      <div class="store-method">Puma, Under Armour, etc.</div>
-      <div class="store-status status-dev">Próximamente</div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== SLIDE 6: IMPACTO ==================== -->
-<section class="slide" id="impacto">
-  <div class="slide-number">06</div>
-  <div class="section-header fade-in">
-    <div class="section-tag">Impacto Esperado</div>
-    <h2 class="section-title">Números que hablan</h2>
-    <p class="section-desc">
-      Darle al cliente la información correcta en el momento correcto se traduce directamente en ventas.
-    </p>
-  </div>
-  <div class="impact-grid fade-in">
-    <div class="impact-card">
-      <div class="impact-number">+30%</div>
-      <div class="impact-label">Conversión en piso</div>
-      <div class="impact-sublabel">Producto con precio visible vs sin precio</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-number">0</div>
-      <div class="impact-label">Costo de instalación</div>
-      <div class="impact-sublabel">PWA - funciona desde el navegador</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-number">2s</div>
-      <div class="impact-label">Tiempo de consulta</div>
-      <div class="impact-sublabel">Escanea y obtén precio al instante</div>
-    </div>
-    <div class="impact-card">
-      <div class="impact-number">7</div>
-      <div class="impact-label">Tiendas comparadas</div>
-      <div class="impact-sublabel">Inteligencia competitiva en la mano</div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== SLIDE 7: ROADMAP ==================== -->
-<section class="slide" id="roadmap">
-  <div class="slide-number">07</div>
-  <div class="section-header fade-in">
-    <div class="section-tag">Siguiente Paso</div>
-    <h2 class="section-title">Roadmap de Implementación</h2>
-  </div>
-  <div class="roadmap-timeline fade-in">
-    <div class="roadmap-item">
-      <div class="roadmap-dot done"></div>
-      <div class="roadmap-phase">Fase 1</div>
-      <div class="roadmap-title">MVP Funcional</div>
-      <div class="roadmap-desc">App con escáner, base de datos Excel y consulta de precios internos. Completado.</div>
-    </div>
-    <div class="roadmap-item">
-      <div class="roadmap-dot done"></div>
-      <div class="roadmap-phase">Fase 2</div>
-      <div class="roadmap-title">Comparación Competitiva</div>
-      <div class="roadmap-desc">API de precios conectada a 7 retailers. Búsqueda automática por estilo. Completado.</div>
-    </div>
-    <div class="roadmap-item">
-      <div class="roadmap-dot current"></div>
-      <div class="roadmap-phase">Fase 3</div>
-      <div class="roadmap-title">Piloto en Tienda</div>
-      <div class="roadmap-desc">Implementación en tiendas piloto. Feedback de asociados. Ajustes en campo.</div>
-    </div>
-    <div class="roadmap-item">
-      <div class="roadmap-dot"></div>
-      <div class="roadmap-phase">Fase 4</div>
-      <div class="roadmap-title">Rollout Nacional</div>
-      <div class="roadmap-desc">Despliegue en todas las tiendas. Dashboard de analytics. Reportes de uso.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== SLIDE 8: CIERRE ==================== -->
-<section class="slide" id="cierre">
-  <div class="slide-number">08</div>
-  <div class="portada-content fade-in">
+  <!-- 09 CIERRE -->
+  <div class="slide" id="slide-9">
+    <div class="slide-number">10</div>
     <h1 class="cierre-logo">TRACK <span>INN</span></h1>
-    <p class="cierre-tagline">El track que mueve tu tienda</p>
-    <button class="cierre-cta" onclick="document.getElementById('portada').scrollIntoView({behavior:'smooth'})">
-      Volver al Inicio
-    </button>
+    <div class="cierre-divider"></div>
+    <p class="cierre-tagline">El track que mueve tu tienda.</p>
+    <p class="cierre-sub">La app ya funciona. Los datos ya se consultan. Los competidores ya se comparan.<br>Solo falta una cosa: <strong>la aprobación para llevarlo a producción.</strong></p>
+    <div class="cierre-cta-group">
+      <button class="btn-primary" onclick="window.open('https://track-inn.vercel.app','_blank')">Ver App en Vivo →</button>
+      <button class="btn-secondary" onclick="goTo(9)">Ver Estado Actual</button>
+    </div>
+    <div class="cierre-meta">
+      <div class="cierre-meta-item"><div class="label">Desarrollado por</div><div class="value">Gerardo — Planning & Product</div></div>
+      <div class="cierre-meta-item"><div class="label">Versión</div><div class="value">v1.0 · Marzo 2026</div></div>
+      <div class="cierre-meta-item"><div class="label">Stack</div><div class="value">PWA · Node.js · Firebase</div></div>
+    </div>
   </div>
-</section>
 
-<!-- Keyboard nav hints -->
-<div class="key-hint">
-  <span>↑↓ Navegar</span>
-  <span>F11 Pantalla completa</span>
 </div>
 
-<!-- Fullscreen button -->
-<button class="fullscreen-hint" onclick="toggleFullscreen()">
-  Pantalla Completa
-</button>
+<button class="nav-arrow prev" onclick="prevSlide()">←</button>
+<button class="nav-arrow next" onclick="nextSlide()">→</button>
+<div class="key-hint"><span>↑↓ Navegar</span><span>F11 Pantalla completa</span></div>
+<button class="fs-btn" onclick="toggleFS()">Pantalla Completa</button>
 
 <script>
-// Intersection Observer for fade-in animations
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
+  let current = 0;
+  const total = 13;
+  const slideIds = ['slide-0','slide-1','slide-video1','slide-demo','slide-2','slide-3','slide-4','slide-rotacion','slide-7','slide-5','slide-6','slide-8','slide-9'];
+
+  function goTo(n) {
+    document.getElementById(slideIds[current]).classList.remove('active');
+    current = Math.max(0, Math.min(n, total - 1));
+    document.getElementById(slideIds[current]).classList.add('active');
+    document.getElementById('curNum').textContent = String(current + 1).padStart(2, '0');
+    document.getElementById('progressBar').style.width = ((current + 1) / total * 100) + '%';
+    document.querySelectorAll('.nav-links a').forEach((a, i) => a.classList.toggle('active', i === current));
+    // Reset videos when navigating away
+    if (slideIds[current] !== 'slide-video1' && typeof v1_reset === 'function') v1_reset();
+    if (slideIds[current] !== 'slide-demo' && typeof dm_reset === 'function') dm_reset();
+  }
+
+  function nextSlide() { goTo(current + 1); }
+  function prevSlide() { goTo(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)) { e.preventDefault(); nextSlide(); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); prevSlide(); }
+    if (e.key === 'F11') { e.preventDefault(); toggleFS(); }
   });
-}, { threshold: 0.15 });
 
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-// Progress bar
-window.addEventListener('scroll', () => {
-  const scrollTop = window.scrollY;
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = (scrollTop / docHeight) * 100;
-  document.getElementById('progressBar').style.width = progress + '%';
-
-  // Update active nav link
-  const sections = document.querySelectorAll('.slide');
-  let current = '';
-  sections.forEach(section => {
-    const sectionTop = section.offsetTop - 100;
-    if (scrollTop >= sectionTop) {
-      current = section.getAttribute('id');
-    }
-  });
-  document.querySelectorAll('.nav-links a').forEach(a => {
-    a.classList.remove('active');
-    if (a.getAttribute('href') === '#' + current) {
-      a.classList.add('active');
-    }
-  });
-});
-
-// Fullscreen toggle
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    document.exitFullscreen();
+  function toggleFS() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
   }
-}
 
-// Keyboard navigation
-const slides = document.querySelectorAll('.slide');
-let currentSlide = 0;
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
-    e.preventDefault();
-    currentSlide = Math.min(currentSlide + 1, slides.length - 1);
-    slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
-  }
-  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
-    e.preventDefault();
-    currentSlide = Math.max(currentSlide - 1, 0);
-    slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
-  }
-  if (e.key === 'Home') {
-    e.preventDefault();
-    currentSlide = 0;
-    slides[0].scrollIntoView({ behavior: 'smooth' });
-  }
-  if (e.key === 'End') {
-    e.preventDefault();
-    currentSlide = slides.length - 1;
-    slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
-  }
-  if (e.key === 'F11') {
-    e.preventDefault();
-    toggleFullscreen();
-  }
-});
-
-// Update currentSlide on scroll
-window.addEventListener('scroll', () => {
-  slides.forEach((slide, i) => {
-    const rect = slide.getBoundingClientRect();
-    if (rect.top >= -100 && rect.top < window.innerHeight / 2) {
-      currentSlide = i;
-    }
-  });
-});
+  goTo(0);
 </script>
-
 </body>
 </html>
