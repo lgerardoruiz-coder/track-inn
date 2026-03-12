@@ -1091,7 +1091,7 @@ body {
         if (v1State === 'video' && t >= ZOOM_AT) {
           v1State = 'zooming';
           video.classList.add('zooming');
-          setTimeout(() => { video.pause(); overlay.classList.add('visible'); btnBack.classList.add('visible'); v1State = 'app'; v1_runAppFlow(); }, 800);
+          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); v1State = 'app'; v1_runAppFlow(); }, 800);
         }
       });
 
@@ -1463,7 +1463,7 @@ body {
         if (dmState === 'video' && t >= ZOOM_AT) {
           dmState = 'zooming';
           video.classList.add('zooming');
-          setTimeout(() => { video.pause(); overlay.classList.add('visible'); btnBack.classList.add('visible'); dmState = 'app'; dm_runAppFlow(); }, 800);
+          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); dmState = 'app'; dm_runAppFlow(); }, 800);
         }
       });
 
