@@ -2647,23 +2647,41 @@ async function captureMaterial() {
   const lastScanInfo = document.getElementById('lastScanInfo');
 
   try {
-    // Try ImageCapture API first for maximum resolution photo
     const track = video.srcObject.getVideoTracks()[0];
     let blob = null;
     let captureW = 0, captureH = 0;
 
+    // Step 1: Trigger single-shot autofocus and wait for it to lock
+    try {
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      if (caps.focusMode && caps.focusMode.includes('single-shot')) {
+        await track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] });
+        btn.textContent = 'Enfocando...';
+        await new Promise(r => setTimeout(r, 600));
+      } else if (caps.focusMode && caps.focusMode.includes('continuous')) {
+        // Trigger re-focus by switching to manual and back to continuous
+        await track.applyConstraints({ advanced: [{ focusMode: 'manual' }] });
+        await new Promise(r => setTimeout(r, 100));
+        await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+        btn.textContent = 'Enfocando...';
+        await new Promise(r => setTimeout(r, 500));
+      }
+    } catch(e) {} // Focus not supported — continue anyway
+
+    btn.textContent = 'Capturando...';
+
+    // Step 2: Take high-res photo via ImageCapture API
     if (typeof ImageCapture !== 'undefined') {
       try {
         const imgCapture = new ImageCapture(track);
         const photoBitmap = await imgCapture.takePhoto();
         blob = photoBitmap;
-        // Get dimensions from blob via createImageBitmap
         const bmp = await createImageBitmap(blob);
         captureW = bmp.width;
         captureH = bmp.height;
         bmp.close();
       } catch(e) {
-        blob = null; // Fallback to canvas
+        blob = null;
       }
     }
 
@@ -2717,6 +2735,12 @@ async function captureMaterial() {
     lastScanInfo.innerHTML = 'Error: ' + e.message;
     showToast('Error al capturar');
   }
+
+  // Restore continuous autofocus
+  try {
+    const track = video.srcObject && video.srcObject.getVideoTracks()[0];
+    if (track) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+  } catch(e) {}
 
   btn.classList.remove('processing');
   btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg> Capturar';
