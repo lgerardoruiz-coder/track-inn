@@ -630,6 +630,46 @@ button, .store-select-btn, .size-btn {
   font-weight: 600;
 }
 
+/* Última Pieza Toast */
+.ultima-pieza-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background: linear-gradient(135deg, #E63946 0%, #c0392b 100%);
+  color: #fff;
+  padding: 24px 40px;
+  border-radius: 20px;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 1px;
+  text-align: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 20px 60px rgba(230, 57, 70, 0.5), 0 0 0 4px rgba(255,255,255,0.2);
+  text-transform: uppercase;
+}
+.ultima-pieza-toast.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.ultima-pieza-toast .toast-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 8px;
+}
+.ultima-pieza-toast .toast-sub {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.9;
+  margin-top: 4px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 /* Price Section */
 .price-section {
   display: flex;
@@ -1634,6 +1674,20 @@ try {
   if (cached) Object.assign(imageCache, JSON.parse(cached));
 } catch(e) {}
 
+// ============ ÚLTIMA PIEZA TOAST ============
+function showUltimaPiezaToast() {
+  let toast = document.getElementById('ultimaPiezaToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'ultimaPiezaToast';
+    toast.className = 'ultima-pieza-toast';
+    toast.innerHTML = '<span class="toast-icon">🔥</span>¡Última pieza!<div class="toast-sub">Aprovecha, no hay más en inventario</div>';
+    document.body.appendChild(toast);
+  }
+  setTimeout(() => toast.classList.add('show'), 50);
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
 // ============ SERVICE WORKER ============
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -2019,8 +2073,8 @@ function displayProduct(rows, scannedCode) {
       </div>`);
   });
 
+  const totalInv = rows.reduce((sum, r) => sum + (parseInt(r[inventoryKey]) || 0), 0);
   if (storeCards.length) {
-    const totalInv = rows.reduce((sum, r) => sum + (parseInt(r[inventoryKey]) || 0), 0);
     storeHTML = `
       <div class="stores-section">
         <div class="section-title">Inventario por sucursal <span style="font-weight:400;font-size:13px;color:var(--gray)">(${totalInv} total)</span></div>
@@ -2155,6 +2209,11 @@ function displayProduct(rows, scannedCode) {
         if (span) span.textContent = 'Imagen no disponible';
       }
     });
+  }
+
+  // Show "última pieza" toast if only 1 unit in total
+  if (typeof totalInv !== 'undefined' && totalInv === 1) {
+    setTimeout(() => showUltimaPiezaToast(), 600);
   }
 
   // Reset to Producto tab
