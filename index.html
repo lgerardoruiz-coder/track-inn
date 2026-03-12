@@ -1878,13 +1878,19 @@ function lookupBarcode(code) {
   });
   if (partialEstilo.length > 0) return partialEstilo;
 
-  // 5. Partial match on Genérico Talla (Material) — only same-length proximity
+  // 5. Partial match on Genérico Talla (Material) — strip zeros and compare core digits
   const partialMaterial = productData.filter(r => {
     const mat = String(r['Genérico Talla'] || r['Generico Talla'] || '').trim();
     if (!mat || mat.length < 6) return false;
-    // Only match if lengths are similar (within 4 chars) to avoid short codes matching inside long ones
-    if (Math.abs(normalizedCode.length - mat.length) > 4) return false;
-    return mat.includes(normalizedCode) || normalizedCode.includes(mat);
+    // Strip leading zeros from Material to get core number (e.g. 000000000395264003 → 395264003)
+    const matCore = mat.replace(/^0+/, '');
+    const codeCore = normalizedCode.replace(/^0+/, '');
+    if (matCore && codeCore && matCore.length >= 6 && codeCore.length >= 6) {
+      if (matCore === codeCore) return true;
+      // Check if core of one contains the other
+      if (matCore.includes(codeCore) || codeCore.includes(matCore)) return true;
+    }
+    return false;
   });
   if (partialMaterial.length > 0) return partialMaterial;
 
@@ -2540,15 +2546,18 @@ function stopScannerAndGoBack() {
   goToScreen(1);
 }
 
-function onScanSuccess(decodedText) {
+function onScanSuccess(decodedText, decodedResult) {
   if (scanCooldown) return;
   scanCooldown = true;
 
   // Vibrate if available
   if (navigator.vibrate) navigator.vibrate(100);
 
+  // Get detected format name for diagnostics
+  const fmt = (decodedResult && decodedResult.result && decodedResult.result.format && decodedResult.result.format.formatName) || 'unknown';
+
   const lastScanInfo = document.getElementById('lastScanInfo');
-  lastScanInfo.innerHTML = 'Ultimo escaneo: <strong>' + decodedText + '</strong>';
+  lastScanInfo.innerHTML = 'Ultimo escaneo: <strong>' + decodedText + '</strong> (' + fmt + ')';
 
   processBarcode(decodedText);
 
