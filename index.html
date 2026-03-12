@@ -2483,13 +2483,14 @@ let retryingWithMaterial = false;
 
 function setScanMode(mode) {
   scanMode = mode;
+  materialRetryCount = 0;
   document.getElementById('btnModeUPC').classList.toggle('active', mode === 'upc');
   document.getElementById('btnModeMaterial').classList.toggle('active', mode === 'material');
   const instr = document.getElementById('scannerInstruction');
   if (mode === 'upc') {
     instr.innerHTML = '<strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca';
   } else {
-    instr.innerHTML = '<strong>Modo Material</strong> — Escanea el codigo de la sticker de precio';
+    instr.innerHTML = '<strong>Modo Material</strong> — Apunta a la sticker de precio. Descarta lecturas malas automaticamente.';
   }
   // Restart scanner with new format config
   if (scannerRunning) {
@@ -2499,22 +2500,19 @@ function setScanMode(mode) {
 }
 
 function getFormatsForMode(mode) {
-  if (mode === 'material') {
-    // Material stickers: only ITF and Code 128 — NO EAN/UPC to prevent misreads
-    return [
-      Html5QrcodeSupportedFormats.ITF,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39,
-      Html5QrcodeSupportedFormats.CODABAR
-    ];
-  }
-  // UPC mode: standard retail barcodes
+  // All formats enabled in both modes — validation handles misreads
   return [
     Html5QrcodeSupportedFormats.EAN_13,
     Html5QrcodeSupportedFormats.EAN_8,
     Html5QrcodeSupportedFormats.UPC_A,
     Html5QrcodeSupportedFormats.UPC_E,
-    Html5QrcodeSupportedFormats.QR_CODE
+    Html5QrcodeSupportedFormats.CODE_128,
+    Html5QrcodeSupportedFormats.CODE_39,
+    Html5QrcodeSupportedFormats.CODE_93,
+    Html5QrcodeSupportedFormats.ITF,
+    Html5QrcodeSupportedFormats.CODABAR,
+    Html5QrcodeSupportedFormats.QR_CODE,
+    Html5QrcodeSupportedFormats.DATA_MATRIX
   ];
 }
 
@@ -2605,42 +2603,58 @@ function stopScannerAndGoBack() {
   goToScreen(1);
 }
 
+let materialRetryCount = 0;
+let materialLastBadCode = '';
+const MATERIAL_MAX_RETRIES = 15; // Keep scanning up to 15 bad reads (~6-8 seconds)
+
 function onScanSuccess(decodedText, decodedResult) {
   if (scanCooldown) return;
-  scanCooldown = true;
-
-  // Vibrate if available
-  if (navigator.vibrate) navigator.vibrate(100);
 
   // Get detected format name for diagnostics
   const fmt = (decodedResult && decodedResult.result && decodedResult.result.format && decodedResult.result.format.formatName) || 'unknown';
 
   const lastScanInfo = document.getElementById('lastScanInfo');
-  lastScanInfo.innerHTML = 'Ultimo escaneo: <strong>' + decodedText + '</strong> (' + fmt + ', modo ' + scanMode + ')';
 
-  // Check if code exists in DB before showing result
+  // Check if code exists in DB
   const rows = lookupBarcode(decodedText);
+
   if (rows && rows.length > 0) {
-    // Found — show product
+    // FOUND — show product
+    scanCooldown = true;
+    if (navigator.vibrate) navigator.vibrate(100);
+    materialRetryCount = 0;
+    lastScanInfo.innerHTML = 'Encontrado: <strong>' + decodedText + '</strong> (' + fmt + ')';
     displayProduct(rows, decodedText);
     goToScreen(3);
-    retryingWithMaterial = false;
-  } else if (scanMode === 'upc' && !retryingWithMaterial) {
-    // UPC mode but not found — auto-retry with Material mode
-    retryingWithMaterial = true;
-    showToast('No encontrado como UPC, reintentando como Material...');
-    setScanMode('material');
-    setTimeout(() => { scanCooldown = false; retryingWithMaterial = false; }, 5000);
-    return;
+    setTimeout(() => { scanCooldown = false; }, 2000);
+  } else if (scanMode === 'material') {
+    // MATERIAL MODE: code not found — keep scanning silently
+    materialRetryCount++;
+    materialLastBadCode = decodedText;
+    lastScanInfo.innerHTML = 'Buscando... descartado: ' + decodedText + ' (' + fmt + ') — intento ' + materialRetryCount + '/' + MATERIAL_MAX_RETRIES;
+
+    if (materialRetryCount >= MATERIAL_MAX_RETRIES) {
+      // Too many bad reads — give up and show not found
+      scanCooldown = true;
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+      materialRetryCount = 0;
+      document.getElementById('notFoundCode').textContent = decodedText + ' (' + fmt + ', ' + decodedText.length + ' dig.)';
+      goToScreen(4);
+      setTimeout(() => { scanCooldown = false; }, 2000);
+    } else {
+      // Brief cooldown then keep scanning
+      scanCooldown = true;
+      setTimeout(() => { scanCooldown = false; }, 400);
+    }
   } else {
-    // Not found in any mode
+    // UPC MODE: not found — show immediately (UPC reads are reliable)
+    scanCooldown = true;
+    if (navigator.vibrate) navigator.vibrate(100);
+    lastScanInfo.innerHTML = 'No encontrado: <strong>' + decodedText + '</strong> (' + fmt + ')';
     document.getElementById('notFoundCode').textContent = decodedText + ' (' + fmt + ', ' + decodedText.length + ' dig.)';
     goToScreen(4);
-    retryingWithMaterial = false;
+    setTimeout(() => { scanCooldown = false; }, 2000);
   }
-
-  // Cooldown to prevent rapid re-scans
-  setTimeout(() => { scanCooldown = false; }, 2000);
 }
 
 function manualSearch() {
