@@ -2161,6 +2161,7 @@ function displayProduct(rows, scannedCode) {
         ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
         <div class="product-barcode-label">UPC: ${String(first['UPC'] || scannedCode).trim()}</div>
         ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="product-barcode-label">Material: ${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
+        <div class="product-barcode-label" style="color:#f59e0b;font-size:0.7rem;margin-top:4px;">Escaneado: ${scannedCode}</div>
         ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
       </div>
       ${storeHTML}
