@@ -449,9 +449,35 @@ button, .store-select-btn, .size-btn {
   to { transform: rotate(360deg); }
 }
 
+.scan-mode-toggle {
+  display: flex;
+  gap: 0;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 3px;
+  width: 100%;
+  max-width: 340px;
+}
+.scan-mode-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gray);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.scan-mode-btn.active {
+  background: var(--red);
+  color: white;
+  box-shadow: 0 2px 8px rgba(230,57,70,0.4);
+}
 .scanner-instruction {
   color: var(--gray);
-  font-size: 15px;
+  font-size: 13px;
   text-align: center;
   font-weight: 400;
   line-height: 1.5;
@@ -1383,8 +1409,12 @@ button, .store-select-btn, .size-btn {
             <div class="scan-line"></div>
           </div>
         </div>
-        <div class="scanner-instruction">
-          <strong>Apunta al codigo de barras</strong> del producto<br>(UPC o Material) para obtener precio e inventario
+        <div class="scan-mode-toggle" id="scanModeToggle">
+          <button class="scan-mode-btn active" id="btnModeUPC" onclick="setScanMode('upc')">UPC (Marca)</button>
+          <button class="scan-mode-btn" id="btnModeMaterial" onclick="setScanMode('material')">Material (Sticker)</button>
+        </div>
+        <div class="scanner-instruction" id="scannerInstruction">
+          <strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca
         </div>
         <div class="manual-input-section">
           <div class="manual-label">o ingresa el codigo manualmente</div>
@@ -2448,6 +2478,46 @@ function goToScreen(target) {
 }
 
 // ============ BARCODE SCANNER ============
+let scanMode = 'upc'; // 'upc' or 'material'
+let retryingWithMaterial = false;
+
+function setScanMode(mode) {
+  scanMode = mode;
+  document.getElementById('btnModeUPC').classList.toggle('active', mode === 'upc');
+  document.getElementById('btnModeMaterial').classList.toggle('active', mode === 'material');
+  const instr = document.getElementById('scannerInstruction');
+  if (mode === 'upc') {
+    instr.innerHTML = '<strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca';
+  } else {
+    instr.innerHTML = '<strong>Modo Material</strong> — Escanea el codigo de la sticker de precio';
+  }
+  // Restart scanner with new format config
+  if (scannerRunning) {
+    stopScanner();
+    setTimeout(() => startScanner(), 300);
+  }
+}
+
+function getFormatsForMode(mode) {
+  if (mode === 'material') {
+    // Material stickers: only ITF and Code 128 — NO EAN/UPC to prevent misreads
+    return [
+      Html5QrcodeSupportedFormats.ITF,
+      Html5QrcodeSupportedFormats.CODE_128,
+      Html5QrcodeSupportedFormats.CODE_39,
+      Html5QrcodeSupportedFormats.CODABAR
+    ];
+  }
+  // UPC mode: standard retail barcodes
+  return [
+    Html5QrcodeSupportedFormats.EAN_13,
+    Html5QrcodeSupportedFormats.EAN_8,
+    Html5QrcodeSupportedFormats.UPC_A,
+    Html5QrcodeSupportedFormats.UPC_E,
+    Html5QrcodeSupportedFormats.QR_CODE
+  ];
+}
+
 function startScanner() {
   if (scannerRunning) return;
 
@@ -2456,24 +2526,13 @@ function startScanner() {
 
   html5QrCode = new Html5Qrcode('scanner-reader');
 
+  const isMaterial = scanMode === 'material';
   const config = {
-    fps: 20,
-    qrbox: { width: 320, height: 140 },
+    fps: isMaterial ? 25 : 15,
+    qrbox: isMaterial ? { width: 340, height: 160 } : { width: 300, height: 120 },
     aspectRatio: 1.0,
     disableFlip: false,
-    formatsToSupport: [
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39,
-      Html5QrcodeSupportedFormats.CODE_93,
-      Html5QrcodeSupportedFormats.ITF,
-      Html5QrcodeSupportedFormats.CODABAR,
-      Html5QrcodeSupportedFormats.QR_CODE,
-      Html5QrcodeSupportedFormats.DATA_MATRIX
-    ],
+    formatsToSupport: getFormatsForMode(scanMode),
     experimentalFeatures: {
       useBarCodeDetectorIfSupported: true
     }
@@ -2497,9 +2556,9 @@ function startScanner() {
         if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
           advanced.focusMode = 'continuous';
         }
-        // Zoom 1.5x — not too close so wider barcodes (ITF/Material) fit in frame
+        // Material mode: less zoom for wider barcodes; UPC mode: more zoom
         if (capabilities.zoom) {
-          advanced.zoom = Math.min(1.5, capabilities.zoom.max);
+          advanced.zoom = Math.min(isMaterial ? 1.2 : 1.8, capabilities.zoom.max);
         }
         // Torch support - save track for later
         if (capabilities.torch) {
@@ -2557,9 +2616,28 @@ function onScanSuccess(decodedText, decodedResult) {
   const fmt = (decodedResult && decodedResult.result && decodedResult.result.format && decodedResult.result.format.formatName) || 'unknown';
 
   const lastScanInfo = document.getElementById('lastScanInfo');
-  lastScanInfo.innerHTML = 'Ultimo escaneo: <strong>' + decodedText + '</strong> (' + fmt + ')';
+  lastScanInfo.innerHTML = 'Ultimo escaneo: <strong>' + decodedText + '</strong> (' + fmt + ', modo ' + scanMode + ')';
 
-  processBarcode(decodedText);
+  // Check if code exists in DB before showing result
+  const rows = lookupBarcode(decodedText);
+  if (rows && rows.length > 0) {
+    // Found — show product
+    displayProduct(rows, decodedText);
+    goToScreen(3);
+    retryingWithMaterial = false;
+  } else if (scanMode === 'upc' && !retryingWithMaterial) {
+    // UPC mode but not found — auto-retry with Material mode
+    retryingWithMaterial = true;
+    showToast('No encontrado como UPC, reintentando como Material...');
+    setScanMode('material');
+    setTimeout(() => { scanCooldown = false; retryingWithMaterial = false; }, 5000);
+    return;
+  } else {
+    // Not found in any mode
+    document.getElementById('notFoundCode').textContent = decodedText + ' (' + fmt + ', ' + decodedText.length + ' dig.)';
+    goToScreen(4);
+    retryingWithMaterial = false;
+  }
 
   // Cooldown to prevent rapid re-scans
   setTimeout(() => { scanCooldown = false; }, 2000);
