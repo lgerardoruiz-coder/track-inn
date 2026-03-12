@@ -2657,14 +2657,14 @@ async function captureMaterial() {
       if (caps.focusMode && caps.focusMode.includes('single-shot')) {
         await track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] });
         btn.textContent = 'Enfocando...';
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 500));
       } else if (caps.focusMode && caps.focusMode.includes('continuous')) {
         // Trigger re-focus by switching to manual and back to continuous
         await track.applyConstraints({ advanced: [{ focusMode: 'manual' }] });
         await new Promise(r => setTimeout(r, 100));
         await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
         btn.textContent = 'Enfocando...';
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 400));
       }
     } catch(e) {} // Focus not supported — continue anyway
 
