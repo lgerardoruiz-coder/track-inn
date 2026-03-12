@@ -2467,7 +2467,10 @@ function startScanner() {
       Html5QrcodeSupportedFormats.CODABAR,
       Html5QrcodeSupportedFormats.QR_CODE,
       Html5QrcodeSupportedFormats.DATA_MATRIX
-    ]
+    ],
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
   };
 
   html5QrCode.start(
@@ -2576,7 +2579,7 @@ function processBarcode(code) {
     displayProduct(rows, code);
     goToScreen(3);
   } else {
-    document.getElementById('notFoundCode').textContent = code;
+    document.getElementById('notFoundCode').textContent = code + ' (' + code.length + ' dígitos)';
     goToScreen(4);
   }
 }
