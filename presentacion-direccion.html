@@ -592,13 +592,8 @@ body {
   }
   .key-hint { display: none; }
 
-  /* Videos — GPU optimizations for mobile */
+  /* Videos */
   #slide-video1, #slide-demo { padding: 0 !important; overflow: hidden !important; }
-  #v1_bgVideo, #dm_bgVideo {
-    will-change: transform, filter;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
   #v1_playBtn, #dm_playBtn { padding: 12px 32px; font-size: 15px; border-radius: 12px; }
   #v1_btnBack, #dm_btnBack { bottom: max(14px, env(safe-area-inset-bottom)); padding: 8px 20px; font-size: 10px; }
   .dm_phone { width: min(280px, 40vw) !important; height: min(600px, calc(100dvh - 60px)) !important; border-radius: 30px !important; }
@@ -899,13 +894,23 @@ body {
       position:absolute; inset:0;
       width:100%; height:100%;
       object-fit:cover; display:block;
-      transition:transform 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.8s ease;
       transform-origin:41.14% 38.05%;
-      will-change:transform,opacity;
-      -webkit-backface-visibility:hidden;
-      backface-visibility:hidden;
     }
-    #v1_bgVideo.zooming { transform:scale(3.5); opacity:0; }
+    /* Desktop: zoom + fade */
+    @media (min-width: 769px) {
+      #v1_bgVideo {
+        transition:transform 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.8s ease;
+        will-change:transform,opacity;
+      }
+      #v1_bgVideo.zooming { transform:scale(3.5); opacity:0; }
+    }
+    /* Mobile: only fade, no transform (saves GPU) */
+    @media (max-width: 768px) {
+      #v1_bgVideo {
+        transition:opacity 0.5s ease;
+      }
+      #v1_bgVideo.zooming { opacity:0; }
+    }
     #v1_appOverlay {
       position:absolute; inset:0; z-index:20;
       opacity:0; pointer-events:none;
@@ -1091,7 +1096,8 @@ body {
         if (v1State === 'video' && t >= ZOOM_AT) {
           v1State = 'zooming';
           video.classList.add('zooming');
-          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); v1State = 'app'; v1_runAppFlow(); }, 800);
+          var isMobile = window.innerWidth <= 768;
+          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); v1State = 'app'; v1_runAppFlow(); }, isMobile ? 500 : 800);
         }
       });
 
@@ -1146,13 +1152,21 @@ body {
       position:absolute; inset:0;
       width:100%; height:100%;
       object-fit:cover; display:block;
-      transition:transform 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.8s ease;
       transform-origin:50.68% 49.54%;
-      will-change:transform,opacity;
-      -webkit-backface-visibility:hidden;
-      backface-visibility:hidden;
     }
-    #dm_bgVideo.zooming { transform:scale(3.5); opacity:0; }
+    @media (min-width: 769px) {
+      #dm_bgVideo {
+        transition:transform 0.8s cubic-bezier(0.4,0,0.2,1), opacity 0.8s ease;
+        will-change:transform,opacity;
+      }
+      #dm_bgVideo.zooming { transform:scale(3.5); opacity:0; }
+    }
+    @media (max-width: 768px) {
+      #dm_bgVideo {
+        transition:opacity 0.5s ease;
+      }
+      #dm_bgVideo.zooming { opacity:0; }
+    }
     #dm_appOverlay {
       position:absolute; inset:0; z-index:20;
       opacity:0; pointer-events:none;
@@ -1463,7 +1477,8 @@ body {
         if (dmState === 'video' && t >= ZOOM_AT) {
           dmState = 'zooming';
           video.classList.add('zooming');
-          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); dmState = 'app'; dm_runAppFlow(); }, 800);
+          var isMobile = window.innerWidth <= 768;
+          setTimeout(() => { overlay.classList.add('visible'); btnBack.classList.add('visible'); dmState = 'app'; dm_runAppFlow(); }, isMobile ? 500 : 800);
         }
       });
 
