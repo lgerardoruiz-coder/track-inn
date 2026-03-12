@@ -1856,8 +1856,12 @@ function lookupBarcode(code) {
   const upcRows = productData.filter(r => String(r.UPC).trim() === normalizedCode);
   if (upcRows.length > 0) return upcRows;
 
-  // 2. Exact match on Genérico Talla (Material)
-  const materialRows = productData.filter(r => String(r['Genérico Talla'] || r['Generico Talla'] || '').trim() === normalizedCode);
+  // 2. Exact match on Genérico Talla (Material) — also try padding with leading zeros to 18 digits
+  const paddedCode = normalizedCode.length < 18 && /^\d+$/.test(normalizedCode) ? normalizedCode.padStart(18, '0') : normalizedCode;
+  const materialRows = productData.filter(r => {
+    const mat = String(r['Genérico Talla'] || r['Generico Talla'] || '').trim();
+    return mat === normalizedCode || mat === paddedCode;
+  });
   if (materialRows.length > 0) return materialRows;
 
   // 3. Exact match on Estilo
