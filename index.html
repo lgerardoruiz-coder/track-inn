@@ -576,17 +576,17 @@ button, .store-select-btn, .size-btn {
 /* SCREEN 3 - PRODUCT RESULT */
 .screen-product { background: var(--white); }
 
-.product-body { padding: 0 20px 140px; }
+.product-body { padding: 8px 20px 140px; }
 
 .product-image-area {
   width: 100%;
-  height: 220px;
+  height: 200px;
   background: var(--white);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   position: relative;
   overflow: hidden;
 }
@@ -644,7 +644,7 @@ button, .store-select-btn, .size-btn {
   font-weight: 600;
 }
 
-.product-info { margin-bottom: 24px; }
+.product-info { margin-bottom: 12px; }
 
 .product-brand {
   font-size: 14px;
@@ -652,21 +652,39 @@ button, .store-select-btn, .size-btn {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .product-name {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--black);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .product-sku {
   font-size: 13px;
   color: var(--gray);
   font-weight: 400;
-  margin-bottom: 10px;
+  margin-bottom: 2px;
+}
+.product-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #f5f5f5;
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--gray);
+}
+.product-details-grid .detail-label {
+  font-weight: 600;
+  color: #555;
+}
+.product-details-grid .detail-value {
+  color: var(--black);
 }
 
 .product-barcode-label {
@@ -2237,8 +2255,16 @@ function displayProduct(rows, scannedCode) {
         ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
         <div class="product-barcode-label">UPC: ${String(first['UPC'] || scannedCode).trim()}</div>
         ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="product-barcode-label">Material: ${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
-        <div class="product-barcode-label" style="color:#f59e0b;font-size:0.7rem;margin-top:4px;">Escaneado: ${scannedCode}</div>
         ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
+        <div class="product-details-grid">
+          ${description ? `<div class="detail-label">Descripcion</div><div class="detail-value">${description}</div>` : ''}
+          ${generico ? `<div class="detail-label">Generico</div><div class="detail-value">${generico}</div>` : ''}
+          ${division && division !== '(Sin valor)' ? `<div class="detail-label">Division</div><div class="detail-value">${division}</div>` : ''}
+          ${deporte && deporte !== '(Sin valor)' ? `<div class="detail-label">Deporte</div><div class="detail-value">${deporte}</div>` : ''}
+          ${genero && genero !== '(Sin valor)' ? `<div class="detail-label">Genero</div><div class="detail-value">${genero}</div>` : ''}
+          ${silueta && silueta !== '(Sin valor)' ? `<div class="detail-label">Silueta</div><div class="detail-value">${silueta}</div>` : ''}
+          ${proveedor && proveedor !== '(Sin valor)' ? `<div class="detail-label">Proveedor</div><div class="detail-value">${proveedor}</div>` : ''}
+        </div>
       </div>
       ${storeHTML}
       ${sizesHTML}
