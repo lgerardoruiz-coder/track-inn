@@ -2451,8 +2451,8 @@ function startScanner() {
   html5QrCode = new Html5Qrcode('scanner-reader');
 
   const config = {
-    fps: 15,
-    qrbox: { width: 280, height: 120 },
+    fps: 20,
+    qrbox: { width: 320, height: 140 },
     aspectRatio: 1.0,
     disableFlip: false,
     formatsToSupport: [
@@ -2464,7 +2464,9 @@ function startScanner() {
       Html5QrcodeSupportedFormats.CODE_39,
       Html5QrcodeSupportedFormats.CODE_93,
       Html5QrcodeSupportedFormats.ITF,
-      Html5QrcodeSupportedFormats.QR_CODE
+      Html5QrcodeSupportedFormats.CODABAR,
+      Html5QrcodeSupportedFormats.QR_CODE,
+      Html5QrcodeSupportedFormats.DATA_MATRIX
     ]
   };
 
@@ -2486,9 +2488,9 @@ function startScanner() {
         if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
           advanced.focusMode = 'continuous';
         }
-        // Zoom 2x for closer barcode reading
+        // Zoom 1.5x — not too close so wider barcodes (ITF/Material) fit in frame
         if (capabilities.zoom) {
-          advanced.zoom = Math.min(2.0, capabilities.zoom.max);
+          advanced.zoom = Math.min(1.5, capabilities.zoom.max);
         }
         // Torch support - save track for later
         if (capabilities.torch) {
