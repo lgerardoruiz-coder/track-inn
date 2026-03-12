@@ -475,6 +475,37 @@ button, .store-select-btn, .size-btn {
   color: white;
   box-shadow: 0 2px 8px rgba(230,57,70,0.4);
 }
+.material-capture-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--red), #c0392b);
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(230,57,70,0.5);
+  transition: transform 0.15s, opacity 0.15s;
+}
+.material-capture-btn:active {
+  transform: scale(0.95);
+  opacity: 0.85;
+}
+.material-capture-btn.processing {
+  opacity: 0.6;
+  pointer-events: none;
+}
+#materialVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .scanner-instruction {
   color: var(--gray);
   font-size: 13px;
@@ -1401,6 +1432,7 @@ button, .store-select-btn, .size-btn {
       <div class="scanner-body">
         <div class="scanner-frame">
           <div id="scanner-reader"></div>
+          <div id="materialTempDecoder" style="display:none"></div>
           <div class="scanner-overlay">
             <div class="corner corner-tl"></div>
             <div class="corner corner-tr"></div>
@@ -1413,6 +1445,10 @@ button, .store-select-btn, .size-btn {
           <button class="scan-mode-btn active" id="btnModeUPC" onclick="setScanMode('upc')">UPC (Marca)</button>
           <button class="scan-mode-btn" id="btnModeMaterial" onclick="setScanMode('material')">Material (Sticker)</button>
         </div>
+        <button class="material-capture-btn" id="materialCaptureBtn" style="display:none" onclick="captureMaterial()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+          Capturar
+        </button>
         <div class="scanner-instruction" id="scannerInstruction">
           <strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca
         </div>
@@ -2464,14 +2500,19 @@ function goToScreen(target) {
   const ctas = document.getElementById('bottomCtas');
   ctas.classList.toggle('visible', target === 3);
 
-  // Start scanner when entering screen 2
+  // Start scanner/camera when entering screen 2
   if (target === 2) {
-    setTimeout(startScanner, 400);
+    if (scanMode === 'material') {
+      setTimeout(startMaterialCamera, 400);
+    } else {
+      setTimeout(startScanner, 400);
+    }
   }
 
-  // Stop scanner when leaving screen 2
+  // Stop scanner/camera when leaving screen 2
   if (currentScreen === 2 && target !== 2) {
     stopScanner();
+    stopMaterialCamera();
   }
 
   currentScreen = target;
@@ -2487,15 +2528,18 @@ function setScanMode(mode) {
   document.getElementById('btnModeUPC').classList.toggle('active', mode === 'upc');
   document.getElementById('btnModeMaterial').classList.toggle('active', mode === 'material');
   const instr = document.getElementById('scannerInstruction');
+  const captureBtn = document.getElementById('materialCaptureBtn');
   if (mode === 'upc') {
     instr.innerHTML = '<strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca';
+    if (captureBtn) captureBtn.style.display = 'none';
+    // Switch to video scanner
+    stopMaterialCamera();
+    if (!scannerRunning) setTimeout(() => startScanner(), 300);
   } else {
-    instr.innerHTML = '<strong>Modo Material</strong> — Apunta a la sticker de precio. Descarta lecturas malas automaticamente.';
-  }
-  // Restart scanner with new format config
-  if (scannerRunning) {
+    instr.innerHTML = '<strong>Modo Material</strong> — Apunta a la sticker y toca Capturar';
+    // Switch to photo capture mode
     stopScanner();
-    setTimeout(() => startScanner(), 300);
+    setTimeout(() => startMaterialCamera(), 300);
   }
 }
 
@@ -2587,6 +2631,120 @@ function stopScanner() {
   }
 }
 
+// ============ MATERIAL CAMERA (HIGH-RES PHOTO CAPTURE) ============
+let materialStream = null;
+
+function startMaterialCamera() {
+  const readerEl = document.getElementById('scanner-reader');
+  readerEl.innerHTML = '<video id="materialVideo" autoplay playsinline></video>';
+  const video = document.getElementById('materialVideo');
+  const captureBtn = document.getElementById('materialCaptureBtn');
+  captureBtn.style.display = 'flex';
+
+  // Request highest resolution possible
+  navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: 'environment',
+      width: { ideal: 3840 },
+      height: { ideal: 2160 }
+    }
+  }).then(stream => {
+    materialStream = stream;
+    video.srcObject = stream;
+    // Apply focus settings
+    try {
+      const track = stream.getVideoTracks()[0];
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      const adv = {};
+      if (caps.focusMode && caps.focusMode.includes('continuous')) adv.focusMode = 'continuous';
+      if (caps.zoom) adv.zoom = Math.min(1.3, caps.zoom.max);
+      if (caps.torch) {
+        window._cameraTrack = track;
+        var torchBtn = document.getElementById('torchBtn');
+        if (torchBtn) torchBtn.style.display = 'flex';
+      }
+      if (Object.keys(adv).length > 0) track.applyConstraints({ advanced: [adv] });
+    } catch(e) {}
+  }).catch(err => {
+    readerEl.innerHTML = '<div style="color:#666;text-align:center;padding:60px 20px;font-size:14px;">No se pudo acceder a la camara.</div>';
+    captureBtn.style.display = 'none';
+  });
+}
+
+function stopMaterialCamera() {
+  if (materialStream) {
+    materialStream.getTracks().forEach(t => t.stop());
+    materialStream = null;
+  }
+  const captureBtn = document.getElementById('materialCaptureBtn');
+  if (captureBtn) captureBtn.style.display = 'none';
+}
+
+async function captureMaterial() {
+  const video = document.getElementById('materialVideo');
+  if (!video || !video.srcObject) return;
+
+  const btn = document.getElementById('materialCaptureBtn');
+  btn.classList.add('processing');
+  btn.innerHTML = 'Procesando...';
+  if (navigator.vibrate) navigator.vibrate(50);
+
+  const lastScanInfo = document.getElementById('lastScanInfo');
+
+  try {
+    // Capture full resolution frame
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+
+    lastScanInfo.innerHTML = 'Captura: ' + canvas.width + 'x' + canvas.height + 'px — Decodificando...';
+
+    // Convert to blob and decode with html5-qrcode
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.95));
+    const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+
+    const tempScanner = new Html5Qrcode('materialTempDecoder');
+    let decoded = null;
+    try {
+      decoded = await tempScanner.scanFileV2(file, true);
+    } catch(e) {
+      // scanFileV2 not available, try scanFile
+      try {
+        const text = await tempScanner.scanFile(file, true);
+        decoded = { decodedText: text };
+      } catch(e2) {}
+    }
+    tempScanner.clear();
+
+    if (decoded && decoded.decodedText) {
+      const code = decoded.decodedText;
+      const fmt = (decoded.result && decoded.result.format && decoded.result.format.formatName) || 'foto';
+      const rows = lookupBarcode(code);
+      if (rows && rows.length > 0) {
+        if (navigator.vibrate) navigator.vibrate(100);
+        lastScanInfo.innerHTML = 'Encontrado: <strong>' + code + '</strong> (' + fmt + ')';
+        displayProduct(rows, code);
+        goToScreen(3);
+      } else {
+        lastScanInfo.innerHTML = 'Leido: ' + code + ' (' + fmt + ') — no encontrado en BD. Intenta de nuevo.';
+        if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+        showToast('Codigo ' + code + ' no encontrado. Reintenta.');
+      }
+    } else {
+      lastScanInfo.innerHTML = 'No se detecto codigo. Acerca mas el celular a la sticker.';
+      showToast('No se detecto codigo. Intenta de nuevo.');
+    }
+  } catch(e) {
+    lastScanInfo.innerHTML = 'Error: ' + e.message;
+    showToast('Error al capturar');
+  }
+
+  btn.classList.remove('processing');
+  btn.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg> Capturar';
+}
+
 let torchOn = false;
 function toggleTorch() {
   if (!window._cameraTrack) return;
@@ -2600,6 +2758,7 @@ function toggleTorch() {
 
 function stopScannerAndGoBack() {
   stopScanner();
+  stopMaterialCamera();
   goToScreen(1);
 }
 
