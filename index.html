@@ -2250,20 +2250,14 @@ function displayProduct(rows, scannedCode) {
       <div class="product-info">
         ${displayBrand ? `<div class="product-brand">${displayBrand}</div>` : ''}
         <div class="product-name">${displayName}</div>
-        <div id="priceSlot"></div>
-        ${estilo && estilo !== '(Sin valor)' ? `<div class="product-sku">Estilo: ${estilo}</div>` : ''}
         ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
-        <div class="product-barcode-label">UPC: ${String(first['UPC'] || scannedCode).trim()}</div>
-        ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="product-barcode-label">Material: ${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
+        <div id="priceSlot"></div>
         ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
         <div class="product-details-grid">
           ${description ? `<div class="detail-label">Descripcion</div><div class="detail-value">${description}</div>` : ''}
-          ${generico ? `<div class="detail-label">Generico</div><div class="detail-value">${generico}</div>` : ''}
-          ${division && division !== '(Sin valor)' ? `<div class="detail-label">Division</div><div class="detail-value">${division}</div>` : ''}
-          ${deporte && deporte !== '(Sin valor)' ? `<div class="detail-label">Deporte</div><div class="detail-value">${deporte}</div>` : ''}
-          ${genero && genero !== '(Sin valor)' ? `<div class="detail-label">Genero</div><div class="detail-value">${genero}</div>` : ''}
-          ${silueta && silueta !== '(Sin valor)' ? `<div class="detail-label">Silueta</div><div class="detail-value">${silueta}</div>` : ''}
-          ${proveedor && proveedor !== '(Sin valor)' ? `<div class="detail-label">Proveedor</div><div class="detail-value">${proveedor}</div>` : ''}
+          ${estilo && estilo !== '(Sin valor)' ? `<div class="detail-label">Estilo</div><div class="detail-value">${estilo}</div>` : ''}
+          ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="detail-label">Material</div><div class="detail-value">${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
+          <div class="detail-label">UPC</div><div class="detail-value">${String(first['UPC'] || scannedCode).trim()}</div>
         </div>
       </div>
       ${storeHTML}
