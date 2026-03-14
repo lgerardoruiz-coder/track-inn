@@ -2755,11 +2755,13 @@ function generateLabelPreview() {
   if (isFullPrice) {
     // WHITE LABEL - Full Price
     html += '<div class="label-frame">'
-      + '<div class="label-content">'
+      + '<div class="label-content" style="justify-content:space-between">'
+      + '<div>'
       + '<div class="label-desc">' + d.description + '</div>'
       + '<div class="label-meta"><span>' + d.estilo + '</span><span>' + d.brand + '</span><span>' + dateStr + '</span></div>'
-      + '<div class="label-price-main" style="margin-top:8px">' + formatP(d.n1) + '</div>'
-      + '<div class="label-barcode-area"><svg id="labelBarcode"></svg></div>'
+      + '<div class="label-price-main" style="margin-top:4px">' + formatP(d.n1) + '</div>'
+      + '</div>'
+      + '<div class="label-barcode-area" style="text-align:center"><svg id="labelBarcode"></svg></div>'
       + '</div></div>';
   } else {
     // RED LABEL - Rebaja, Promo, or CP+Promo
@@ -2772,28 +2774,30 @@ function generateLabelPreview() {
       stripeText = '<span>REBAJA</span>';
     }
 
-    var priceFrom = '';
-    var priceTo = '';
+    var pricesHTML = '';
     if (isCPPromo) {
-      priceFrom = 'De: ' + formatP(d.n1);
-      priceTo = formatP(d.n3);
+      // 3 prices: regular → rebaja → promo
+      pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:8px">De: ' + formatP(d.n1) + '</div>'
+        + '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:9px">CP: ' + formatP(d.n2) + '</div>'
+        + '<div class="label-price-main" style="margin-top:1px">A: ' + formatP(d.n3) + '</div>';
     } else if (isPromoOnly) {
-      priceFrom = 'De: ' + formatP(d.n1);
-      priceTo = formatP(d.n3);
+      pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through">De: ' + formatP(d.n1) + '</div>'
+        + '<div class="label-price-main" style="margin-top:2px">A: ' + formatP(d.n3) + '</div>';
     } else {
       // CP or REBAJA
-      priceFrom = 'De: ' + formatP(d.n1);
-      priceTo = formatP(d.n2);
+      pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through">De: ' + formatP(d.n1) + '</div>'
+        + '<div class="label-price-main" style="margin-top:2px">A: ' + formatP(d.n2) + '</div>';
     }
 
     html += '<div class="label-frame rebaja-bg">'
       + '<div class="label-stripe">' + stripeText + '</div>'
-      + '<div class="label-content with-stripe">'
-      + '<div class="label-price-from" style="color:#000">' + priceFrom + '</div>'
-      + '<div class="label-price-main" style="margin-top:2px">A: ' + priceTo + '</div>'
+      + '<div class="label-content with-stripe" style="justify-content:space-between">'
+      + '<div>'
+      + pricesHTML
       + '<div class="label-estilo">' + d.estilo + '</div>'
-      + '<div class="label-desc" style="margin-top:1px">' + d.description + '</div>'
-      + '<div class="label-barcode-area"><svg id="labelBarcode"></svg></div>'
+      + '<div class="label-desc" style="margin-top:1px;font-size:7px">' + d.description + '</div>'
+      + '</div>'
+      + '<div class="label-barcode-area" style="text-align:center"><svg id="labelBarcode"></svg></div>'
       + '</div></div>';
   }
 
