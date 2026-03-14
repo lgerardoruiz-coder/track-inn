@@ -2127,15 +2127,21 @@ function displayProduct(rows, scannedCode) {
     storeTallaMap[suc][t] += inv;
   });
 
-  // Sort rows: current store first, then by inventory descending
+  // Show only current store (or closest if no current store selected)
   const sortedRows = [...rows].sort((a, b) => {
     const aIsCurrent = currentStore && a['Sucursal'] === currentStore ? 1 : 0;
     const bIsCurrent = currentStore && b['Sucursal'] === currentStore ? 1 : 0;
     if (aIsCurrent !== bIsCurrent) return bIsCurrent - aIsCurrent;
-    return (parseInt(b[inventoryKey]) || 0) - (parseInt(a[inventoryKey]) || 0);
+    // Sort by distance if available
+    var aDist = STORE_COORDS[a['Sucursal']] && userLat ? haversineDistance(userLat, userLng, STORE_COORDS[a['Sucursal']].lat, STORE_COORDS[a['Sucursal']].lng) : 999999;
+    var bDist = STORE_COORDS[b['Sucursal']] && userLat ? haversineDistance(userLat, userLng, STORE_COORDS[b['Sucursal']].lat, STORE_COORDS[b['Sucursal']].lng) : 999999;
+    return aDist - bDist;
   });
 
-  sortedRows.forEach(r => {
+  // Only show first one (current or closest store)
+  const showRows = sortedRows.slice(0, 1);
+
+  showRows.forEach(r => {
     const sucursal = r['Sucursal'] || '';
     const inv = parseInt(r[inventoryKey]) || 0;
     const direccion = r['Direcci\u00f3n'] || r['Direccion'] || '';
