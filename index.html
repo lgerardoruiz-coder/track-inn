@@ -2663,6 +2663,15 @@ function openTallaSheet(selectedTalla) {
     storeInv[suc].inv += inv;
   });
 
+  // === FAKE DATA FOR TESTING (20 stores) — REMOVE LATER ===
+  var fakeStores = ['IS Galerías Vallarta','IS Plaza Patria GDL','IS Antara CDMX','IS Santa Fe CDMX','IS Perisur CDMX','IS Angelópolis Puebla','IS Forum Tlaquepaque','IS La Isla Cancún','IS Punto Valle MTY','IS Fashion Drive MTY','IS Plaza Fiesta SLP','IS Altabrisa Mérida','IS Galerías Querétaro','IS Las Américas Ecatepec','IS Parque Delta CDMX','IS Outlet Lerma','IS Town Square Metepec','IS Explanada Pachuca'];
+  fakeStores.forEach(function(name) {
+    if (!storeInv[name]) {
+      storeInv[name] = { inv: Math.floor(Math.random() * 6), dir: 'Dirección demo', estado: 'Estado' };
+    }
+  });
+  // === END FAKE DATA ===
+
   // Sort by distance (closest first), then by inventory
   var stores = Object.keys(storeInv).map(function(suc) {
     var dist = (STORE_COORDS[suc] && userLat) ? haversineDistance(userLat, userLng, STORE_COORDS[suc].lat, STORE_COORDS[suc].lng) : 999999;
