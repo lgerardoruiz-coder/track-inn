@@ -1,5 +1,5 @@
-// v19 — TAG-driven pricing with tappable badges
-const CACHE_NAME = 'trackinn-v19';
+// v20 — Store talla breakdown + red current talla
+const CACHE_NAME = 'trackinn-v20';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
