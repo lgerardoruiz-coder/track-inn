@@ -1,5 +1,5 @@
-// v21 — Dynamic store inventory update on talla select
-const CACHE_NAME = 'trackinn-v21';
+// v22 — Long press bottom sheet for all-store talla inventory
+const CACHE_NAME = 'trackinn-v22';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

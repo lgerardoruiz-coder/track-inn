@@ -1355,6 +1355,97 @@ button, .store-select-btn, .size-btn {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* Bottom Sheet - Talla inventory detail */
+.bottom-sheet-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.bottom-sheet-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.bottom-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 20px 20px 0 0;
+  z-index: 1001;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+.bottom-sheet.active {
+  transform: translateY(0);
+}
+.bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #ccc;
+  border-radius: 2px;
+  margin: 10px auto 6px;
+}
+.bottom-sheet-header {
+  padding: 4px 20px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.bottom-sheet-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black);
+}
+.bottom-sheet-subtitle {
+  font-size: 13px;
+  color: var(--gray);
+  margin-top: 2px;
+}
+.bottom-sheet-body {
+  padding: 8px 20px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.bs-store-card {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  gap: 10px;
+}
+.bs-store-card:last-child { border-bottom: none; }
+.bs-store-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bs-store-dot.green { background: var(--green); }
+.bs-store-dot.orange { background: var(--orange); }
+.bs-store-dot.red { background: var(--red); }
+.bs-store-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+}
+.bs-store-dist {
+  font-size: 11px;
+  color: var(--gray);
+}
+.bs-store-inv {
+  font-size: 18px;
+  font-weight: 800;
+  min-width: 30px;
+  text-align: right;
+}
 </style>
 </head>
 <body>
@@ -1514,6 +1605,17 @@ button, .store-select-btn, .size-btn {
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
+</div>
+
+<!-- Bottom Sheet: Talla inventory all stores -->
+<div class="bottom-sheet-overlay" id="bsOverlay" onclick="closeBottomSheet()"></div>
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="bottom-sheet-handle"></div>
+  <div class="bottom-sheet-header">
+    <div class="bottom-sheet-title" id="bsTitle">Talla 25</div>
+    <div class="bottom-sheet-subtitle" id="bsSubtitle">Inventario en todas las sucursales</div>
+  </div>
+  <div class="bottom-sheet-body" id="bsBody"></div>
 </div>
 
 <script>
@@ -2196,13 +2298,8 @@ function displayProduct(rows, scannedCode) {
       let sizeButtons = '';
       sizeEntries.forEach(([size, info]) => {
         const isCurrentTalla = size === talla;
-        if (info.total <= 0) {
-          sizeButtons += `<button class="size-btn sold-out${isCurrentTalla ? ' selected' : ''}" disabled>${size}</button>`;
-        } else if (info.total <= 3) {
-          sizeButtons += `<button class="size-btn low-stock${isCurrentTalla ? ' selected' : ''}" onclick="selectSize(this)">${size}</button>`;
-        } else {
-          sizeButtons += `<button class="size-btn available${isCurrentTalla ? ' selected' : ''}" onclick="selectSize(this)">${size}</button>`;
-        }
+        const stockClass = info.total <= 0 ? 'sold-out' : (info.total <= 3 ? 'low-stock' : 'available');
+        sizeButtons += `<button class="size-btn ${stockClass}${isCurrentTalla ? ' selected' : ''}" data-talla="${size}" onclick="selectSize(this)" ontouchstart="startLongPress(this)" ontouchend="cancelLongPress()" ontouchcancel="cancelLongPress()" oncontextmenu="return false">${size}</button>`;
       });
 
       sizesHTML = `
@@ -2495,6 +2592,7 @@ function formatPriceGlobal(n) {
 
 // ============ SIZE SELECTION ============
 function selectSize(btn) {
+  if (_longPressTriggered) { _longPressTriggered = false; return; }
   document.querySelectorAll('.size-btn.selected').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   btn.style.transform = 'scale(0.92)';
@@ -2526,6 +2624,117 @@ function selectSize(btn) {
     el.style.color = newInv <= 0 ? '#ccc' : '#1D1D1D';
   });
 }
+
+// ============ LONG PRESS → BOTTOM SHEET ============
+var _longPressTimer = null;
+var _longPressTriggered = false;
+
+function startLongPress(btn) {
+  _longPressTriggered = false;
+  _longPressTimer = setTimeout(function() {
+    _longPressTriggered = true;
+    btn.style.transform = '';
+    openTallaSheet(btn.getAttribute('data-talla'));
+  }, 500);
+}
+
+function cancelLongPress() {
+  if (_longPressTimer) {
+    clearTimeout(_longPressTimer);
+    _longPressTimer = null;
+  }
+}
+
+function openTallaSheet(selectedTalla) {
+  var inventoryKey = null;
+  if (productData.length > 0) {
+    inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
+  }
+  if (!inventoryKey || !window._currentEstilo) return;
+
+  // Gather inventory for this talla across ALL stores
+  var storeInv = {};
+  productData.forEach(function(r) {
+    if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
+    if (String(r['Talla'] || '').trim() !== selectedTalla) return;
+    var suc = r['Sucursal'] || '';
+    var inv = parseInt(r[inventoryKey]) || 0;
+    if (!storeInv[suc]) storeInv[suc] = { inv: 0, dir: r['Dirección'] || r['Direccion'] || '', estado: r['Estado'] || '' };
+    storeInv[suc].inv += inv;
+  });
+
+  // Sort by distance (closest first), then by inventory
+  var stores = Object.keys(storeInv).map(function(suc) {
+    var dist = (STORE_COORDS[suc] && userLat) ? haversineDistance(userLat, userLng, STORE_COORDS[suc].lat, STORE_COORDS[suc].lng) : 999999;
+    return { name: suc, inv: storeInv[suc].inv, dir: storeInv[suc].dir, estado: storeInv[suc].estado, dist: dist };
+  }).sort(function(a, b) {
+    return a.dist - b.dist;
+  });
+
+  // Build HTML
+  var total = stores.reduce(function(s, x) { return s + x.inv; }, 0);
+  document.getElementById('bsTitle').textContent = 'Talla ' + selectedTalla;
+  document.getElementById('bsSubtitle').textContent = 'Inventario en todas las sucursales (' + total + ' total)';
+
+  var html = '';
+  stores.forEach(function(s) {
+    var dotColor = s.inv <= 0 ? 'red' : (s.inv <= 3 ? 'orange' : 'green');
+    var distLabel = '';
+    if (s.dist < 999999) {
+      distLabel = s.dist < 1000 ? Math.round(s.dist) + 'm' : (s.dist / 1000).toFixed(1) + 'km';
+    }
+    var isCurrent = currentStore && s.name === currentStore;
+    html += '<div class="bs-store-card">'
+      + '<div class="bs-store-dot ' + dotColor + '"></div>'
+      + '<div style="flex:1">'
+      + '<div class="bs-store-name">' + s.name + (isCurrent ? ' <span style="font-size:10px;background:var(--green);color:#fff;padding:1px 6px;border-radius:4px;font-weight:600">Aquí</span>' : '') + '</div>'
+      + (distLabel ? '<div class="bs-store-dist">' + distLabel + '</div>' : '')
+      + '</div>'
+      + '<div class="bs-store-inv" style="color:' + (s.inv <= 0 ? '#ccc' : '#1D1D1D') + '">' + s.inv + '</div>'
+      + '</div>';
+  });
+
+  document.getElementById('bsBody').innerHTML = html;
+
+  // Open
+  document.getElementById('bsOverlay').classList.add('active');
+  document.getElementById('bottomSheet').classList.add('active');
+}
+
+function closeBottomSheet() {
+  document.getElementById('bsOverlay').classList.remove('active');
+  document.getElementById('bottomSheet').classList.remove('active');
+}
+
+// Swipe down to close bottom sheet
+(function() {
+  var sheet = document.getElementById('bottomSheet');
+  var startY = 0, currentY = 0, dragging = false;
+  sheet.addEventListener('touchstart', function(e) {
+    if (e.target.closest('.bottom-sheet-body') && e.target.closest('.bottom-sheet-body').scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    dragging = true;
+  });
+  sheet.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    currentY = e.touches[0].clientY;
+    var dy = currentY - startY;
+    if (dy > 0) {
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+      sheet.style.transition = 'none';
+    }
+  });
+  sheet.addEventListener('touchend', function() {
+    if (!dragging) return;
+    dragging = false;
+    var dy = currentY - startY;
+    sheet.style.transition = '';
+    if (dy > 80) {
+      closeBottomSheet();
+    }
+    sheet.style.transform = '';
+  });
+})();
 
 // ============ SCREEN NAVIGATION ============
 function goToScreen(target) {
