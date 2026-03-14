@@ -2044,8 +2044,8 @@ function displayProduct(rows, scannedCode) {
       // CP + PROMO: two discounts stacked
       priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
         + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
-        + tapBadge('CP', pctCP, '#F39C12', 'Cambio de Precio: ' + formatPrice(n1) + ' → ' + formatPrice(n2))
-        + tapBadge('PROMO', pctPromo, '#E63946', impulsoLabel || 'Promoción activa')
+        + tapBadge('CP', pctCP, '#E63946', 'Cambio de Precio: ' + formatPrice(n1) + ' → ' + formatPrice(n2))
+        + tapBadge('PROMO', pctPromo, '#F39C12', impulsoLabel || 'Promoción activa')
         + '</div>'
         + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + impulsoLabel + '</div>' : '')
         + '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
@@ -2060,7 +2060,7 @@ function displayProduct(rows, scannedCode) {
       var cpExplain = tagIsRebaja ? 'Rebaja: ' + formatPrice(n1) + ' → ' + formatPrice(n2) : 'Cambio de Precio: ' + formatPrice(n1) + ' → ' + formatPrice(n2);
       priceHTML = '<div style="background:#FFF8E1;border:1px solid #FFE082;border-radius:16px;padding:16px 18px;margin:12px 0">'
         + '<div style="display:flex;gap:6px;margin-bottom:8px">'
-        + tapBadge(cpLabel, pctCP, '#F39C12', cpExplain)
+        + tapBadge(cpLabel, pctCP, '#E63946', cpExplain)
         + '</div>'
         + '<div style="display:flex;align-items:baseline;gap:10px">'
         + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
@@ -2073,7 +2073,7 @@ function displayProduct(rows, scannedCode) {
       var promoPct = promoFrom > 0 && n3 > 0 && n3 < promoFrom ? Math.round((1 - n3 / promoFrom) * 100) : 0;
       priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
         + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
-        + tapBadge('PROMO', promoPct, '#E63946', impulsoLabel || 'Promoción activa')
+        + tapBadge('PROMO', promoPct, '#F39C12', impulsoLabel || 'Promoción activa')
         + '</div>'
         + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + impulsoLabel + '</div>' : '')
         + '<div style="display:flex;align-items:baseline;gap:10px">'
