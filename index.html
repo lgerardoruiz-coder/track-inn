@@ -2147,34 +2147,16 @@ function displayProduct(rows, scannedCode) {
       : null;
     const distLabel = dist ? (dist < 1000 ? Math.round(dist) + 'm' : (dist / 1000).toFixed(1) + 'km') : '';
 
-    // Talla breakdown for this store
-    var tallasInStore = storeTallaMap[sucursal] || {};
-    var tallaChips = '';
-    var tallaKeys = Object.keys(tallasInStore).sort(function(a, b) {
-      var na = parseFloat(a), nb = parseFloat(b);
-      if (!isNaN(na) && !isNaN(nb)) return na - nb;
-      return a.localeCompare(b);
-    });
-    tallaKeys.forEach(function(t) {
-      var tInv = tallasInStore[t];
-      if (tInv <= 0) return;
-      var isCurrentTalla = t === talla;
-      tallaChips += '<span style="display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:600;'
-        + (isCurrentTalla ? 'background:#E63946;color:#fff' : 'background:#f0f0f0;color:#555')
-        + '">T' + t + ': ' + tInv + '</span>';
-    });
-
     storeCards.push(`
       <div class="store-card${isCurrent ? ' current-store' : ''}">
         <div class="store-status-dot ${stockColor}"></div>
         <div class="store-info">
           <div class="store-name">${sucursal} ${isCurrent ? '<span class="current-store-tag">Estas aqui</span>' : ''}</div>
           <div class="store-stock ${stockColor}">${stockText}</div>
-          ${tallaChips ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${tallaChips}</div>` : ''}
           ${direccion ? `<div style="font-size:11px;color:#999;margin-top:2px">${direccion}${estado ? ', ' + estado : ''}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-          <div style="font-size:20px;font-weight:800;color:${inv <= 0 ? '#ccc' : 'var(--black)'}">${inv}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--gray)">${talla || ''} - ${inv}</div>
           ${distLabel ? `<div style="font-size:11px;color:var(--gray)">${distLabel}</div>` : ''}
         </div>
       </div>`);
