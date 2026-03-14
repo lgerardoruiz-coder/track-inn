@@ -2650,13 +2650,11 @@ function alignOverlayToQrbox() {
 }
 
 function stopScanner() {
-  if (html5QrCode && scannerRunning) {
+  if (html5QrCode) {
+    scannerRunning = false; // Mark as stopped immediately so startScanner won't be blocked
     html5QrCode.stop().then(() => {
-      scannerRunning = false;
       html5QrCode.clear();
-    }).catch(() => {
-      scannerRunning = false;
-    });
+    }).catch(() => {});
   }
 }
 
