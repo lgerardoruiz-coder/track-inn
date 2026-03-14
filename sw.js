@@ -1,5 +1,5 @@
-// v17 — Nuclear cleanup: delete all caches and unregister
-const CACHE_NAME = 'trackinn-v17';
+// v18 — Fix product-name visibility (screen background)
+const CACHE_NAME = 'trackinn-v18';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
