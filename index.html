@@ -2240,15 +2240,15 @@ function displayProduct(rows, scannedCode) {
           ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${estilo}</span>` : ''}
         </div>
         <div id="priceSlot"></div>
-        ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
-        <div class="product-details-grid">
-          ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="detail-label">Material</div><div class="detail-value">${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
-          <div class="detail-label">UPC</div><div class="detail-value">${String(first['UPC'] || scannedCode).trim()}</div>
-        </div>
       </div>
       ${storeHTML}
       ${sizesHTML}
       ${detailsHTML}
+      ${categoryLabel ? `<span class="category-badge" style="display:inline-block;margin-top:12px">${categoryLabel}</span>` : ''}
+      <div class="product-details-grid" style="margin-top:8px">
+        ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="detail-label">Material</div><div class="detail-value">${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
+        <div class="detail-label">UPC</div><div class="detail-value">${String(first['UPC'] || scannedCode).trim()}</div>
+      </div>
     </div>
     <template id="noImgTemplate">
       <div class="no-image-placeholder">
