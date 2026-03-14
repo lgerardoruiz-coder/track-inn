@@ -633,10 +633,10 @@ button, .store-select-btn, .size-btn {
 }
 
 .product-name {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--black);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .product-sku {
@@ -2188,8 +2188,6 @@ function displayProduct(rows, scannedCode) {
     }
   }
   const displayName = descriptionFinal || estilo || 'Producto';
-  // TEMP DEBUG — will show inline
-  var _debugDesc = 'DESC:[' + descriptionFinal + '] KEYS:[' + keys.join('|') + ']';
   const displayBrand = brand || '';
   const categoryLabel = deporte || division || '';
 
@@ -2213,7 +2211,7 @@ function displayProduct(rows, scannedCode) {
         ${imageHTML}
       </div>
       <div class="product-info">
-        <div class="product-name" style="color:#111;font-size:20px;font-weight:800;display:block;min-height:24px;background:rgba(255,255,0,0.2);">${displayName || 'SIN DESCRIPCION'}</div>
+        <div class="product-name">${displayName}</div>
         <div class="product-talla-estilo">
           ${talla && talla !== '(Sin valor)' ? `<span class="product-sku">Talla: ${talla}</span>` : ''}
           ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${estilo}</span>` : ''}
