@@ -643,7 +643,11 @@ button, .store-select-btn, .size-btn {
   font-size: 13px;
   color: var(--gray);
   font-weight: 400;
-  margin-bottom: 2px;
+}
+.product-talla-estilo {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 4px;
 }
 .product-details-grid {
   display: grid;
@@ -726,8 +730,8 @@ button, .store-select-btn, .size-btn {
 .price-section {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 28px;
+  gap: 12px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
@@ -739,13 +743,13 @@ button, .store-select-btn, .size-btn {
 }
 
 .promo-price {
-  font-size: 34px;
+  font-size: 29px;
   font-weight: 800;
   color: var(--red);
 }
 
 .current-price {
-  font-size: 34px;
+  font-size: 29px;
   font-weight: 800;
   color: var(--black);
 }
@@ -2196,13 +2200,14 @@ function displayProduct(rows, scannedCode) {
         ${imageHTML}
       </div>
       <div class="product-info">
-        <div class="product-name">${displayName}</div>
-        ${talla && talla !== '(Sin valor)' ? `<div class="product-sku">Talla: ${talla}</div>` : ''}
+        <div class="product-name">${description || displayName}</div>
+        <div class="product-talla-estilo">
+          ${talla && talla !== '(Sin valor)' ? `<span class="product-sku">Talla: ${talla}</span>` : ''}
+          ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${estilo}</span>` : ''}
+        </div>
         <div id="priceSlot"></div>
         ${categoryLabel ? `<span class="category-badge">${categoryLabel}</span>` : ''}
         <div class="product-details-grid">
-          ${description ? `<div class="detail-label">Descripcion</div><div class="detail-value">${description}</div>` : ''}
-          ${estilo && estilo !== '(Sin valor)' ? `<div class="detail-label">Estilo</div><div class="detail-value">${estilo}</div>` : ''}
           ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="detail-label">Material</div><div class="detail-value">${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
           <div class="detail-label">UPC</div><div class="detail-value">${String(first['UPC'] || scannedCode).trim()}</div>
         </div>
