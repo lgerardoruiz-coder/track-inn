@@ -2213,8 +2213,7 @@ function displayProduct(rows, scannedCode) {
         ${imageHTML}
       </div>
       <div class="product-info">
-        <div class="product-name">${displayName}</div>
-        <div style="font-size:9px;color:red;word-break:break-all;padding:4px;background:#fff3f3;border:1px solid red;margin:4px 0;">${_debugDesc}</div>
+        <div class="product-name" style="color:#111;font-size:20px;font-weight:800;display:block;min-height:24px;background:rgba(255,255,0,0.2);">${displayName || 'SIN DESCRIPCION'}</div>
         <div class="product-talla-estilo">
           ${talla && talla !== '(Sin valor)' ? `<span class="product-sku">Talla: ${talla}</span>` : ''}
           ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${estilo}</span>` : ''}
