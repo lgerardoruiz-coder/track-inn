@@ -2525,6 +2525,12 @@ function getFormatsForMode(mode) {
 function startScanner() {
   if (scannerRunning) return;
 
+  // Wait for any pending stop to finish before starting
+  if (_stopPromise) {
+    _stopPromise.then(function() { startScanner(); }).catch(function() { startScanner(); });
+    return;
+  }
+
   const readerEl = document.getElementById('scanner-reader');
   readerEl.innerHTML = '';
 
@@ -2649,12 +2655,18 @@ function alignOverlayToQrbox() {
   }
 }
 
+var _stopPromise = null;
 function stopScanner() {
+  scannerRunning = false;
   if (html5QrCode) {
-    scannerRunning = false; // Mark as stopped immediately so startScanner won't be blocked
-    html5QrCode.stop().then(() => {
-      html5QrCode.clear();
-    }).catch(() => {});
+    var q = html5QrCode;
+    html5QrCode = null;
+    _stopPromise = q.stop().then(function() {
+      try { q.clear(); } catch(e) {}
+      _stopPromise = null;
+    }).catch(function() {
+      _stopPromise = null;
+    });
   }
 }
 
@@ -2786,7 +2798,7 @@ function toggleTorch() {
 }
 
 function stopScannerAndGoBack() {
-  stopScanner();
+  try { stopScanner(); } catch(e) {}
   goToScreen(1);
 }
 
