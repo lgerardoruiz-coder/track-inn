@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Limpiando...</title></head>
+<body style="font-family:sans-serif;text-align:center;padding:40px;">
+<h2>Limpiando caché...</h2>
+<p id="status">Trabajando...</p>
+<script>
+async function nukeEverything() {
+  var status = document.getElementById('status');
+  try {
+    // 1. Unregister ALL service workers
+    var regs = await navigator.serviceWorker.getRegistrations();
+    for (var r of regs) {
+      await r.unregister();
+    }
+    status.textContent = 'Service workers eliminados: ' + regs.length;
+
+    // 2. Delete ALL caches
+    var keys = await caches.keys();
+    for (var k of keys) {
+      await caches.delete(k);
+    }
+    status.textContent += ' | Caches eliminados: ' + keys.length;
+
+    // 3. Redirect to app
+    status.textContent += ' | Redirigiendo...';
+    setTimeout(function() {
+      window.location.href = '/track-inn/?cleared=' + Date.now();
+    }, 1500);
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+}
+nukeEverything();
+</script>
+</body>
+</html>
