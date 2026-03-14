@@ -388,6 +388,8 @@ button, .store-select-btn, .size-btn {
 #scanner-reader__scan_region { border-radius: 24px; overflow: hidden; }
 #scanner-reader__scan_region > br { display: none; }
 #scanner-reader__header_message { display: none; }
+/* Hide white corner brackets from library — we use our own red corners */
+#qr-shaded-region > div { display: none !important; }
 
 .scanner-frame {
   position: relative;
