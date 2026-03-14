@@ -2177,6 +2177,7 @@ function displayProduct(rows, scannedCode) {
 
   // Display name
   const displayName = description || estilo || 'Producto';
+  console.log('[DEBUG] description:', JSON.stringify(description), 'displayName:', JSON.stringify(displayName), 'keys:', JSON.stringify(keys));
   const displayBrand = brand || '';
   const categoryLabel = deporte || division || '';
 
