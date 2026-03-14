@@ -1978,6 +1978,7 @@ function displayProduct(rows, scannedCode) {
   const brand = getField('Marca') || getField('Grupos de Marca') || '';
   const description = getField('Descripcion') || getField('Descripción') || getField('DESCRIPCION') || '';
   const estilo = getField('Estilo') || '';
+  window._currentEstilo = estilo;
   const generico = getField('Generico') || '';
   const division = getField('Division') || '';
   const deporte = getField('Deporte') || '';
@@ -2156,7 +2157,7 @@ function displayProduct(rows, scannedCode) {
           ${direccion ? `<div style="font-size:11px;color:#999;margin-top:2px">${direccion}${estado ? ', ' + estado : ''}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-          <div style="font-size:13px;font-weight:600;color:var(--gray)">${talla || ''} - ${inv}</div>
+          <div style="font-size:20px;font-weight:800;color:${inv <= 0 ? '#ccc' : 'var(--black)'}" data-sucursal="${sucursal}" class="store-inv-num">${inv}</div>
           ${distLabel ? `<div style="font-size:11px;color:var(--gray)">${distLabel}</div>` : ''}
         </div>
       </div>`);
@@ -2492,6 +2493,32 @@ function selectSize(btn) {
   btn.classList.add('selected');
   btn.style.transform = 'scale(0.92)';
   setTimeout(() => btn.style.transform = '', 150);
+
+  // Update store inventory numbers for the selected talla
+  var selectedTalla = btn.textContent.trim();
+  var inventoryKey = null;
+  if (productData.length > 0) {
+    inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
+  }
+  if (!inventoryKey || !window._currentEstilo) return;
+
+  // Find all rows for this estilo + selected talla, grouped by sucursal
+  var tallaInv = {};
+  productData.forEach(function(r) {
+    if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
+    if (String(r['Talla'] || '').trim() !== selectedTalla) return;
+    var suc = r['Sucursal'] || '';
+    if (!tallaInv[suc]) tallaInv[suc] = 0;
+    tallaInv[suc] += parseInt(r[inventoryKey]) || 0;
+  });
+
+  // Update each store card's number
+  document.querySelectorAll('.store-inv-num').forEach(function(el) {
+    var suc = el.getAttribute('data-sucursal');
+    var newInv = tallaInv[suc] || 0;
+    el.textContent = newInv;
+    el.style.color = newInv <= 0 ? '#ccc' : '#1D1D1D';
+  });
 }
 
 // ============ SCREEN NAVIGATION ============
