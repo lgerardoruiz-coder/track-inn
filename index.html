@@ -2600,9 +2600,9 @@ function startScanner() {
   const config = {
     fps: isMaterial ? 25 : 15,
     qrbox: function(viewfinderWidth, viewfinderHeight) {
-      var w = Math.min(Math.floor(viewfinderWidth * 0.85), 340);
-      var h = Math.min(Math.floor(viewfinderHeight * 0.45), 200);
-      return { width: Math.max(w, 200), height: Math.max(h, 120) };
+      var w = Math.min(Math.floor(viewfinderWidth * 0.85), 380);
+      var h = Math.min(Math.floor(viewfinderHeight * 0.6), 280);
+      return { width: Math.max(w, 220), height: Math.max(h, 160) };
     },
     disableFlip: false,
     formatsToSupport: getFormatsForMode(scanMode),
