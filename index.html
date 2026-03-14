@@ -7,6 +7,14 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Track Inn - Escaner de Precios</title>
+<script>
+// Force SW update on every page load
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistration().then(function(reg) {
+    if (reg) reg.update();
+  });
+}
+</script>
 <meta name="theme-color" content="#E63946">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
