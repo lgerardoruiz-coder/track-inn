@@ -2175,9 +2175,21 @@ function displayProduct(rows, scannedCode) {
   // Product details
   let detailsHTML = '';
 
-  // Display name
-  const displayName = description || estilo || 'Producto';
-  console.log('[DEBUG] description:', JSON.stringify(description), 'displayName:', JSON.stringify(displayName), 'keys:', JSON.stringify(keys));
+  // Display name — try all possible description columns including raw key search
+  var descriptionFinal = description;
+  if (!descriptionFinal) {
+    // Brute force: search all keys for anything containing "desc"
+    for (var ki = 0; ki < keys.length; ki++) {
+      var kn = keys[ki].toLowerCase().replace(/[^a-z]/g, '');
+      if (kn.indexOf('desc') >= 0 && first[keys[ki]]) {
+        descriptionFinal = String(first[keys[ki]]);
+        break;
+      }
+    }
+  }
+  const displayName = descriptionFinal || estilo || 'Producto';
+  // TEMP DEBUG — remove later
+  setTimeout(function() { showToast('DESC: "' + descriptionFinal + '" | KEYS: ' + keys.slice(0, 15).join(', ')); }, 500);
   const displayBrand = brand || '';
   const categoryLabel = deporte || division || '';
 
@@ -2201,7 +2213,7 @@ function displayProduct(rows, scannedCode) {
         ${imageHTML}
       </div>
       <div class="product-info">
-        <div class="product-name">${description || displayName}</div>
+        <div class="product-name">${displayName}</div>
         <div class="product-talla-estilo">
           ${talla && talla !== '(Sin valor)' ? `<span class="product-sku">Talla: ${talla}</span>` : ''}
           ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${estilo}</span>` : ''}
