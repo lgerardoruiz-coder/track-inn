@@ -25,6 +25,7 @@ if ('serviceWorker' in navigator) {
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <style>
 *, *::before, *::after {
   box-sizing: border-box;
@@ -1446,6 +1447,121 @@ button, .store-select-btn, .size-btn {
   min-width: 30px;
   text-align: right;
 }
+
+/* Label Preview */
+.label-preview-wrapper {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.label-frame {
+  /* 50mm x 30mm at ~3.78px/mm ≈ 189x113, scaled up for preview */
+  width: 300px;
+  height: 180px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.label-frame.rebaja-bg {
+  background: #E8554E;
+}
+.label-stripe {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 24px;
+  background: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.label-stripe span {
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  letter-spacing: 1.5px;
+}
+.label-content {
+  padding: 6px 8px 4px 8px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.label-content.with-stripe {
+  padding-left: 32px;
+}
+.label-desc {
+  font-size: 10px;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.label-meta {
+  font-size: 7px;
+  color: #333;
+  margin-top: 2px;
+  display: flex;
+  gap: 8px;
+}
+.label-price-from {
+  font-size: 9px;
+  color: #000;
+  margin-top: 4px;
+}
+.label-price-main {
+  font-size: 22px;
+  font-weight: 900;
+  color: #000;
+  line-height: 1.1;
+}
+.label-estilo {
+  font-size: 7px;
+  color: #000;
+  margin-top: 1px;
+}
+.label-barcode-area {
+  margin-top: auto;
+  text-align: center;
+}
+.label-barcode-area svg {
+  max-width: 100%;
+  height: 30px;
+}
+.label-barcode-num {
+  font-size: 7px;
+  color: #000;
+  text-align: center;
+}
+.btn-print-label {
+  width: 100%;
+  max-width: 300px;
+  padding: 14px;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-print-label:active { transform: scale(0.97); }
 </style>
 </head>
 <body>
@@ -1563,6 +1679,10 @@ button, .store-select-btn, .size-btn {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Producto
         </button>
+        <button class="result-tab" id="tabEtiqueta" onclick="switchTab('etiqueta')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          Etiqueta
+        </button>
         <button class="result-tab" id="tabCompetencia" onclick="switchTab('competencia')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
           Competencia
@@ -1571,6 +1691,8 @@ button, .store-select-btn, .size-btn {
       </div>
       <!-- Tab Content: Producto -->
       <div id="productContent" class="tab-content active"></div>
+      <!-- Tab Content: Etiqueta -->
+      <div id="etiquetaContent" class="tab-content" style="display:none"></div>
       <!-- Tab Content: Competencia -->
       <div id="competenciaContent" class="tab-content" style="display:none"></div>
     </div>
@@ -2125,6 +2247,17 @@ function displayProduct(rows, scannedCode) {
   const pctTotal = (n1 > 0 && n3 > 0 && n1 > n3) ? Math.round((1 - n3 / n1) * 100) : 0;
   const impulsoLabel = (impulso && impulso !== 'SIN PROMO') ? impulso : '';
 
+  // Save data for label preview
+  window._labelData = {
+    description: description || estilo || 'Producto',
+    estilo: estilo,
+    brand: brand,
+    n1: n1, n2: n2, n3: n3,
+    tag: tag,
+    impulso: impulsoLabel,
+    upc: String(first['UPC'] || scannedCode).trim()
+  };
+
   // Tappable badge helper
   var _badgeId = 0;
   function tapBadge(label, pct, bgColor, explanation) {
@@ -2437,26 +2570,23 @@ function displayProduct(rows, scannedCode) {
 
 // ============ TABS ============
 function switchTab(tab) {
-  var tabProd = document.getElementById('tabProducto');
-  var tabComp = document.getElementById('tabCompetencia');
-  var contentProd = document.getElementById('productContent');
-  var contentComp = document.getElementById('competenciaContent');
-
-  if (tab === 'producto') {
-    tabProd.classList.add('active');
-    tabComp.classList.remove('active');
-    contentProd.style.display = 'block';
-    contentProd.classList.add('active');
-    contentComp.style.display = 'none';
-    contentComp.classList.remove('active');
-  } else {
-    tabComp.classList.add('active');
-    tabProd.classList.remove('active');
-    contentComp.style.display = 'block';
-    contentComp.classList.add('active');
-    contentProd.style.display = 'none';
-    contentProd.classList.remove('active');
-  }
+  var tabs = {
+    producto: { tab: document.getElementById('tabProducto'), content: document.getElementById('productContent') },
+    etiqueta: { tab: document.getElementById('tabEtiqueta'), content: document.getElementById('etiquetaContent') },
+    competencia: { tab: document.getElementById('tabCompetencia'), content: document.getElementById('competenciaContent') }
+  };
+  Object.keys(tabs).forEach(function(key) {
+    if (key === tab) {
+      tabs[key].tab.classList.add('active');
+      tabs[key].content.style.display = 'block';
+      tabs[key].content.classList.add('active');
+    } else {
+      tabs[key].tab.classList.remove('active');
+      tabs[key].content.style.display = 'none';
+      tabs[key].content.classList.remove('active');
+    }
+  });
+  if (tab === 'etiqueta') generateLabelPreview();
 }
 
 // ============ PRICE COMPARISON (Tab 2) ============
@@ -2591,6 +2721,113 @@ function formatPriceGlobal(n) {
 }
 
 // ============ SIZE SELECTION ============
+// ============ LABEL PREVIEW ============
+function generateLabelPreview() {
+  var container = document.getElementById('etiquetaContent');
+  if (!container || !window._labelData) return;
+  var d = window._labelData;
+
+  var tag = d.tag;
+  var isFullPrice = (tag === 'FULL PRICE' || tag === '');
+  var hasCP = tag.indexOf('CP') >= 0 || tag === 'REBAJA';
+  var hasPromo = tag.indexOf('PROMO') >= 0;
+  var isRebaja = hasCP && !hasPromo;
+  var isCPPromo = hasCP && hasPromo;
+  var isPromoOnly = hasPromo && !hasCP;
+
+  var formatP = function(n) {
+    var num = Math.round(Number(n));
+    if (isNaN(num) || num === 0) return '$0.00';
+    var str = String(num);
+    var r = '';
+    for (var i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 === 0) r += ',';
+      r += str[i];
+    }
+    return '$' + r + '.00';
+  };
+
+  var today = new Date();
+  var dateStr = ('0' + today.getDate()).slice(-2) + '/' + ('0' + (today.getMonth() + 1)).slice(-2) + '/' + today.getFullYear();
+
+  var html = '<div class="label-preview-wrapper">';
+
+  if (isFullPrice) {
+    // WHITE LABEL - Full Price
+    html += '<div class="label-frame">'
+      + '<div class="label-content">'
+      + '<div class="label-desc">' + d.description + '</div>'
+      + '<div class="label-meta"><span>' + d.estilo + '</span><span>' + d.brand + '</span><span>' + dateStr + '</span></div>'
+      + '<div class="label-price-main" style="margin-top:8px">' + formatP(d.n1) + '</div>'
+      + '<div class="label-barcode-area"><svg id="labelBarcode"></svg></div>'
+      + '</div></div>';
+  } else {
+    // RED LABEL - Rebaja, Promo, or CP+Promo
+    var stripeText = '';
+    if (isCPPromo) {
+      stripeText = '<span>REBAJA</span><span style="font-size:6px;letter-spacing:0.5px">+ PROMO</span>';
+    } else if (isPromoOnly) {
+      stripeText = '<span>PROMO</span>';
+    } else {
+      stripeText = '<span>REBAJA</span>';
+    }
+
+    var priceFrom = '';
+    var priceTo = '';
+    if (isCPPromo) {
+      priceFrom = 'De: ' + formatP(d.n1);
+      priceTo = formatP(d.n3);
+    } else if (isPromoOnly) {
+      priceFrom = 'De: ' + formatP(d.n1);
+      priceTo = formatP(d.n3);
+    } else {
+      // CP or REBAJA
+      priceFrom = 'De: ' + formatP(d.n1);
+      priceTo = formatP(d.n2);
+    }
+
+    html += '<div class="label-frame rebaja-bg">'
+      + '<div class="label-stripe">' + stripeText + '</div>'
+      + '<div class="label-content with-stripe">'
+      + '<div class="label-price-from" style="color:#000">' + priceFrom + '</div>'
+      + '<div class="label-price-main" style="margin-top:2px">A: ' + priceTo + '</div>'
+      + '<div class="label-estilo">' + d.estilo + '</div>'
+      + '<div class="label-desc" style="margin-top:1px">' + d.description + '</div>'
+      + '<div class="label-barcode-area"><svg id="labelBarcode"></svg></div>'
+      + '</div></div>';
+  }
+
+  html += '<button class="btn-print-label" onclick="printLabel()">'
+    + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
+    + 'Imprimir etiqueta'
+    + '</button>'
+    + '<div style="font-size:12px;color:var(--gray);text-align:center">Vista previa 50mm x 30mm</div>'
+    + '</div>';
+
+  container.innerHTML = html;
+
+  // Generate barcode
+  try {
+    var barcodeVal = String(d.upc || '').trim();
+    if (barcodeVal && typeof JsBarcode !== 'undefined') {
+      JsBarcode('#labelBarcode', barcodeVal, {
+        format: 'CODE128',
+        width: 1.2,
+        height: 28,
+        displayValue: true,
+        fontSize: 8,
+        margin: 0,
+        background: 'transparent'
+      });
+    }
+  } catch(e) {}
+}
+
+function printLabel() {
+  // TODO: connect to Zebra ZQ220 printer
+  alert('Función de impresión próximamente. Se conectará a impresora Zebra.');
+}
+
 function selectSize(btn) {
   if (_longPressTriggered) { _longPressTriggered = false; return; }
   document.querySelectorAll('.size-btn.selected').forEach(b => b.classList.remove('selected'));
@@ -3229,12 +3466,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (dx > 0) {
         // Swipe right — go back
         if (currentScreen === 3) {
-          // On results screen: check which tab is active
-          var prodTab = document.getElementById('tabProducto');
-          if (prodTab && !prodTab.classList.contains('active')) {
-            // On Competencia tab → switch to Producto tab first
-            switchTab('producto');
-            return;
+          var compTab = document.getElementById('tabCompetencia');
+          var etqTab = document.getElementById('tabEtiqueta');
+          if (compTab && compTab.classList.contains('active')) {
+            switchTab('etiqueta'); return;
+          }
+          if (etqTab && etqTab.classList.contains('active')) {
+            switchTab('producto'); return;
           }
         }
         var backMap = { 1: 0, 2: 1, 3: 2, 4: 3 };
@@ -3245,8 +3483,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         // Swipe left — go forward on results screen tabs
         if (currentScreen === 3) {
-          var compTab = document.getElementById('tabCompetencia');
-          if (compTab && !compTab.classList.contains('active')) {
+          var prodTab = document.getElementById('tabProducto');
+          var etqTab = document.getElementById('tabEtiqueta');
+          if (prodTab && prodTab.classList.contains('active')) {
+            switchTab('etiqueta');
+          } else if (etqTab && etqTab.classList.contains('active')) {
             switchTab('competencia');
           }
         }

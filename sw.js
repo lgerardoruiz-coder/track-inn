@@ -1,5 +1,5 @@
-// v22 — Long press bottom sheet for all-store talla inventory
-const CACHE_NAME = 'trackinn-v22';
+// v23 — Label preview tab (Etiqueta) with 4 TAG-based designs
+const CACHE_NAME = 'trackinn-v23';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
