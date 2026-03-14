@@ -1536,9 +1536,15 @@ button, .store-select-btn, .size-btn {
   margin-top: auto;
   text-align: center;
 }
+.label-barcode-area {
+  min-height: 81px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .label-barcode-area svg {
-  max-width: 100%;
-  height: 72px;
+  width: 90%;
+  height: 81px;
 }
 .label-barcode-num {
   font-size: 7px;
@@ -2816,10 +2822,10 @@ function generateLabelPreview() {
     if (barcodeVal && typeof JsBarcode !== 'undefined') {
       JsBarcode('#labelBarcode', barcodeVal, {
         format: 'CODE128',
-        width: 1.8,
-        height: 60,
+        width: 2,
+        height: 70,
         displayValue: true,
-        fontSize: 11,
+        fontSize: 12,
         margin: 0,
         background: 'transparent'
       });
