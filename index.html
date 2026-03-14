@@ -1965,7 +1965,7 @@ function displayProduct(rows, scannedCode) {
 
   // Extract product fields
   const brand = getField('Marca') || getField('Grupos de Marca') || '';
-  const description = getField('Descripcion') || '';
+  const description = getField('Descripcion') || getField('Descripción') || getField('DESCRIPCION') || '';
   const estilo = getField('Estilo') || '';
   const generico = getField('Generico') || '';
   const division = getField('Division') || '';
