@@ -1,5 +1,5 @@
-// v18 — Fix product-name visibility (screen background)
-const CACHE_NAME = 'trackinn-v18';
+// v19 — TAG-driven pricing with tappable badges
+const CACHE_NAME = 'trackinn-v19';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

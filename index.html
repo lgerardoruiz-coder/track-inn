@@ -2008,12 +2008,30 @@ function displayProduct(rows, scannedCode) {
   const n2 = cleanPrice(getField('Precio Nivel 2'));
   const n3 = cleanPrice(getField('Precio Final a público - Nivel 3') || getField('Precio Final a publico - Nivel 3'));
   const impulso = String(getField('IMPULSO') || '').trim();
+  const tag = String(getField('TAG') || '').trim().toUpperCase();
 
-  // Determine scenario from actual prices
-  const hasCP = n1 > 0 && n2 > 0 && n1 > n2;
-  const hasPromo = n2 > 0 && n3 > 0 && n3 < n2;
-  const pctCP = hasCP ? Math.round((1 - n2 / n1) * 100) : 0;
-  const pctPromo = hasPromo ? Math.round((1 - n3 / n2) * 100) : 0;
+  // TAG-driven logic
+  const tagHasCP = tag.indexOf('CP') >= 0;
+  const tagHasPromo = tag.indexOf('PROMO') >= 0;
+  const tagIsRebaja = tag === 'REBAJA';
+  const tagIsFullPrice = tag === 'FULL PRICE' || tag === '';
+
+  // Calculate percentages from prices
+  const pctCP = (n1 > 0 && n2 > 0 && n1 > n2) ? Math.round((1 - n2 / n1) * 100) : 0;
+  const pctPromo = (n2 > 0 && n3 > 0 && n3 < n2) ? Math.round((1 - n3 / n2) * 100) : 0;
+  const pctTotal = (n1 > 0 && n3 > 0 && n1 > n3) ? Math.round((1 - n3 / n1) * 100) : 0;
+  const impulsoLabel = (impulso && impulso !== 'SIN PROMO') ? impulso : '';
+
+  // Tappable badge helper
+  var _badgeId = 0;
+  function tapBadge(label, pct, bgColor, explanation) {
+    var id = 'priceBadge' + (++_badgeId);
+    var tipId = id + 'Tip';
+    return '<span id="' + id + '" onclick="var t=document.getElementById(\'' + tipId + '\');t.style.display=t.style.display===\'none\'?\'block\':\'none\'" style="background:' + bgColor + ';color:#fff;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;user-select:none;letter-spacing:0.3px">'
+      + label + (pct > 0 ? ' -' + pct + '%' : '')
+      + '</span>'
+      + '<div id="' + tipId + '" style="display:none;background:#1D1D1D;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-top:6px;margin-bottom:2px">' + explanation + '</div>';
+  }
 
   // Fallback to old columns if new ones are empty
   const precioOriginal = getField('Precio Original') || getField('PrecioOriginal') || '';
@@ -2022,58 +2040,52 @@ function displayProduct(rows, scannedCode) {
   const actualFallback = cleanPrice(precioActual);
 
   if (n1 > 0) {
-    // New 3-level system
-    if (hasCP && hasPromo) {
-      // PROMO + CP: show all 3 levels
-      var impulsoLabel = (impulso && impulso !== 'SIN PROMO') ? impulso : '';
+    if (tagHasCP && tagHasPromo) {
+      // CP + PROMO: two discounts stacked
       priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
-        // Badges row
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
-        + '<span style="background:#E63946;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.5px">REBAJA</span>'
-        + '<span style="background:#E63946;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700">OFF</span>'
-        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctCP + '%</span>'
-        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctPromo + '%</span>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
+        + tapBadge('CP', pctCP, '#F39C12', 'Cambio de Precio: ' + formatPrice(n1) + ' → ' + formatPrice(n2))
+        + tapBadge('PROMO', pctPromo, '#E63946', impulsoLabel || 'Promoción activa')
         + '</div>'
-        // Impulso text
-        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:600;margin-bottom:10px">' + impulsoLabel + '</div>' : '')
-        // Price levels
+        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + impulsoLabel + '</div>' : '')
         + '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
-        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
-        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n2) + '</span>'
-        + '<span style="font-size:30px;font-weight:800;color:#E63946">' + formatPrice(n3) + '</span>'
+        + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
+        + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n2) + '</span>'
+        + '<span style="font-size:29px;font-weight:800;color:#E63946">' + formatPrice(n3) + '</span>'
         + '</div>'
         + '</div>';
-    } else if (hasCP) {
-      // Solo CP (rebaja): N1 tachado, N2 como actual
+    } else if (tagHasCP || tagIsRebaja) {
+      // Solo CP o REBAJA: N1 tachado, N2 como actual
+      var cpLabel = tagIsRebaja ? 'REBAJA' : 'CP';
+      var cpExplain = tagIsRebaja ? 'Rebaja: ' + formatPrice(n1) + ' → ' + formatPrice(n2) : 'Cambio de Precio: ' + formatPrice(n1) + ' → ' + formatPrice(n2);
       priceHTML = '<div style="background:#FFF8E1;border:1px solid #FFE082;border-radius:16px;padding:16px 18px;margin:12px 0">'
-        + '<div style="display:flex;gap:6px;margin-bottom:12px">'
-        + '<span style="background:#F39C12;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:0.5px">REBAJA</span>'
-        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctCP + '%</span>'
+        + '<div style="display:flex;gap:6px;margin-bottom:8px">'
+        + tapBadge(cpLabel, pctCP, '#F39C12', cpExplain)
         + '</div>'
         + '<div style="display:flex;align-items:baseline;gap:10px">'
-        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
-        + '<span style="font-size:30px;font-weight:800;color:#1D1D1D">' + formatPrice(n2) + '</span>'
+        + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
+        + '<span style="font-size:29px;font-weight:800;color:#1D1D1D">' + formatPrice(n2) + '</span>'
         + '</div>'
         + '</div>';
-    } else if (hasPromo) {
-      // Solo PROMO: N1 tachado, N3 en rojo
-      var impulsoLabel = (impulso && impulso !== 'SIN PROMO') ? impulso : '';
+    } else if (tagHasPromo) {
+      // Solo PROMO: N1/N2 tachado, N3 en rojo
+      var promoFrom = (n2 > 0 && n2 < n1) ? n2 : n1;
+      var promoPct = promoFrom > 0 && n3 > 0 && n3 < promoFrom ? Math.round((1 - n3 / promoFrom) * 100) : 0;
       priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
-        + '<span style="background:#E63946;color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700">OFF</span>'
-        + '<span style="border:1.5px solid #1D1D1D;color:#1D1D1D;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + pctPromo + '%</span>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
+        + tapBadge('PROMO', promoPct, '#E63946', impulsoLabel || 'Promoción activa')
         + '</div>'
-        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:600;margin-bottom:10px">' + impulsoLabel + '</div>' : '')
+        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + impulsoLabel + '</div>' : '')
         + '<div style="display:flex;align-items:baseline;gap:10px">'
-        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
-        + '<span style="font-size:30px;font-weight:800;color:#E63946">' + formatPrice(n3) + '</span>'
+        + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(promoFrom) + '</span>'
+        + '<span style="font-size:29px;font-weight:800;color:#E63946">' + formatPrice(n3) + '</span>'
         + '</div>'
         + '</div>';
     } else {
       // FULL PRICE
       priceHTML = '<div style="background:#F5F5F5;border-radius:16px;padding:16px 18px;margin:12px 0">'
-        + '<div style="font-size:12px;color:#999;margin-bottom:4px;font-weight:500">Precio</div>'
-        + '<span style="font-size:30px;font-weight:800;color:#1D1D1D">' + formatPrice(n1) + '</span>'
+        + '<div style="font-size:12px;color:#999;margin-bottom:4px;font-weight:500">Precio Regular</div>'
+        + '<span style="font-size:29px;font-weight:800;color:#1D1D1D">' + formatPrice(n1) + '</span>'
         + '</div>';
     }
   } else if (origFallback > 0 || actualFallback > 0) {
@@ -2083,13 +2095,13 @@ function displayProduct(rows, scannedCode) {
       var sav = Math.round((1 - actualFallback / origFallback) * 100);
       priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
         + '<div style="display:flex;align-items:baseline;gap:10px">'
-        + '<span style="font-size:16px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(origFallback) + '</span>'
-        + '<span style="font-size:30px;font-weight:800;color:#E63946">' + formatPrice(actualFallback) + '</span>'
+        + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(origFallback) + '</span>'
+        + '<span style="font-size:29px;font-weight:800;color:#E63946">' + formatPrice(actualFallback) + '</span>'
         + '<span style="background:#2ECC71;color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700">-' + sav + '%</span>'
         + '</div></div>';
     } else {
       priceHTML = '<div style="background:#F5F5F5;border-radius:16px;padding:16px 18px;margin:12px 0">'
-        + '<span style="font-size:30px;font-weight:800;color:#1D1D1D">' + formatPrice(finalP) + '</span></div>';
+        + '<span style="font-size:29px;font-weight:800;color:#1D1D1D">' + formatPrice(finalP) + '</span></div>';
     }
   } else {
     priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0"><span style="font-size:15px;font-weight:700;color:#E63946">Precio no disponible</span></div>';
