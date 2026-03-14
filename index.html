@@ -75,41 +75,7 @@ button, .store-select-btn, .size-btn {
 }
 
 /* Status Bar */
-.status-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 24px 0;
-  z-index: 100;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--white);
-}
 
-.status-bar-dark { color: var(--white); }
-.status-bar-light { color: var(--black); }
-
-.status-time {
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.5px;
-}
-
-.status-icons {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-icons svg {
-  width: 18px;
-  height: 18px;
-}
 
 /* Screen Container */
 .screens-viewport {
@@ -1379,27 +1345,6 @@ button, .store-select-btn, .size-btn {
 <body>
 
 <div class="phone-frame">
-  <!-- Status Bar -->
-  <div class="status-bar status-bar-dark" id="statusBar">
-    <div class="status-time" id="statusTime">9:41</div>
-    <div class="status-icons">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M1 9l4-4 4 4"/><path d="M5 5v14"/>
-        <path d="M15 19l4 4 4-4"/><path d="M19 23V9"/>
-      </svg>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-        <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-        <circle cx="12" cy="20" r="1" fill="currentColor"/>
-      </svg>
-      <svg viewBox="0 0 24 24" fill="currentColor">
-        <rect x="1" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
-        <rect x="3" y="8" width="12" height="8" rx="1" fill="currentColor"/>
-        <rect x="21" y="10" width="2" height="4" rx="0.5" fill="currentColor"/>
-      </svg>
-    </div>
-  </div>
 
   <div class="screens-viewport">
     <!-- SCREEN 0: STORE SELECT -->
@@ -1605,14 +1550,6 @@ const STORE_COORDS = {
   'IS Plaza Cumbres':   { lat: 25.7540, lng: -100.3750, address: 'Hacienda Penuelos 6771, Plaza Cumbres, NLE' }
 };
 
-// ============ TIME ============
-function updateTime() {
-  const now = new Date();
-  document.getElementById('statusTime').textContent =
-    now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
-}
-updateTime();
-setInterval(updateTime, 30000);
 
 // ============ GEOLOCATION ============
 function haversineDistance(lat1, lng1, lat2, lng2) {
@@ -2521,11 +2458,6 @@ function goToScreen(target) {
   targetEl.classList.remove('left', 'right');
   targetEl.classList.add('active');
 
-  // Status bar color
-  const statusBar = document.getElementById('statusBar');
-  statusBar.className = (target <= 2 || target === 0)
-    ? 'status-bar status-bar-dark'
-    : 'status-bar status-bar-light';
 
   // Bottom CTAs
   const ctas = document.getElementById('bottomCtas');
