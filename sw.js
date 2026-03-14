@@ -1,5 +1,5 @@
-// v23 — Label preview tab (Etiqueta) with 4 TAG-based designs
-const CACHE_NAME = 'trackinn-v23';
+// v24 — 85 fake stores by region, state headers in bottom sheet
+const CACHE_NAME = 'trackinn-v24';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

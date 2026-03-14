@@ -2907,21 +2907,124 @@ function openTallaSheet(selectedTalla) {
     storeInv[suc].inv += inv;
   });
 
-  // === FAKE DATA FOR TESTING (20 stores) — REMOVE LATER ===
-  var fakeStores = ['IS Galerías Vallarta','IS Plaza Patria GDL','IS Antara CDMX','IS Santa Fe CDMX','IS Perisur CDMX','IS Angelópolis Puebla','IS Forum Tlaquepaque','IS La Isla Cancún','IS Punto Valle MTY','IS Fashion Drive MTY','IS Plaza Fiesta SLP','IS Altabrisa Mérida','IS Galerías Querétaro','IS Las Américas Ecatepec','IS Parque Delta CDMX','IS Outlet Lerma','IS Town Square Metepec','IS Explanada Pachuca'];
-  fakeStores.forEach(function(name) {
-    if (!storeInv[name]) {
-      storeInv[name] = { inv: Math.floor(Math.random() * 6), dir: 'Dirección demo', estado: 'Estado' };
+  // === FAKE DATA FOR TESTING (85 stores by region) — REMOVE LATER ===
+  var fakeByRegion = [
+    // Monterrey y Noreste
+    {name:'IS Punto Valle MTY',dir:'Av. Lázaro Cárdenas 1000',estado:'Nuevo León'},
+    {name:'IS Fashion Drive MTY',dir:'Av. Fundadores 1234',estado:'Nuevo León'},
+    {name:'IS Citadel MTY',dir:'Av. Churubusco 500',estado:'Nuevo León'},
+    {name:'IS Esfera MTY',dir:'Carretera Nacional Km 265',estado:'Nuevo León'},
+    {name:'IS Outlet Monterrey',dir:'Av. Lincoln 1300',estado:'Nuevo León'},
+    {name:'IS Paseo La Fe',dir:'Av. Raúl Salinas 6000',estado:'Nuevo León'},
+    {name:'IS Plaza Cumbres',dir:'Av. Lincoln 7070',estado:'Nuevo León'},
+    {name:'IS Saltillo',dir:'Blvd. Venustiano Carranza 4050',estado:'Coahuila'},
+    {name:'IS Villahermosa',dir:'Av. 27 de Febrero 1234',estado:'Tabasco'},
+    {name:'IS Tampico',dir:'Blvd. Adolfo López Mateos 500',estado:'Tamaulipas'},
+    {name:'IS Reynosa',dir:'Blvd. Morelos 1100',estado:'Tamaulipas'},
+    // CDMX y Centro
+    {name:'IS Antara CDMX',dir:'Av. Ejército Nacional 843',estado:'CDMX'},
+    {name:'IS Santa Fe CDMX',dir:'Av. Vasco de Quiroga 3800',estado:'CDMX'},
+    {name:'IS Perisur CDMX',dir:'Anillo Periférico 4690',estado:'CDMX'},
+    {name:'IS Parque Delta CDMX',dir:'Av. Cuauhtémoc 462',estado:'CDMX'},
+    {name:'IS Reforma 222',dir:'Av. Paseo de la Reforma 222',estado:'CDMX'},
+    {name:'IS Patio Universidad',dir:'Av. Universidad 1000',estado:'CDMX'},
+    {name:'IS Duraznos CDMX',dir:'Bosque de Duraznos 39',estado:'CDMX'},
+    {name:'IS Forum Buenavista',dir:'Eje 1 Norte Mosqueta 259',estado:'CDMX'},
+    {name:'IS Oasis Coyoacán',dir:'Av. Coyoacán 2000',estado:'CDMX'},
+    {name:'IS Gran Terraza Coapa',dir:'Canal de Miramontes 2636',estado:'CDMX'},
+    {name:'IS Multiplaza Aragón',dir:'Av. Central 99',estado:'Edo. de México'},
+    {name:'IS Las Américas Ecatepec',dir:'Av. Central 22',estado:'Edo. de México'},
+    {name:'IS Outlet Lerma',dir:'Paseo Tollocan Km 52',estado:'Edo. de México'},
+    {name:'IS Town Square Metepec',dir:'Blvd. Toluca-Metepec 700',estado:'Edo. de México'},
+    {name:'IS Explanada Pachuca',dir:'Blvd. Ramón G. Bonfil 100',estado:'Hidalgo'},
+    {name:'IS Galerías Atizapán',dir:'Blvd. Adolfo López Mateos 2',estado:'Edo. de México'},
+    // Guadalajara y Occidente
+    {name:'IS Galerías Vallarta',dir:'Av. Rafael Sanzio 150',estado:'Jalisco'},
+    {name:'IS Plaza Patria GDL',dir:'Av. Ávila Camacho 2600',estado:'Jalisco'},
+    {name:'IS Forum Tlaquepaque',dir:'Av. Independencia 4550',estado:'Jalisco'},
+    {name:'IS Andares GDL',dir:'Blvd. Puerta de Hierro 4965',estado:'Jalisco'},
+    {name:'IS Midtown GDL',dir:'Av. Américas 1501',estado:'Jalisco'},
+    {name:'IS Centro Magno GDL',dir:'Av. Vallarta 2425',estado:'Jalisco'},
+    {name:'IS Outlet GDL',dir:'Carretera a Chapala Km 20',estado:'Jalisco'},
+    {name:'IS La Gran Plaza GDL',dir:'Av. Ignacio L. Vallarta 3959',estado:'Jalisco'},
+    {name:'IS Tepic',dir:'Blvd. Tepic-Xalisco 300',estado:'Nayarit'},
+    // Bajío
+    {name:'IS Galerías Querétaro',dir:'Blvd. Bernardo Quintana 300',estado:'Querétaro'},
+    {name:'IS Antea Querétaro',dir:'Blvd. Bernardo Quintana 4500',estado:'Querétaro'},
+    {name:'IS Altacia León',dir:'Blvd. Aeropuerto 1950',estado:'Guanajuato'},
+    {name:'IS Galerías Celaya',dir:'Blvd. Adolfo López Mateos 100',estado:'Guanajuato'},
+    {name:'IS Plaza Fiesta SLP',dir:'Av. Salvador Nava 3600',estado:'San Luis Potosí'},
+    {name:'IS Galerías SLP',dir:'Av. Benito Juárez 1401',estado:'San Luis Potosí'},
+    {name:'IS Aguascalientes',dir:'Blvd. A Zacatecas Nte 849',estado:'Aguascalientes'},
+    {name:'IS Morelia',dir:'Av. Camelinas 3000',estado:'Michoacán'},
+    // Puebla y Sureste
+    {name:'IS Angelópolis Puebla',dir:'Blvd. del Niño Poblano 2510',estado:'Puebla'},
+    {name:'IS Sonata Puebla',dir:'Av. Osa Mayor 100',estado:'Puebla'},
+    {name:'IS Galerías Serdán',dir:'Blvd. Norte 2',estado:'Puebla'},
+    {name:'IS Cuernavaca',dir:'Av. Plan de Ayala 500',estado:'Morelos'},
+    {name:'IS Oaxaca',dir:'Calz. Porfirio Díaz 300',estado:'Oaxaca'},
+    // Sureste y Caribe
+    {name:'IS La Isla Cancún',dir:'Blvd. Kukulcán Km 12.5',estado:'Quintana Roo'},
+    {name:'IS Plaza Las Américas Cancún',dir:'Av. Tulum 260',estado:'Quintana Roo'},
+    {name:'IS Altabrisa Mérida',dir:'Calle 7 No. 451',estado:'Yucatán'},
+    {name:'IS Galerías Mérida',dir:'Calle 59 Diagonal 460',estado:'Yucatán'},
+    {name:'IS Campeche',dir:'Av. Patricio Trueba 100',estado:'Campeche'},
+    // Norte y Noroeste
+    {name:'IS Galerías Chihuahua',dir:'Periférico de la Juventud 6002',estado:'Chihuahua'},
+    {name:'IS Cd. Juárez',dir:'Av. Tomás Fernández 7930',estado:'Chihuahua'},
+    {name:'IS Durango',dir:'Blvd. Felipe Pescador 1001',estado:'Durango'},
+    {name:'IS Hermosillo',dir:'Blvd. Kino 349',estado:'Sonora'},
+    {name:'IS Culiacán',dir:'Blvd. Universitarios 1350',estado:'Sinaloa'},
+    {name:'IS Mazatlán',dir:'Av. Rafael Buelna 100',estado:'Sinaloa'},
+    {name:'IS Los Mochis',dir:'Blvd. Antonio Rosales 1200',estado:'Sinaloa'},
+    {name:'IS Tijuana',dir:'Blvd. Agua Caliente 11600',estado:'Baja California'},
+    {name:'IS Mexicali',dir:'Blvd. Benito Juárez 1800',estado:'Baja California'},
+    {name:'IS Ensenada',dir:'Blvd. Costero 100',estado:'Baja California'},
+    {name:'IS La Paz BCS',dir:'Blvd. Forjadores 2990',estado:'Baja California Sur'},
+    {name:'IS Los Cabos',dir:'Carretera Transpeninsular Km 4',estado:'Baja California Sur'},
+    // Centro-Sur
+    {name:'IS Toluca',dir:'Paseo Tollocan 900',estado:'Edo. de México'},
+    {name:'IS Tlaxcala',dir:'Blvd. Revolución 2',estado:'Tlaxcala'},
+    {name:'IS Veracruz',dir:'Blvd. Adolfo Ruíz Cortines 4300',estado:'Veracruz'},
+    {name:'IS Xalapa',dir:'Av. Lázaro Cárdenas 77',estado:'Veracruz'},
+    {name:'IS Coatzacoalcos',dir:'Av. Universidad Veracruzana 100',estado:'Veracruz'},
+    {name:'IS Tuxtla Gutiérrez',dir:'Blvd. Belisario Domínguez 1071',estado:'Chiapas'},
+    {name:'IS Acapulco',dir:'Av. Costera Miguel Alemán 1632',estado:'Guerrero'},
+    {name:'IS Irapuato',dir:'Blvd. Solidaridad 300',estado:'Guanajuato'},
+    {name:'IS Zacatecas',dir:'Blvd. López Portillo 450',estado:'Zacatecas'},
+    {name:'IS Colima',dir:'Blvd. Camino Real 600',estado:'Colima'},
+    {name:'IS Monclova',dir:'Blvd. Harold R. Pape 700',estado:'Coahuila'},
+    {name:'IS Torreón',dir:'Blvd. Independencia 3000',estado:'Coahuila'},
+    {name:'IS Chiapas Premium',dir:'Carretera Panamericana Km 3',estado:'Chiapas'},
+    {name:'IS Playa del Carmen',dir:'5ta Avenida esq Calle 8',estado:'Quintana Roo'},
+    {name:'IS León Centro',dir:'Blvd. Juan Alonso de Torres 1200',estado:'Guanajuato'},
+    {name:'IS Uruapan',dir:'Av. Latinoamericana 400',estado:'Michoacán'},
+    {name:'IS Poza Rica',dir:'Blvd. Adolfo Ruíz Cortines 600',estado:'Veracruz'}
+  ];
+  fakeByRegion.forEach(function(s) {
+    if (!storeInv[s.name]) {
+      storeInv[s.name] = { inv: Math.floor(Math.random() * 8), dir: s.dir, estado: s.estado };
     }
   });
   // === END FAKE DATA ===
 
-  // Sort by distance (closest first), then by inventory
+  // Sort: current store first, then by region (estado), then by inventory desc
+  var regionOrder = ['Nuevo León','Coahuila','Tamaulipas','Tabasco','CDMX','Edo. de México','Hidalgo','Jalisco','Nayarit','Querétaro','Guanajuato','San Luis Potosí','Aguascalientes','Michoacán','Puebla','Morelos','Oaxaca','Quintana Roo','Yucatán','Campeche','Chihuahua','Durango','Sonora','Sinaloa','Baja California','Baja California Sur','Tlaxcala','Veracruz','Chiapas','Guerrero','Zacatecas','Colima'];
   var stores = Object.keys(storeInv).map(function(suc) {
     var dist = (STORE_COORDS[suc] && userLat) ? haversineDistance(userLat, userLng, STORE_COORDS[suc].lat, STORE_COORDS[suc].lng) : 999999;
-    return { name: suc, inv: storeInv[suc].inv, dir: storeInv[suc].dir, estado: storeInv[suc].estado, dist: dist };
+    var estado = storeInv[suc].estado || '';
+    var regionIdx = regionOrder.indexOf(estado);
+    if (regionIdx < 0) regionIdx = 999;
+    return { name: suc, inv: storeInv[suc].inv, dir: storeInv[suc].dir, estado: estado, dist: dist, regionIdx: regionIdx };
   }).sort(function(a, b) {
-    return a.dist - b.dist;
+    // Current store always first
+    var aIsCurrent = (currentStore && a.name === currentStore) ? 0 : 1;
+    var bIsCurrent = (currentStore && b.name === currentStore) ? 0 : 1;
+    if (aIsCurrent !== bIsCurrent) return aIsCurrent - bIsCurrent;
+    // Then by region
+    if (a.regionIdx !== b.regionIdx) return a.regionIdx - b.regionIdx;
+    // Then by inventory descending
+    return b.inv - a.inv;
   });
 
   // Build HTML
@@ -2930,7 +3033,12 @@ function openTallaSheet(selectedTalla) {
   document.getElementById('bsSubtitle').textContent = 'Inventario en todas las sucursales (' + total + ' total)';
 
   var html = '';
+  var lastEstado = '';
   stores.forEach(function(s) {
+    if (s.estado && s.estado !== lastEstado) {
+      lastEstado = s.estado;
+      html += '<div style="font-size:11px;font-weight:700;color:var(--gray);padding:8px 0 4px;border-bottom:1px solid #eee;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px">' + s.estado + '</div>';
+    }
     var dotColor = s.inv <= 0 ? 'red' : (s.inv <= 3 ? 'orange' : 'green');
     var distLabel = '';
     if (s.dist < 999999) {
