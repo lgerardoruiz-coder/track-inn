@@ -396,6 +396,7 @@ button, .store-select-btn, .size-btn {
   margin-right: -20px;
   max-width: none;
   height: 55vh;
+  height: 55dvh;
   border-radius: 0;
   overflow: hidden;
   background: #0d0d0d;
@@ -418,17 +419,25 @@ button, .store-select-btn, .size-btn {
 
 .corner {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-color: var(--red);
   border-style: solid;
   border-width: 0;
+  transition: top 0.3s ease, left 0.3s ease, bottom 0.3s ease, right 0.3s ease;
 }
 
-.corner-tl { top: 25px; left: 20px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 12px; }
-.corner-tr { top: 25px; right: 20px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 12px; }
-.corner-bl { bottom: 25px; left: 20px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 12px; }
-.corner-br { bottom: 25px; right: 20px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 12px; }
+/* Border directions per corner */
+.corner-tl { border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 12px; }
+.corner-tr { border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 12px; }
+.corner-bl { border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 12px; }
+.corner-br { border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 12px; }
+
+/* Default fallback positions — overridden by JS after scanner starts */
+.corner-tl { top: 25px; left: 20px; }
+.corner-tr { top: 25px; right: 20px; }
+.corner-bl { bottom: 25px; left: 20px; }
+.corner-br { bottom: 25px; right: 20px; }
 
 .scan-line {
   position: absolute;
@@ -436,9 +445,9 @@ button, .store-select-btn, .size-btn {
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--red), var(--red), transparent);
   box-shadow: 0 0 12px var(--red), 0 0 30px rgba(230, 57, 70, 0.3);
-  animation: scanLine 2.2s ease-in-out infinite;
   opacity: 0.9;
   z-index: 6;
+  animation: scanLine 2.2s ease-in-out infinite;
 }
 
 @keyframes scanLine {
@@ -2590,8 +2599,11 @@ function startScanner() {
   const isMaterial = scanMode === 'material';
   const config = {
     fps: isMaterial ? 25 : 15,
-    qrbox: isMaterial ? { width: 340, height: 220 } : { width: 340, height: 220 },
-    aspectRatio: 1.0,
+    qrbox: function(viewfinderWidth, viewfinderHeight) {
+      var w = Math.min(Math.floor(viewfinderWidth * 0.85), 340);
+      var h = Math.min(Math.floor(viewfinderHeight * 0.45), 200);
+      return { width: Math.max(w, 200), height: Math.max(h, 120) };
+    },
     disableFlip: false,
     formatsToSupport: getFormatsForMode(scanMode),
     experimentalFeatures: {
@@ -2606,6 +2618,9 @@ function startScanner() {
     () => {} // ignore scan failures
   ).then(() => {
     scannerRunning = true;
+    // Align red overlay to actual qrbox — 500ms for render, retry at 1000ms
+    setTimeout(alignOverlayToQrbox, 500);
+    setTimeout(alignOverlayToQrbox, 1000);
     // Apply advanced camera settings for better focus
     try {
       const videoEl = document.querySelector('#scanner-reader video');
@@ -2637,6 +2652,70 @@ function startScanner() {
     readerEl.innerHTML = '<div style="color:#666;text-align:center;padding:60px 20px;font-size:14px;">' +
       'No se pudo acceder a la camara.<br>Usa la entrada manual abajo.</div>';
   });
+}
+
+// Read the actual qr-shaded-region borders and align red corners + scan-line
+function alignOverlayToQrbox() {
+  var frame = document.querySelector('.scanner-frame');
+  var shaded = document.getElementById('qr-shaded-region');
+  if (!frame || !shaded) return;
+
+  // Get bounding rects
+  var frameRect = frame.getBoundingClientRect();
+  var shadedRect = shaded.getBoundingClientRect();
+
+  // Read the border widths — these define where the white qrbox is
+  var cs = getComputedStyle(shaded);
+  var bTop = parseFloat(cs.borderTopWidth) || 0;
+  var bBottom = parseFloat(cs.borderBottomWidth) || 0;
+  var bLeft = parseFloat(cs.borderLeftWidth) || 0;
+  var bRight = parseFloat(cs.borderRightWidth) || 0;
+
+  // If borders are 0, library hasn't rendered yet — skip
+  if (bTop === 0 && bLeft === 0) return;
+
+  // White qrbox position relative to the scanner-frame
+  var boxTop = (shadedRect.top + bTop) - frameRect.top;
+  var boxLeft = (shadedRect.left + bLeft) - frameRect.left;
+  var boxBottom = (shadedRect.bottom - bBottom) - frameRect.top;
+  var boxRight = (shadedRect.right - bRight) - frameRect.left;
+
+  // Pad outward slightly so red corners wrap around the white box
+  var pad = 6;
+  var t = boxTop - pad;
+  var l = boxLeft - pad;
+  var b = boxBottom + pad;
+  var r = boxRight + pad;
+
+  // Position the 4 red corners
+  var tl = document.querySelector('.corner-tl');
+  var tr = document.querySelector('.corner-tr');
+  var bl = document.querySelector('.corner-bl');
+  var br = document.querySelector('.corner-br');
+
+  if (tl) { tl.style.top = t + 'px'; tl.style.left = l + 'px'; tl.style.bottom = 'auto'; tl.style.right = 'auto'; }
+  if (tr) { tr.style.top = t + 'px'; tr.style.right = (frameRect.width - r) + 'px'; tr.style.bottom = 'auto'; tr.style.left = 'auto'; }
+  if (bl) { bl.style.bottom = (frameRect.height - b) + 'px'; bl.style.left = l + 'px'; bl.style.top = 'auto'; bl.style.right = 'auto'; }
+  if (br) { br.style.bottom = (frameRect.height - b) + 'px'; br.style.right = (frameRect.width - r) + 'px'; br.style.top = 'auto'; br.style.left = 'auto'; }
+
+  // Position the scan-line to move only within the qrbox area
+  var scanLine = document.querySelector('.scan-line');
+  if (scanLine) {
+    scanLine.style.left = (l + 10) + 'px';
+    scanLine.style.right = (frameRect.width - r + 10) + 'px';
+    // Replace the animation with one that uses the actual qrbox bounds
+    scanLine.style.animation = 'none';
+    var styleId = 'dynamic-scanline-anim';
+    var existing = document.getElementById(styleId);
+    if (existing) existing.remove();
+    var style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = '@keyframes scanLineDyn { 0%, 100% { top: ' + (t + 8) + 'px; } 50% { top: ' + (b - 8) + 'px; } }';
+    document.head.appendChild(style);
+    requestAnimationFrame(function() {
+      scanLine.style.animation = 'scanLineDyn 2.2s ease-in-out infinite';
+    });
+  }
 }
 
 function stopScanner() {
