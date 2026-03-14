@@ -2465,13 +2465,14 @@ function goToScreen(target) {
 
   // Start scanner when entering screen 2 (used for both UPC and Material modes)
   if (target === 2) {
-    setTimeout(startScanner, 400);
+    setTimeout(function() {
+      if (currentScreen === 2) startScanner();
+    }, 600);
   }
 
   // Stop scanner/camera when leaving screen 2
   if (currentScreen === 2 && target !== 2) {
-    stopScanner();
-
+    try { stopScanner(); } catch(e) {}
   }
 
   currentScreen = target;
@@ -2527,7 +2528,9 @@ function startScanner() {
 
   // Wait for any pending stop to finish before starting
   if (_stopPromise) {
-    _stopPromise.then(function() { startScanner(); }).catch(function() { startScanner(); });
+    _stopPromise.finally(function() {
+      setTimeout(startScanner, 300);
+    });
     return;
   }
 
