@@ -2188,8 +2188,8 @@ function displayProduct(rows, scannedCode) {
     }
   }
   const displayName = descriptionFinal || estilo || 'Producto';
-  // TEMP DEBUG — remove later
-  setTimeout(function() { showToast('DESC: "' + descriptionFinal + '" | KEYS: ' + keys.slice(0, 15).join(', ')); }, 500);
+  // TEMP DEBUG — will show inline
+  var _debugDesc = 'DESC:[' + descriptionFinal + '] KEYS:[' + keys.join('|') + ']';
   const displayBrand = brand || '';
   const categoryLabel = deporte || division || '';
 
@@ -2214,6 +2214,7 @@ function displayProduct(rows, scannedCode) {
       </div>
       <div class="product-info">
         <div class="product-name">${displayName}</div>
+        <div style="font-size:9px;color:red;word-break:break-all;padding:4px;background:#fff3f3;border:1px solid red;margin:4px 0;">${_debugDesc}</div>
         <div class="product-talla-estilo">
           ${talla && talla !== '(Sin valor)' ? `<span class="product-sku">Talla: ${talla}</span>` : ''}
           ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${estilo}</span>` : ''}
