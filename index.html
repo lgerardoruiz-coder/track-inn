@@ -3497,6 +3497,11 @@ function handleBleError(e) {
 }
 
 function togglePrinter() {
+  // DEBUG v28 — quitar después de confirmar que funciona
+  var hasBT = !!navigator.bluetooth;
+  alert('DEBUG v28\n\nBluetooth API: ' + (hasBT ? 'SI' : 'NO') + '\nNavegador: ' + navigator.userAgent.slice(0, 80));
+  if (!hasBT) return;
+
   if (window._phomemo.isConnected()) {
     window._phomemo.disconnect();
     updatePrinterUI(false, 'Desconectada');
