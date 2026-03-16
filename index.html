@@ -2244,13 +2244,13 @@ button, .store-select-btn, .size-btn {
             <option value="">Marca</option>
           </select>
           <select class="pu-filter" id="puFilterGenero" onchange="applyPuFilters()">
-            <option value="">Genero</option>
+            <option value="">Gen</option>
           </select>
           <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()">
-            <option value="">Division</option>
+            <option value="">Div</option>
           </select>
           <select class="pu-filter" id="puFilterVigencia" onchange="applyPuFilters()">
-            <option value="">Vigencia</option>
+            <option value="">Vig</option>
           </select>
         </div>
         <div class="pu-controls">
@@ -4181,9 +4181,9 @@ function populatePuFilters() {
   });
 
   fillPuSelect('puFilterMarca', 'Marca', sortedMarcas, true);
-  fillPuSelect('puFilterGenero', 'Genero', Object.keys(generos).sort());
-  fillPuSelect('puFilterDivision', 'Division', Object.keys(divisiones).sort());
-  fillPuSelect('puFilterVigencia', 'Vigencia', Object.keys(vigencias).sort());
+  fillPuSelect('puFilterGenero', 'Gen', Object.keys(generos).sort());
+  fillPuSelect('puFilterDivision', 'Div', Object.keys(divisiones).sort());
+  fillPuSelect('puFilterVigencia', 'Vig', Object.keys(vigencias).sort());
 }
 
 function fillPuSelect(id, label, options, preserveOrder) {
