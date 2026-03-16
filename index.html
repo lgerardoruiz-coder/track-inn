@@ -3267,7 +3267,6 @@ function renderLabelToCanvas() {
   if (!d) return null;
 
   // M120: 40mm x 30mm label at 203 DPI = 320x240 px (8 px/mm)
-  // Print width = 40 bytes = 320 pixels, centered in 48-byte (384px) raster line
   var W = 320, H = 240;
   var canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
@@ -3277,7 +3276,6 @@ function renderLabelToCanvas() {
   var isFullPrice = (tag === 'FULL PRICE' || tag === '');
   var hasCP = tag.indexOf('CP') >= 0 || tag === 'REBAJA';
   var hasPromo = tag.indexOf('PROMO') >= 0;
-  var isRebaja = hasCP && !hasPromo;
   var isCPPromo = hasCP && hasPromo;
   var isPromoOnly = hasPromo && !hasCP;
 
@@ -3293,122 +3291,73 @@ function renderLabelToCanvas() {
     return '$' + r + '.00';
   };
 
-  var today = new Date();
-  var dateStr = ('0' + today.getDate()).slice(-2) + '/' + ('0' + (today.getMonth() + 1)).slice(-2) + '/' + today.getFullYear();
+  // White background
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, W, H);
 
-  // Background
-  if (isFullPrice) {
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, W, H);
-  } else {
-    ctx.fillStyle = '#E8554E';
-    ctx.fillRect(0, 0, W, H);
-  }
+  // === TOP SECTION: Prices left, Estilo+Desc right ===
+  var pad = 8;
+
+  // Estilo + Description — top right, small
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 11px Arial';
+  ctx.fillText(d.estilo, W - pad, 14);
+  ctx.font = '10px Arial';
+  ctx.fillText(d.description, W - pad, 28);
+
+  // Prices — top left
+  ctx.textAlign = 'left';
 
   if (isFullPrice) {
-    // === WHITE LABEL ===
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 20px Arial, Helvetica, sans-serif';
-    ctx.fillText(d.description, 10, 28);
-
+    ctx.font = 'bold 36px Arial';
+    ctx.fillText(formatP(d.n1), pad, 50);
+  } else if (isCPPromo) {
+    ctx.fillStyle = '#000';
     ctx.font = '12px Arial';
-    ctx.fillStyle = '#333';
-    ctx.fillText(d.estilo + '   ' + d.brand + '   ' + dateStr, 10, 48);
+    var t1 = 'De: ' + formatP(d.n1);
+    ctx.fillText(t1, pad, 18);
+    var tw1 = ctx.measureText(t1).width;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, 14); ctx.lineTo(pad + tw1, 14); ctx.stroke();
 
+    ctx.font = '14px Arial';
+    var t2 = 'CP: ' + formatP(d.n2);
+    ctx.fillText(t2, pad, 36);
+    var tw2 = ctx.measureText(t2).width;
+    ctx.beginPath(); ctx.moveTo(pad, 32); ctx.lineTo(pad + tw2, 32); ctx.stroke();
+
+    ctx.font = 'bold 34px Arial';
+    ctx.fillText('A: ' + formatP(d.n3), pad, 72);
+  } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 42px Arial, Helvetica, sans-serif';
-    ctx.fillText(formatP(d.n1), 10, 98);
+    ctx.font = '14px Arial';
+    var t3 = 'De: ' + formatP(d.n1);
+    ctx.fillText(t3, pad, 22);
+    var tw3 = ctx.measureText(t3).width;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw3, 18); ctx.stroke();
 
-    // Barcode at bottom
-    renderBarcodeToCanvas(ctx, d.upc, 40, 115, 300, 90);
-    // Border
-    ctx.strokeStyle = '#ccc';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, W, H);
-
+    ctx.font = 'bold 36px Arial';
+    ctx.fillText('A: ' + formatP(d.n3), pad, 62);
   } else {
-    // === RED LABEL ===
-    var stripeW = 36;
-
-    // Black stripe on left
-    ctx.fillStyle = '#333';
-    ctx.fillRect(0, 0, stripeW, H);
-
-    // Stripe text (vertical)
-    ctx.save();
-    ctx.translate(stripeW / 2, H / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillStyle = '#FFF';
-    ctx.font = 'bold 14px Arial';
-    ctx.textAlign = 'center';
-    if (isCPPromo) {
-      ctx.fillText('REBAJA + PROMO', 0, 5);
-    } else if (isPromoOnly) {
-      ctx.fillText('PROMO', 0, 5);
-    } else {
-      ctx.fillText('REBAJA', 0, 5);
-    }
-    ctx.restore();
-
-    var leftPad = stripeW + 10;
-    ctx.textAlign = 'left';
-
-    if (isCPPromo) {
-      // 3 prices
-      ctx.fillStyle = '#000';
-      ctx.font = '14px Arial';
-      var deText = 'De: ' + formatP(d.n1);
-      ctx.fillText(deText, leftPad, 26);
-      var tw = ctx.measureText(deText).width;
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(leftPad, 22); ctx.lineTo(leftPad + tw, 22); ctx.stroke();
-
-      ctx.font = '16px Arial';
-      var cpText = 'CP: ' + formatP(d.n2);
-      ctx.fillText(cpText, leftPad, 48);
-      tw = ctx.measureText(cpText).width;
-      ctx.beginPath(); ctx.moveTo(leftPad, 44); ctx.lineTo(leftPad + tw, 44); ctx.stroke();
-
-      ctx.fillStyle = '#000';
-      ctx.font = 'bold 38px Arial';
-      ctx.fillText('A: ' + formatP(d.n3), leftPad, 92);
-    } else if (isPromoOnly) {
-      ctx.fillStyle = '#000';
-      ctx.font = '16px Arial';
-      var deText2 = 'De: ' + formatP(d.n1);
-      ctx.fillText(deText2, leftPad, 30);
-      var tw2 = ctx.measureText(deText2).width;
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(leftPad, 26); ctx.lineTo(leftPad + tw2, 26); ctx.stroke();
-
-      ctx.fillStyle = '#000';
-      ctx.font = 'bold 42px Arial';
-      ctx.fillText('A: ' + formatP(d.n3), leftPad, 80);
-    } else {
-      // CP or REBAJA
-      ctx.fillStyle = '#000';
-      ctx.font = '16px Arial';
-      var deText3 = 'De: ' + formatP(d.n1);
-      ctx.fillText(deText3, leftPad, 30);
-      var tw3 = ctx.measureText(deText3).width;
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(leftPad, 26); ctx.lineTo(leftPad + tw3, 26); ctx.stroke();
-
-      ctx.fillStyle = '#000';
-      ctx.font = 'bold 42px Arial';
-      ctx.fillText('A: ' + formatP(d.n2), leftPad, 80);
-    }
-
-    // Estilo + description
+    // REBAJA / CP
     ctx.fillStyle = '#000';
-    ctx.font = '11px Arial';
-    ctx.fillText(d.estilo, leftPad, 105);
-    ctx.font = '10px Arial';
-    ctx.fillText(d.description, leftPad, 120);
+    ctx.font = '14px Arial';
+    var t4 = 'De: ' + formatP(d.n1);
+    ctx.fillText(t4, pad, 22);
+    var tw4 = ctx.measureText(t4).width;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw4, 18); ctx.stroke();
 
-    // Barcode
-    renderBarcodeToCanvas(ctx, d.upc, leftPad, 128, 280, 85);
+    ctx.font = 'bold 36px Arial';
+    ctx.fillText('A: ' + formatP(d.n2), pad, 62);
   }
+
+  // === BOTTOM SECTION: Big barcode ===
+  // Barcode takes up from y=80 to y=240 (160px tall), full width
+  renderBarcodeToCanvas(ctx, d.upc, 8, 78, W - 16, 158);
 
   return canvas;
 }
@@ -3420,8 +3369,8 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
     var tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(tmpSvg);
     JsBarcode(tmpSvg, upc.trim(), {
-      format: 'CODE128', width: 2, height: 60,
-      displayValue: true, fontSize: 14, margin: 0,
+      format: 'CODE128', width: 3, height: 120,
+      displayValue: true, fontSize: 18, margin: 0,
       background: 'transparent', lineColor: '#000'
     });
     var svgData = new XMLSerializer().serializeToString(tmpSvg);
