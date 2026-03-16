@@ -1,5 +1,5 @@
-// v24 — 85 fake stores by region, state headers in bottom sheet
-const CACHE_NAME = 'trackinn-v24';
+// v26 — Phomemo M120 BLE printing, 40x30mm labels
+const CACHE_NAME = 'trackinn-v26';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
