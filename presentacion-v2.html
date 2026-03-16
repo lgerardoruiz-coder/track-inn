@@ -47,6 +47,8 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
 .portada-title span { color: var(--red); }
 .portada-subtitle { font-size: 20px; color: var(--gray); font-weight: 300; margin-bottom: 32px; line-height: 1.6; }
 .portada-meta { display: flex; gap: 30px; justify-content: center; color: rgba(255,255,255,0.4); font-size: 12px; flex-wrap: wrap; }
+.portada-logo { margin-bottom: 20px; }
+.portada-logo svg { border-radius: 20px; box-shadow: 0 10px 40px rgba(230,57,70,0.2); }
 .portada-new-badge { display: inline-block; background: var(--green); color: #000; padding: 8px 24px; border-radius: 30px; font-size: 13px; font-weight: 700; margin-top: 24px; letter-spacing: 1px; }
 
 /* CARDS GRID */
@@ -167,7 +169,7 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="nav-links">
     <a href="#portada">Inicio</a>
     <a href="#recap">v1</a>
-    <a href="#impresion">Impresion</a>
+    <a href="#impresion">Modulo 1</a>
     <a href="#lotes">Lotes</a>
     <a href="#piezas">Piezas</a>
     <a href="#roi">ROI</a>
@@ -182,10 +184,24 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="slide-number">01</div>
   <div class="portada-content fade-in">
     <div class="portada-badge">Actualización Marzo 2026</div>
+    <div class="portada-logo">
+      <svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 512 512'>
+        <rect width='512' height='512' rx='80' fill='#1D1D1D'/>
+        <rect x='77' y='154' width='20' height='204' rx='10' fill='white' opacity='0.6'/>
+        <rect x='113' y='128' width='16' height='256' rx='8' fill='white' opacity='0.8'/>
+        <rect x='144' y='154' width='26' height='204' rx='10' fill='white'/>
+        <rect x='190' y='128' width='16' height='256' rx='8' fill='#E63946'/>
+        <rect x='226' y='154' width='31' height='204' rx='10' fill='white'/>
+        <rect x='277' y='128' width='16' height='256' rx='8' fill='#E63946' opacity='0.8'/>
+        <rect x='313' y='154' width='20' height='204' rx='10' fill='white' opacity='0.6'/>
+        <rect x='354' y='179' width='26' height='154' rx='10' fill='white' opacity='0.4'/>
+        <rect x='400' y='154' width='36' height='204' rx='10' fill='#E63946' opacity='0.3'/>
+      </svg>
+    </div>
     <h1 class="portada-title">TRACK <span>INN</span></h1>
     <p class="portada-subtitle">
-      De escaner de precios a <strong>plataforma operativa de piso de venta</strong>.<br>
-      Ahora con impresion de etiquetas, lotes y gestion de piezas unicas.
+      La <strong>app que mueve tu tienda</strong>.<br>
+      Escaneo, verificacion de precios, inventario e impresion de etiquetas — todo desde el celular.
     </p>
     <div class="portada-meta">
       <span>Marzo 2026</span>
@@ -193,7 +209,7 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
       <span>v2.0</span>
       <span>250 tiendas</span>
     </div>
-    <div class="portada-new-badge">3 NUEVOS MODULOS</div>
+    <div class="portada-new-badge">3 MODULOS</div>
   </div>
 </section>
 
@@ -243,10 +259,10 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   </div>
   <div class="cards-grid cols-3 fade-in">
     <div class="card" style="border-color:rgba(230,57,70,0.3)">
-      <div class="card-icon">🖨️</div>
-      <div class="card-title">Impresion BLE</div>
-      <div class="card-text">Imprime etiquetas de precio directo desde el celular via Bluetooth a una Phomemo M120. Sin cables, sin PC.</div>
-      <div class="card-badge badge-new">NUEVO</div>
+      <div class="card-icon">🔍</div>
+      <div class="card-title">Escaneo y Verificacion de Precios</div>
+      <div class="card-text">El modulo mas importante para el asesor. Escaner, verificador de precios y promociones, inventario por tienda y region, e impresion de etiquetas — todo en uno.</div>
+      <div class="card-badge badge-active">CORE</div>
     </div>
     <div class="card" style="border-color:rgba(230,57,70,0.3)">
       <div class="card-icon">📦</div>
@@ -268,25 +284,84 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="slide-number">04</div>
   <div class="feature-row fade-in">
     <div class="feature-content">
-      <div class="section-tag">Modulo 1</div>
-      <h2 class="section-title">Impresion de etiquetas via Bluetooth</h2>
-      <p class="section-desc">El asociado escanea el producto y con un toque imprime la etiqueta de precio. Sin PC, sin software, sin cables.</p>
+      <div class="section-tag">Modulo 1 — El mas importante</div>
+      <h2 class="section-title">Escaneo y Verificacion de Precios</h2>
+      <p class="section-desc">La herramienta esencial del asesor en piso de venta. Escanea cualquier producto y obtén toda la informacion al instante.</p>
       <ul class="feature-list">
         <li>
           <div class="feature-num">1</div>
-          <div><div class="feature-li-title">Conexion Web Bluetooth</div><div class="feature-li-text">Chrome en Android se conecta directo a la Phomemo M120 via BLE</div></div>
+          <div><div class="feature-li-title">Escaner de productos</div><div class="feature-li-text">Escanea el codigo de barras con la camara del celular. Identificacion instantanea del articulo.</div></div>
         </li>
         <li>
           <div class="feature-num">2</div>
-          <div><div class="feature-li-title">Etiqueta inteligente</div><div class="feature-li-text">Genera automaticamente el layout correcto: Full Price (blanca) o Rebaja/Promo con precios tachados</div></div>
+          <div><div class="feature-li-title">Verificador de precios y promociones</div><div class="feature-li-text">Muestra los 3 niveles de precio (Full Price, Cambio de Precio, Promo) con deteccion automatica del tipo de etiqueta y badges de promocion.</div></div>
         </li>
         <li>
           <div class="feature-num">3</div>
-          <div><div class="feature-li-title">Codigo de barras grande</div><div class="feature-li-text">Barcode legible por escaner, formato 40x30mm a 203 DPI</div></div>
+          <div><div class="feature-li-title">Inventario por tienda y region</div><div class="feature-li-text">Consulta el stock disponible en tu tienda y otras tiendas de la region. El asesor sabe al instante si hay piezas disponibles.</div></div>
         </li>
         <li>
           <div class="feature-num">4</div>
-          <div><div class="feature-li-title">Keepalive + auto-desconexion</div><div class="feature-li-text">Se mantiene conectada mientras la uses. Se desconecta a los 10 min sin imprimir para ahorrar bateria.</div></div>
+          <div><div class="feature-li-title">Impresion de etiqueta del articulo</div><div class="feature-li-text">Con un toque imprime la etiqueta de precio via Bluetooth a la Phomemo M120. Sin PC, sin cables.</div></div>
+        </li>
+      </ul>
+    </div>
+    <div class="feature-visual">
+      <div class="mock-phone">
+        <div class="mock-phone-screen">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:#fff">Resultado de Escaneo</div>
+          <div style="background:var(--dark-gray);border-radius:10px;padding:12px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-size:10px;color:var(--red);font-weight:700">HOKA</div>
+                <div style="font-size:13px;font-weight:700;color:#fff">Bondi 9</div>
+                <div style="font-size:10px;color:var(--gray)">1162D11-GCTC</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:10px;color:var(--gray);text-decoration:line-through">$4,299</div>
+                <div style="font-size:22px;font-weight:900;color:#fff">$3,009</div>
+                <div style="background:var(--red);color:#fff;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;display:inline-block">CAMBIO DE PRECIO</div>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--dark-gray);border-radius:8px;padding:8px;margin-bottom:8px">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:4px">Inventario</div>
+            <div style="display:flex;gap:6px">
+              <div style="flex:1;background:#1a1a2e;padding:4px;border-radius:4px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--green)">3</div><div style="font-size:8px;color:var(--gray)">Tu tienda</div></div>
+              <div style="flex:1;background:#1a1a2e;padding:4px;border-radius:4px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--orange)">12</div><div style="font-size:8px;color:var(--gray)">Region</div></div>
+            </div>
+          </div>
+          <div style="background:var(--red);color:#fff;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700">🖨️ IMPRIMIR ETIQUETA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SLIDE 4B: IMPRESION BLE DETALLE ========== -->
+<section class="slide" id="ble">
+  <div class="slide-number">04b</div>
+  <div class="feature-row reverse fade-in">
+    <div class="feature-content">
+      <div class="section-tag">Impresion via Bluetooth</div>
+      <h2 class="section-title">Etiquetas inteligentes desde el celular</h2>
+      <p class="section-desc">Conecta la impresora una vez y listo. La app genera la etiqueta correcta automaticamente.</p>
+      <ul class="feature-list">
+        <li>
+          <div class="feature-num">1</div>
+          <div><div class="feature-li-title">Conexion Web Bluetooth</div><div class="feature-li-text">La app se conecta directo a la Phomemo M120 via BLE. Sin cables, sin drivers.</div></div>
+        </li>
+        <li>
+          <div class="feature-num">2</div>
+          <div><div class="feature-li-title">Etiqueta inteligente</div><div class="feature-li-text">Genera automaticamente el layout correcto: Full Price (blanca) o Rebaja/Promo con precios tachados.</div></div>
+        </li>
+        <li>
+          <div class="feature-num">3</div>
+          <div><div class="feature-li-title">Codigo de barras legible</div><div class="feature-li-text">Barcode legible por escaner, formato 40x30mm a 203 DPI.</div></div>
+        </li>
+        <li>
+          <div class="feature-num">4</div>
+          <div><div class="feature-li-title">Keepalive + auto-desconexion</div><div class="feature-li-text">Se mantiene conectada mientras la uses. Se desconecta a los 10 min para ahorrar bateria.</div></div>
         </li>
       </ul>
     </div>
@@ -423,13 +498,13 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="section-header fade-in">
     <div class="section-tag">Infraestructura</div>
     <h2 class="section-title">Lo unico que necesitas</h2>
-    <p class="section-desc">Sin servidores, sin licencias, sin hardware costoso. El celular del asociado + una impresora de $35 USD.</p>
+    <p class="section-desc">Sin servidores, sin licencias, sin hardware costoso. La app en el celular del asociado + una impresora de $35 USD.</p>
   </div>
   <div class="cards-grid cols-3 fade-in">
     <div class="card">
       <div class="card-icon">📱</div>
-      <div class="card-title">Celular con Chrome</div>
-      <div class="card-text">Android con Chrome. El asociado usa su propio celular o el de la tienda. Sin instalar nada.</div>
+      <div class="card-title">Track INN App</div>
+      <div class="card-text">Se instala en el celular del asociado o el de la tienda. Funciona offline despues de la primera carga.</div>
       <div style="font-size:28px;font-weight:900;color:var(--green);margin-top:12px">$0</div>
     </div>
     <div class="card">
@@ -589,7 +664,7 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="slide-number">11</div>
   <div class="portada-content fade-in">
     <h1 class="cierre-logo">TRACK <span>INN</span></h1>
-    <p class="cierre-tagline">El track que mueve tu tienda</p>
+    <p class="cierre-tagline">La app que mueve tu tienda</p>
     <p style="color:var(--gray);font-size:16px;margin-bottom:32px;max-width:500px;margin-left:auto;margin-right:auto">
       Escanea. Imprime. Vende.<br>
       Todo desde el celular del asociado.
