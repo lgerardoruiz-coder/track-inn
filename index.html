@@ -1585,6 +1585,48 @@ button, .store-select-btn, .size-btn {
 }
 .btn-connect-printer.connected { border-color: #2ECC71; color: #2ECC71; }
 .printer-status { font-size: 11px; color: var(--gray); text-align: center; }
+.label-qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  max-width: 300px;
+}
+.label-qty-row .qty-btn {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #444;
+  background: var(--dark-gray);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.label-qty-row .qty-btn:first-child { border-radius: 10px 0 0 10px; }
+.label-qty-row .qty-btn:last-child { border-radius: 0 10px 10px 0; }
+.label-qty-row .qty-btn:active { background: var(--red); }
+.label-qty-row .qty-input {
+  flex: 1;
+  height: 48px;
+  border: 1px solid #444;
+  border-left: none;
+  border-right: none;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  -moz-appearance: textfield;
+}
+.label-qty-row .qty-input::-webkit-outer-spin-button,
+.label-qty-row .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.label-qty-label { font-size: 13px; color: var(--gray); text-align: center; }
 </style>
 </head>
 <body>
@@ -2975,6 +3017,14 @@ function generateLabelPreview() {
     + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;align-items:center;justify-content:center"><svg id="labelBarcode"></svg></div>'
     + '</div></div>';
 
+  // Quantity selector
+  html += '<div class="label-qty-label">Cantidad de etiquetas</div>'
+    + '<div class="label-qty-row">'
+    + '<button class="qty-btn" onclick="changeLabelQty(-1)">−</button>'
+    + '<input type="number" class="qty-input" id="labelQtyInput" value="1" min="1" max="99" onchange="validateLabelQty()">'
+    + '<button class="qty-btn" onclick="changeLabelQty(1)">+</button>'
+    + '</div>';
+
   var printerConnected = window._phomemo && window._phomemo.isConnected();
   html += '<button class="btn-print-label' + (printerConnected ? ' connected' : '') + '" onclick="printLabel()" id="btnPrintLabel">'
     + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
@@ -3373,8 +3423,32 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
   } catch(e) {}
 }
 
+function changeLabelQty(delta) {
+  var input = document.getElementById('labelQtyInput');
+  if (!input) return;
+  var val = parseInt(input.value) || 1;
+  val += delta;
+  if (val < 1) val = 1;
+  if (val > 99) val = 99;
+  input.value = val;
+}
+
+function validateLabelQty() {
+  var input = document.getElementById('labelQtyInput');
+  if (!input) return;
+  var val = parseInt(input.value) || 1;
+  if (val < 1) val = 1;
+  if (val > 99) val = 99;
+  input.value = val;
+}
+
 async function printLabel() {
   if (!window._labelData) return;
+
+  var qtyInput = document.getElementById('labelQtyInput');
+  var qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+  if (qty < 1) qty = 1;
+  if (qty > 99) qty = 99;
 
   try {
     // If not connected, connect first
@@ -3383,21 +3457,26 @@ async function printLabel() {
       updatePrinterUI(true);
     }
 
-    // Now print
+    // Render label once
     updatePrinterUI('printing', 'Generando etiqueta...');
-
     var canvas = renderLabelToCanvas();
     if (!canvas) throw new Error('No se pudo generar la etiqueta');
 
-    // Wait for barcode SVG to render to canvas
+    // Wait for barcode SVG to render
     await new Promise(function(r) { setTimeout(r, 400); });
     canvas = renderLabelToCanvas();
     await new Promise(function(r) { setTimeout(r, 400); });
 
-    updatePrinterUI('printing', 'Enviando a impresora...');
-    await window._phomemo.print(canvas);
+    // Print N copies
+    for (var i = 0; i < qty; i++) {
+      updatePrinterUI('printing', 'Imprimiendo ' + (i + 1) + ' de ' + qty + '...');
+      await window._phomemo.print(canvas);
+      if (i < qty - 1) {
+        await new Promise(function(r) { setTimeout(r, 500); });
+      }
+    }
 
-    updatePrinterUI(true, '¡Etiqueta impresa!');
+    updatePrinterUI(true, '¡' + qty + (qty === 1 ? ' etiqueta impresa!' : ' etiquetas impresas!'));
     setTimeout(function() { updatePrinterUI(true); }, 3000);
 
   } catch(e) {
