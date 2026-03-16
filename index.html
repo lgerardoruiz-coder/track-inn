@@ -1747,12 +1747,14 @@ button, .store-select-btn, .size-btn {
 .batch-delete-btn {
   background: none;
   border: none;
-  color: #666;
-  font-size: 18px;
+  color: #888;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
 }
 .batch-delete-btn:active { color: var(--red); }
+.batch-delete-btn svg { pointer-events: none; }
 .batch-add-btn {
   width: 100%;
   padding: 12px;
@@ -2058,6 +2060,9 @@ button, .store-select-btn, .size-btn {
           IMPRIMIR TODO
         </button>
         <div class="batch-status" id="batchStatus"></div>
+        <button class="btn-connect-printer" id="batchConnectBtn" onclick="togglePrinter()" style="max-width:100%;margin-top:8px">
+          &#9678; Conectar impresora Phomemo
+        </button>
       </div>
     </div>
   </div>
@@ -3578,28 +3583,31 @@ function updatePrinterUI(state, customMsg) {
   var btn = document.getElementById('btnPrintLabel');
   var conn = document.getElementById('btnConnectPrinter');
   var status = document.getElementById('printerStatus');
+  var batchConn = document.getElementById('batchConnectBtn');
   var name = window._phomemo.getDeviceName();
 
   if (state === true || state === 'connected') {
-    // Connected and ready
     if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = _printerSvg + 'Imprimir etiqueta'; }
     if (conn) { conn.className = 'btn-connect-printer connected'; conn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
+    if (batchConn) { batchConn.className = 'btn-connect-printer connected'; batchConn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
     if (status) status.textContent = customMsg || 'Impresora lista';
   } else if (state === 'connecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Conectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Conectando a ' + name + '...'; }
+    if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Conectando...'; }
     if (status) status.textContent = customMsg || 'Estableciendo conexión BLE...';
   } else if (state === 'reconnecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Reconectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Reconectando...'; }
+    if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Reconectando...'; }
     if (status) status.textContent = customMsg || 'Conexión perdida, reconectando...';
   } else if (state === 'printing') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Imprimiendo...'; }
     if (status) status.textContent = customMsg || 'Enviando etiqueta...';
   } else {
-    // Disconnected
     if (btn) { btn.className = 'btn-print-label'; btn.innerHTML = _printerSvg + 'Conectar e imprimir'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
+    if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
     if (status) status.textContent = customMsg || 'Sin impresora conectada';
   }
 }
@@ -3896,13 +3904,12 @@ function addBatchRow() {
     + '<input type="number" class="batch-qty-val" id="batchQty' + id + '" value="1" min="1" max="99" onchange="validateBatchQty(' + id + ')">'
     + '<button class="batch-qty-btn" onclick="updateBatchQty(' + id + ',1)">+</button>'
     + '</div>'
-    + '<button class="batch-delete-btn" onclick="removeBatchRow(' + id + ')">&times;</button>'
+    + '<button class="batch-delete-btn" onclick="removeBatchRow(' + id + ')" title="Eliminar">'
+    + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>'
+    + '</button>'
     + '</div>'
     + '</div>';
   document.getElementById('batchList').insertAdjacentHTML('beforeend', html);
-  // Focus the new input
-  var inp = document.getElementById('batchInput' + id);
-  if (inp) setTimeout(function() { inp.focus(); }, 100);
   updateBatchAddBtn();
 }
 
