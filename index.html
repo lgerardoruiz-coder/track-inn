@@ -3044,9 +3044,25 @@ window._phomemo = (function() {
     return (device && device.name) ? device.name : 'Phomemo M120';
   }
 
+  // Check if Web Bluetooth is available and permissions are OK
+  async function checkBluetooth() {
+    if (!navigator.bluetooth) {
+      throw new Error('BT_NOT_SUPPORTED');
+    }
+    // Check if bluetooth is available (permissions + adapter)
+    if (navigator.bluetooth.getAvailability) {
+      var available = await navigator.bluetooth.getAvailability();
+      if (!available) {
+        throw new Error('BT_NOT_AVAILABLE');
+      }
+    }
+    return true;
+  }
+
   // Step 1: Pair - only opens the BLE picker (fast, user selects device)
   async function pair() {
     if (device) return true; // already paired
+    await checkBluetooth();
     device = await navigator.bluetooth.requestDevice({
       filters: [{ namePrefix: 'M' }],
       optionalServices: [0xFF00]
@@ -3458,13 +3474,25 @@ async function printLabel() {
     setTimeout(function() { updatePrinterUI(true); }, 3000);
 
   } catch(e) {
-    var msg = e.message || String(e);
-    var isCancelled = msg.indexOf('cancel') >= 0 || msg.indexOf('Cancel') >= 0 || msg.indexOf('denied') >= 0;
-    if (isCancelled) {
-      updatePrinterUI(false, 'Conexión cancelada');
-    } else {
-      updatePrinterUI(false, 'Error: ' + msg);
-    }
+    handleBleError(e);
+  }
+}
+
+function handleBleError(e) {
+  var msg = e.message || String(e);
+  var isCancelled = msg.indexOf('cancel') >= 0 || msg.indexOf('Cancel') >= 0 || msg.indexOf('denied') >= 0;
+
+  if (msg === 'BT_NOT_SUPPORTED') {
+    updatePrinterUI(false, 'Tu navegador no soporta Bluetooth');
+    alert('Web Bluetooth no está disponible.\n\nNecesitas:\n• Chrome en Android\n• O Chrome/Edge en PC\n\nSafari y Firefox NO lo soportan.');
+  } else if (msg === 'BT_NOT_AVAILABLE') {
+    updatePrinterUI(false, 'Bluetooth no disponible');
+    alert('Bluetooth no está disponible.\n\nRevisa:\n1. Bluetooth ENCENDIDO\n2. Ubicación ENCENDIDA\n3. Permiso de Ubicación para Chrome\n\n(Android requiere ubicación para escanear BLE)');
+  } else if (isCancelled) {
+    updatePrinterUI(false, 'Conexión cancelada');
+  } else {
+    updatePrinterUI(false, 'Error: ' + msg);
+    alert('Error de conexión: ' + msg);
   }
 }
 
@@ -3473,19 +3501,10 @@ function togglePrinter() {
     window._phomemo.disconnect();
     updatePrinterUI(false, 'Desconectada');
   } else {
-    // Step 1: pair (shows BLE picker - fast)
     updatePrinterUI(false, 'Selecciona tu impresora del menú...');
     window._phomemo.connect().then(function() {
       updatePrinterUI(true);
-    }).catch(function(e) {
-      var msg = e.message || String(e);
-      var isCancelled = msg.indexOf('cancel') >= 0 || msg.indexOf('Cancel') >= 0 || msg.indexOf('denied') >= 0;
-      if (isCancelled) {
-        updatePrinterUI(false, 'Conexión cancelada');
-      } else {
-        updatePrinterUI(false, 'Error: ' + msg);
-      }
-    });
+    }).catch(handleBleError);
   }
 }
 
