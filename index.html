@@ -1925,6 +1925,20 @@ button, .store-select-btn, .size-btn {
   background: #F39C12;
   color: #000;
 }
+.pu-clear-btn {
+  padding: 6px 10px;
+  background: none;
+  border: 1px solid #555;
+  border-radius: 8px;
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pu-clear-btn:active { background: var(--red); color: #fff; }
 .pu-sort {
   flex: 1;
   padding: 6px 4px;
@@ -2235,6 +2249,9 @@ button, .store-select-btn, .size-btn {
           <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()">
             <option value="">Division</option>
           </select>
+          <select class="pu-filter" id="puFilterVigencia" onchange="applyPuFilters()">
+            <option value="">Vigencia</option>
+          </select>
         </div>
         <div class="pu-controls">
           <div class="pu-toggle" id="puPzaToggle">
@@ -2247,6 +2264,7 @@ button, .store-select-btn, .size-btn {
             <option value="pzas-asc">Menos pzas</option>
             <option value="pzas-desc">Mas pzas</option>
           </select>
+          <button class="pu-clear-btn" onclick="clearPuFilters()">Limpiar filtros</button>
         </div>
         <!-- Results list -->
         <div id="puList" class="pu-list"></div>
@@ -4125,6 +4143,7 @@ function initPiezasUnicas() {
       brand: String(getField(first, 'Marca') || getField(first, 'Grupos de Marca') || '').trim(),
       genero: String(getField(first, 'Genero') || '').trim(),
       division: String(getField(first, 'Division') || '').trim(),
+      vigencia: String(getField(first, 'Vigencia') || '').trim(),
       tallas: tallasStr,
       tallasCount: tallasWithInv.length,
       n1: n1,
@@ -4141,25 +4160,49 @@ function initPiezasUnicas() {
 }
 
 function populatePuFilters() {
-  var marcas = {}, generos = {}, divisiones = {};
+  var marcas = {}, generos = {}, divisiones = {}, vigencias = {};
   puAllData.forEach(function(item) {
     if (item.brand) marcas[item.brand] = true;
     if (item.genero) generos[item.genero] = true;
     if (item.division) divisiones[item.division] = true;
+    if (item.vigencia) vigencias[item.vigencia] = true;
   });
 
-  fillPuSelect('puFilterMarca', 'Marca', Object.keys(marcas).sort());
+  // Sort marcas: priority brands first, then alphabetical
+  var priorityBrands = ['NIKE', 'ADIDAS', 'PUMA', 'UNDER ARMOUR', 'ON', 'NEW BALANCE'];
+  var allMarcas = Object.keys(marcas);
+  var sortedMarcas = [];
+  priorityBrands.forEach(function(pb) {
+    var found = allMarcas.find(function(m) { return m.toUpperCase() === pb || m.toUpperCase().startsWith(pb); });
+    if (found) sortedMarcas.push(found);
+  });
+  allMarcas.sort().forEach(function(m) {
+    if (sortedMarcas.indexOf(m) < 0) sortedMarcas.push(m);
+  });
+
+  fillPuSelect('puFilterMarca', 'Marca', sortedMarcas, true);
   fillPuSelect('puFilterGenero', 'Genero', Object.keys(generos).sort());
   fillPuSelect('puFilterDivision', 'Division', Object.keys(divisiones).sort());
+  fillPuSelect('puFilterVigencia', 'Vigencia', Object.keys(vigencias).sort());
 }
 
-function fillPuSelect(id, label, options) {
+function fillPuSelect(id, label, options, preserveOrder) {
   var sel = document.getElementById(id);
+  if (!sel) return;
   var current = sel.value;
   sel.innerHTML = '<option value="">' + label + ' (' + options.length + ')</option>';
   options.forEach(function(opt) {
     sel.innerHTML += '<option value="' + opt + '"' + (opt === current ? ' selected' : '') + '>' + opt + '</option>';
   });
+}
+
+function clearPuFilters() {
+  document.getElementById('puFilterMarca').value = '';
+  document.getElementById('puFilterGenero').value = '';
+  document.getElementById('puFilterDivision').value = '';
+  document.getElementById('puFilterVigencia').value = '';
+  document.getElementById('puSort').value = 'price-desc';
+  setPuMaxPzas(1);
 }
 
 function setPuMaxPzas(n) {
@@ -4175,6 +4218,7 @@ function applyPuFilters() {
   var marca = document.getElementById('puFilterMarca').value;
   var genero = document.getElementById('puFilterGenero').value;
   var division = document.getElementById('puFilterDivision').value;
+  var vigencia = document.getElementById('puFilterVigencia').value;
   var sort = document.getElementById('puSort').value;
 
   puData = puAllData.filter(function(item) {
@@ -4182,6 +4226,7 @@ function applyPuFilters() {
     if (marca && item.brand !== marca) return false;
     if (genero && item.genero !== genero) return false;
     if (division && item.division !== division) return false;
+    if (vigencia && item.vigencia !== vigencia) return false;
     return true;
   });
 
