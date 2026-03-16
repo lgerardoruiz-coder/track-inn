@@ -1,5 +1,5 @@
 // v27 — BLE reconnect, better UX, timeout
-const CACHE_NAME = 'trackinn-v45';
+const CACHE_NAME = 'trackinn-v46';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
