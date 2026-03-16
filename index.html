@@ -1457,8 +1457,8 @@ button, .store-select-btn, .size-btn {
   gap: 16px;
 }
 .label-frame {
-  /* 50mm x 30mm at ~3.78px/mm ≈ 189x113, scaled up for preview */
-  width: 300px;
+  /* 40mm x 30mm at ~3.78px/mm ≈ 151x113, scaled up for preview */
+  width: 240px;
   height: 180px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -1565,6 +1565,26 @@ button, .store-select-btn, .size-btn {
   gap: 8px;
 }
 .btn-print-label:active { transform: scale(0.97); }
+.btn-print-label.connected { background: #2ECC71; }
+.btn-print-label.printing { background: #F39C12; pointer-events: none; }
+.btn-connect-printer {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px;
+  background: transparent;
+  color: var(--gray);
+  border: 1px solid #444;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-connect-printer.connected { border-color: #2ECC71; color: #2ECC71; }
+.printer-status { font-size: 11px; color: var(--gray); text-align: center; }
 </style>
 </head>
 <body>
@@ -1613,6 +1633,21 @@ button, .store-select-btn, .size-btn {
           </button>
           <input type="file" id="excelInput" class="file-input-hidden" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" onchange="handleFileUpload(event)">
           <div id="dataStatus" class="data-status">Sin datos cargados</div>
+          <div id="apiConnectSection" style="margin-top:12px">
+            <div id="apiStatus" style="font-size:12px;color:var(--gray);margin-bottom:6px">
+              <span id="apiDot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#666;margin-right:4px;vertical-align:middle"></span>
+              <span id="apiStatusText">API desconectada</span>
+            </div>
+            <div id="apiLoginForm" style="display:none">
+              <input type="text" id="apiUsername" placeholder="Usuario" style="width:140px;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#fff;font-size:13px;margin-right:4px;font-family:'Poppins',sans-serif">
+              <input type="password" id="apiPassword" placeholder="Contraseña" style="width:140px;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#fff;font-size:13px;font-family:'Poppins',sans-serif">
+              <div style="margin-top:6px">
+                <button onclick="connectAPI()" style="background:#E63946;border:none;color:#fff;padding:8px 20px;border-radius:8px;font-size:12px;font-family:'Poppins',sans-serif;cursor:pointer">Conectar</button>
+                <button onclick="document.getElementById('apiLoginForm').style.display='none'" style="background:none;border:none;color:var(--gray);font-size:12px;font-family:'Poppins',sans-serif;cursor:pointer;margin-left:8px">Cancelar</button>
+              </div>
+            </div>
+            <button id="btnApiConnect" onclick="toggleApiLogin()" style="background:none;border:1px solid #333;color:var(--light);font-size:12px;font-family:'Poppins',sans-serif;cursor:pointer;padding:6px 16px;border-radius:8px">Conectar API</button>
+          </div>
           <button onclick="goToScreen(0)" style="background:none;border:none;color:var(--gray);font-size:13px;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:8px;padding:8px 16px">&#8592; Cambiar tienda</button>
         </div>
       </div>
@@ -1754,6 +1789,164 @@ let currentStore = null; // Detected store via GPS
 let userLat = null;
 let userLng = null;
 let selectedBusiness = null; // 'innovasport' or 'innvictus'
+
+// ============ TRACK INN CORE API ============
+const API_BASE = 'http://localhost:4000';
+let apiToken = null;
+let apiUser = null;
+
+async function apiLogin() {
+  try {
+    const creds = JSON.parse(localStorage.getItem('trackinn_api_creds') || 'null');
+    if (!creds) return false;
+    const res = await fetch(API_BASE + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(creds),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    apiToken = data.token;
+    apiUser = data.user;
+    localStorage.setItem('trackinn_api_token', apiToken);
+    localStorage.setItem('trackinn_api_refresh', data.refreshToken);
+    return true;
+  } catch (e) {
+    console.warn('API no disponible:', e.message);
+    return false;
+  }
+}
+
+async function apiRefreshToken() {
+  try {
+    const refreshToken = localStorage.getItem('trackinn_api_refresh');
+    if (!refreshToken) return false;
+    const res = await fetch(API_BASE + '/api/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    apiToken = data.token;
+    localStorage.setItem('trackinn_api_token', apiToken);
+    return true;
+  } catch (e) { return false; }
+}
+
+async function apiFetch(path) {
+  if (!apiToken) {
+    apiToken = localStorage.getItem('trackinn_api_token');
+    if (!apiToken) return null;
+  }
+  try {
+    let res = await fetch(API_BASE + path, {
+      headers: { 'Authorization': 'Bearer ' + apiToken },
+    });
+    // Si el token expiró, intentar refresh
+    if (res.status === 401) {
+      const refreshed = await apiRefreshToken();
+      if (!refreshed) return null;
+      res = await fetch(API_BASE + path, {
+        headers: { 'Authorization': 'Bearer ' + apiToken },
+      });
+    }
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    console.warn('API fetch error:', e.message);
+    return null;
+  }
+}
+
+async function apiGetInventoryByUPC(upc) {
+  const data = await apiFetch('/api/inventory/upc/' + encodeURIComponent(upc));
+  return data ? data.stores : null;
+}
+
+async function apiGetInventoryByEstilo(estilo) {
+  const data = await apiFetch('/api/inventory/estilo/' + encodeURIComponent(estilo));
+  return data ? data.inventory : null;
+}
+
+async function apiGetProduct(estilo) {
+  return await apiFetch('/api/products/' + encodeURIComponent(estilo));
+}
+
+// Auto-login al iniciar si hay credenciales guardadas
+function apiAutoConnect() {
+  const token = localStorage.getItem('trackinn_api_token');
+  if (token) {
+    apiToken = token;
+    apiFetch('/api/auth/me').then(data => {
+      if (data) {
+        apiUser = data.user;
+        console.log('API conectada:', apiUser.username);
+        updateApiUI(true);
+      } else {
+        apiRefreshToken().then(ok => { if (ok) updateApiUI(true); });
+      }
+    });
+  }
+}
+
+function updateApiUI(connected) {
+  var dot = document.getElementById('apiDot');
+  var text = document.getElementById('apiStatusText');
+  var btn = document.getElementById('btnApiConnect');
+  if (connected) {
+    dot.style.background = '#2ecc71';
+    text.textContent = 'API conectada' + (apiUser ? ' — ' + apiUser.username : '');
+    btn.textContent = 'Desconectar';
+    btn.onclick = disconnectAPI;
+    document.getElementById('apiLoginForm').style.display = 'none';
+  } else {
+    dot.style.background = '#666';
+    text.textContent = 'API desconectada';
+    btn.textContent = 'Conectar API';
+    btn.onclick = toggleApiLogin;
+  }
+}
+
+function toggleApiLogin() {
+  var form = document.getElementById('apiLoginForm');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function connectAPI() {
+  var username = document.getElementById('apiUsername').value.trim();
+  var password = document.getElementById('apiPassword').value;
+  if (!username || !password) { showToast('Ingresa usuario y contraseña'); return; }
+  localStorage.setItem('trackinn_api_creds', JSON.stringify({ username, password }));
+  var ok = await apiLogin();
+  if (ok) {
+    updateApiUI(true);
+    showToast('API conectada');
+    document.getElementById('apiPassword').value = '';
+  } else {
+    showToast('Error: credenciales inválidas o API no disponible');
+    localStorage.removeItem('trackinn_api_creds');
+  }
+}
+
+function disconnectAPI() {
+  apiToken = null;
+  apiUser = null;
+  localStorage.removeItem('trackinn_api_token');
+  localStorage.removeItem('trackinn_api_refresh');
+  localStorage.removeItem('trackinn_api_creds');
+  updateApiUI(false);
+  showToast('API desconectada');
+}
+
+// Enriquecer inventario con datos del backend
+async function enrichWithAPI(estilo, upc) {
+  if (!apiToken) return null;
+  try {
+    var inv = await apiGetInventoryByEstilo(estilo);
+    return inv;
+  } catch (e) { return null; }
+}
 
 // ============ STORE SELECTION ============
 function selectStore(business) {
@@ -2804,11 +2997,15 @@ function generateLabelPreview() {
       + '</div></div>';
   }
 
-  html += '<button class="btn-print-label" onclick="printLabel()">'
+  var printerConnected = window._phomemo && window._phomemo.isConnected();
+  html += '<button class="btn-print-label' + (printerConnected ? ' connected' : '') + '" onclick="printLabel()" id="btnPrintLabel">'
     + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
-    + 'Imprimir etiqueta'
+    + (printerConnected ? 'Imprimir etiqueta' : 'Conectar e imprimir')
     + '</button>'
-    + '<div style="font-size:12px;color:var(--gray);text-align:center">Vista previa 50mm x 30mm</div>'
+    + '<button class="btn-connect-printer' + (printerConnected ? ' connected' : '') + '" onclick="togglePrinter()" id="btnConnectPrinter">'
+    + (printerConnected ? '&#9679; Phomemo M120 conectada — Desconectar' : '&#9678; Conectar impresora Phomemo M120')
+    + '</button>'
+    + '<div class="printer-status" id="printerStatus">' + (printerConnected ? 'Impresora lista' : 'Vista previa 40mm x 30mm') + '</div>'
     + '</div>';
 
   container.innerHTML = html;
@@ -2830,9 +3027,397 @@ function generateLabelPreview() {
   } catch(e) {}
 }
 
-function printLabel() {
-  // TODO: connect to Zebra ZQ220 printer
-  alert('Función de impresión próximamente. Se conectará a impresora Zebra.');
+// ============ PHOMEMO M120 BLE PRINTER ============
+window._phomemo = (function() {
+  var device = null;
+  var writeChar = null;
+  var PRINTER_WIDTH_BYTES = 48; // 384 pixels at 203 DPI
+  var CHUNK_SIZE = 128;
+  var CHUNK_DELAY = 20;
+
+  function isConnected() {
+    return device && device.gatt && device.gatt.connected && writeChar;
+  }
+
+  async function connect() {
+    if (isConnected()) return true;
+    try {
+      device = await navigator.bluetooth.requestDevice({
+        filters: [{ namePrefix: 'M' }],
+        optionalServices: [0xFF00]
+      });
+      var server = await device.gatt.connect();
+      await new Promise(function(r) { setTimeout(r, 100); });
+      var service = await server.getPrimaryService(0xFF00);
+      writeChar = await service.getCharacteristic(0xFF02);
+      device.addEventListener('gattserverdisconnected', function() {
+        writeChar = null;
+        updatePrinterUI(false);
+      });
+      return true;
+    } catch(e) {
+      device = null; writeChar = null;
+      throw e;
+    }
+  }
+
+  function disconnect() {
+    if (device && device.gatt && device.gatt.connected) {
+      device.gatt.disconnect();
+    }
+    device = null; writeChar = null;
+  }
+
+  async function send(data) {
+    var buf = (data instanceof Uint8Array) ? data : new Uint8Array(data);
+    if (writeChar.properties.writeWithoutResponse) {
+      await writeChar.writeValueWithoutResponse(buf.buffer);
+    } else {
+      await writeChar.writeValue(buf.buffer);
+    }
+  }
+
+  async function sendChunked(data) {
+    for (var i = 0; i < data.length; i += CHUNK_SIZE) {
+      var chunk = data.slice(i, Math.min(i + CHUNK_SIZE, data.length));
+      await send(chunk);
+      await new Promise(function(r) { setTimeout(r, CHUNK_DELAY); });
+    }
+  }
+
+  function canvasToRaster(canvas) {
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    var pixels = ctx.getImageData(0, 0, w, h).data;
+    var canvasBytesPerRow = Math.ceil(w / 8);
+    var output = new Uint8Array(PRINTER_WIDTH_BYTES * h);
+    var offset = Math.floor((PRINTER_WIDTH_BYTES - canvasBytesPerRow) / 2);
+    if (offset < 0) offset = 0;
+
+    for (var y = 0; y < h; y++) {
+      for (var byteX = 0; byteX < canvasBytesPerRow && (offset + byteX) < PRINTER_WIDTH_BYTES; byteX++) {
+        var b = 0;
+        for (var bit = 0; bit < 8; bit++) {
+          var x = byteX * 8 + bit;
+          if (x >= w) continue;
+          var idx = (y * w + x) * 4;
+          var brightness = 0.299 * pixels[idx] + 0.587 * pixels[idx+1] + 0.114 * pixels[idx+2];
+          var alpha = pixels[idx+3];
+          if (alpha > 128 && brightness < 128) {
+            b |= (1 << (7 - bit));
+          }
+        }
+        if (b === 0x0A) b = 0x14; // avoid LF byte
+        output[y * PRINTER_WIDTH_BYTES + offset + byteX] = b;
+      }
+    }
+    return { data: output, widthBytes: PRINTER_WIDTH_BYTES, heightLines: h };
+  }
+
+  async function print(canvas, density) {
+    if (!isConnected()) throw new Error('No conectada');
+    density = density || 6;
+    var raster = canvasToRaster(canvas);
+
+    // Set speed
+    await send(new Uint8Array([0x1B, 0x4E, 0x0D, 0x05]));
+    await new Promise(function(r) { setTimeout(r, 30); });
+
+    // Set density
+    var d = Math.round(5 + density * 1.25);
+    await send(new Uint8Array([0x1B, 0x4E, 0x04, d]));
+    await new Promise(function(r) { setTimeout(r, 30); });
+
+    // Set media type: labels with gaps
+    await send(new Uint8Array([0x1F, 0x11, 0x0A]));
+    await new Promise(function(r) { setTimeout(r, 30); });
+
+    // Raster header: GS v 0 \0 + width(2B LE) + height(2B LE)
+    var wb = raster.widthBytes;
+    var hl = raster.heightLines;
+    await send(new Uint8Array([
+      0x1D, 0x76, 0x30, 0x00,
+      wb & 0xFF, (wb >> 8) & 0xFF,
+      hl & 0xFF, (hl >> 8) & 0xFF
+    ]));
+
+    // Send raster data
+    await sendChunked(raster.data);
+
+    // Footer
+    await new Promise(function(r) { setTimeout(r, 300); });
+    await send(new Uint8Array([0x1F, 0xF0, 0x05, 0x00, 0x1F, 0xF0, 0x03, 0x00]));
+  }
+
+  return { connect: connect, disconnect: disconnect, isConnected: isConnected, print: print, canvasToRaster: canvasToRaster, PRINTER_WIDTH_BYTES: PRINTER_WIDTH_BYTES };
+})();
+
+function updatePrinterUI(connected) {
+  var btn = document.getElementById('btnPrintLabel');
+  var conn = document.getElementById('btnConnectPrinter');
+  var status = document.getElementById('printerStatus');
+  if (btn) {
+    btn.className = 'btn-print-label' + (connected ? ' connected' : '');
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
+      + (connected ? 'Imprimir etiqueta' : 'Conectar e imprimir');
+  }
+  if (conn) {
+    conn.className = 'btn-connect-printer' + (connected ? ' connected' : '');
+    conn.innerHTML = connected ? '&#9679; Phomemo M120 conectada — Desconectar' : '&#9678; Conectar impresora Phomemo M120';
+  }
+  if (status) {
+    status.textContent = connected ? 'Impresora lista' : 'Sin impresora conectada';
+  }
+}
+
+function renderLabelToCanvas() {
+  var d = window._labelData;
+  if (!d) return null;
+
+  // M120: 40mm x 30mm label at 203 DPI = 320x240 px (8 px/mm)
+  // Print width = 40 bytes = 320 pixels, centered in 48-byte (384px) raster line
+  var W = 320, H = 240;
+  var canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  var tag = d.tag;
+  var isFullPrice = (tag === 'FULL PRICE' || tag === '');
+  var hasCP = tag.indexOf('CP') >= 0 || tag === 'REBAJA';
+  var hasPromo = tag.indexOf('PROMO') >= 0;
+  var isRebaja = hasCP && !hasPromo;
+  var isCPPromo = hasCP && hasPromo;
+  var isPromoOnly = hasPromo && !hasCP;
+
+  var formatP = function(n) {
+    var num = Math.round(Number(n));
+    if (isNaN(num) || num === 0) return '$0';
+    var str = String(num);
+    var r = '';
+    for (var i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 === 0) r += ',';
+      r += str[i];
+    }
+    return '$' + r + '.00';
+  };
+
+  var today = new Date();
+  var dateStr = ('0' + today.getDate()).slice(-2) + '/' + ('0' + (today.getMonth() + 1)).slice(-2) + '/' + today.getFullYear();
+
+  // Background
+  if (isFullPrice) {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    ctx.fillStyle = '#E8554E';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  if (isFullPrice) {
+    // === WHITE LABEL ===
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 20px Arial, Helvetica, sans-serif';
+    ctx.fillText(d.description, 10, 28);
+
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#333';
+    ctx.fillText(d.estilo + '   ' + d.brand + '   ' + dateStr, 10, 48);
+
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 42px Arial, Helvetica, sans-serif';
+    ctx.fillText(formatP(d.n1), 10, 98);
+
+    // Barcode at bottom
+    renderBarcodeToCanvas(ctx, d.upc, 40, 115, 300, 90);
+    // Border
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, 0, W, H);
+
+  } else {
+    // === RED LABEL ===
+    var stripeW = 36;
+
+    // Black stripe on left
+    ctx.fillStyle = '#333';
+    ctx.fillRect(0, 0, stripeW, H);
+
+    // Stripe text (vertical)
+    ctx.save();
+    ctx.translate(stripeW / 2, H / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    if (isCPPromo) {
+      ctx.fillText('REBAJA + PROMO', 0, 5);
+    } else if (isPromoOnly) {
+      ctx.fillText('PROMO', 0, 5);
+    } else {
+      ctx.fillText('REBAJA', 0, 5);
+    }
+    ctx.restore();
+
+    var leftPad = stripeW + 10;
+    ctx.textAlign = 'left';
+
+    if (isCPPromo) {
+      // 3 prices
+      ctx.fillStyle = '#000';
+      ctx.font = '14px Arial';
+      var deText = 'De: ' + formatP(d.n1);
+      ctx.fillText(deText, leftPad, 26);
+      var tw = ctx.measureText(deText).width;
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(leftPad, 22); ctx.lineTo(leftPad + tw, 22); ctx.stroke();
+
+      ctx.font = '16px Arial';
+      var cpText = 'CP: ' + formatP(d.n2);
+      ctx.fillText(cpText, leftPad, 48);
+      tw = ctx.measureText(cpText).width;
+      ctx.beginPath(); ctx.moveTo(leftPad, 44); ctx.lineTo(leftPad + tw, 44); ctx.stroke();
+
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 38px Arial';
+      ctx.fillText('A: ' + formatP(d.n3), leftPad, 92);
+    } else if (isPromoOnly) {
+      ctx.fillStyle = '#000';
+      ctx.font = '16px Arial';
+      var deText2 = 'De: ' + formatP(d.n1);
+      ctx.fillText(deText2, leftPad, 30);
+      var tw2 = ctx.measureText(deText2).width;
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(leftPad, 26); ctx.lineTo(leftPad + tw2, 26); ctx.stroke();
+
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 42px Arial';
+      ctx.fillText('A: ' + formatP(d.n3), leftPad, 80);
+    } else {
+      // CP or REBAJA
+      ctx.fillStyle = '#000';
+      ctx.font = '16px Arial';
+      var deText3 = 'De: ' + formatP(d.n1);
+      ctx.fillText(deText3, leftPad, 30);
+      var tw3 = ctx.measureText(deText3).width;
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(leftPad, 26); ctx.lineTo(leftPad + tw3, 26); ctx.stroke();
+
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 42px Arial';
+      ctx.fillText('A: ' + formatP(d.n2), leftPad, 80);
+    }
+
+    // Estilo + description
+    ctx.fillStyle = '#000';
+    ctx.font = '11px Arial';
+    ctx.fillText(d.estilo, leftPad, 105);
+    ctx.font = '10px Arial';
+    ctx.fillText(d.description, leftPad, 120);
+
+    // Barcode
+    renderBarcodeToCanvas(ctx, d.upc, leftPad, 128, 280, 85);
+  }
+
+  return canvas;
+}
+
+function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
+  if (!upc || !upc.trim()) return;
+  try {
+    // Create temp SVG to render barcode, then draw to canvas
+    var tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    document.body.appendChild(tmpSvg);
+    JsBarcode(tmpSvg, upc.trim(), {
+      format: 'CODE128', width: 2, height: 60,
+      displayValue: true, fontSize: 14, margin: 0,
+      background: 'transparent', lineColor: '#000'
+    });
+    var svgData = new XMLSerializer().serializeToString(tmpSvg);
+    document.body.removeChild(tmpSvg);
+
+    var img = new Image();
+    var blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+
+    return new Promise(function(resolve) {
+      img.onload = function() {
+        var scale = Math.min(maxW / img.width, maxH / img.height, 1);
+        var dw = img.width * scale;
+        var dh = img.height * scale;
+        ctx.drawImage(img, x, y, dw, dh);
+        URL.revokeObjectURL(url);
+        resolve();
+      };
+      img.onerror = function() { URL.revokeObjectURL(url); resolve(); };
+      img.src = url;
+    });
+  } catch(e) {}
+}
+
+async function printLabel() {
+  if (!window._labelData) return;
+  var btn = document.getElementById('btnPrintLabel');
+  var status = document.getElementById('printerStatus');
+
+  try {
+    // Connect if needed
+    if (!window._phomemo.isConnected()) {
+      if (status) status.textContent = 'Conectando a Phomemo M120...';
+      await window._phomemo.connect();
+      updatePrinterUI(true);
+    }
+
+    // Render label to canvas
+    if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimiendo...'; }
+    if (status) status.textContent = 'Generando etiqueta...';
+
+    var canvas = renderLabelToCanvas();
+    if (!canvas) throw new Error('No se pudo generar la etiqueta');
+
+    // Wait for barcode to render (async SVG to canvas)
+    await new Promise(function(r) { setTimeout(r, 500); });
+
+    // Re-render to ensure barcode is drawn
+    canvas = renderLabelToCanvas();
+    await new Promise(function(r) { setTimeout(r, 500); });
+
+    if (status) status.textContent = 'Enviando a impresora...';
+    await window._phomemo.print(canvas);
+
+    if (status) status.textContent = '¡Etiqueta impresa!';
+    if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir etiqueta'; }
+
+    setTimeout(function() {
+      if (status) status.textContent = 'Impresora lista';
+    }, 3000);
+
+  } catch(e) {
+    var msg = e.message || String(e);
+    if (msg.indexOf('cancel') >= 0 || msg.indexOf('Cancel') >= 0) {
+      if (status) status.textContent = 'Conexión cancelada';
+    } else {
+      if (status) status.textContent = 'Error: ' + msg;
+      alert('Error de impresión: ' + msg);
+    }
+    if (btn) { btn.className = 'btn-print-label'; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Conectar e imprimir'; }
+  }
+}
+
+function togglePrinter() {
+  if (window._phomemo.isConnected()) {
+    window._phomemo.disconnect();
+    updatePrinterUI(false);
+  } else {
+    window._phomemo.connect().then(function() {
+      updatePrinterUI(true);
+    }).catch(function(e) {
+      var msg = e.message || String(e);
+      if (msg.indexOf('cancel') < 0 && msg.indexOf('Cancel') < 0) {
+        alert('No se pudo conectar: ' + msg);
+      }
+      updatePrinterUI(false);
+    });
+  }
 }
 
 function selectSize(btn) {
@@ -2890,6 +3475,38 @@ function cancelLongPress() {
 }
 
 function openTallaSheet(selectedTalla) {
+  // Si hay API conectada, intentar cargar inventario real
+  if (apiToken && window._currentEstilo) {
+    openTallaSheetFromAPI(selectedTalla);
+    return;
+  }
+  openTallaSheetLocal(selectedTalla);
+}
+
+async function openTallaSheetFromAPI(selectedTalla) {
+  var estilo = window._currentEstilo;
+  var apiInv = await apiGetInventoryByEstilo(estilo);
+  if (!apiInv || apiInv.length === 0) {
+    // Fallback a datos locales
+    openTallaSheetLocal(selectedTalla);
+    return;
+  }
+
+  // Filtrar por talla seleccionada
+  var filtered = apiInv.filter(function(item) { return item.size === selectedTalla; });
+
+  // Agrupar por tienda
+  var storeInv = {};
+  filtered.forEach(function(item) {
+    var name = item.store_name;
+    if (!storeInv[name]) storeInv[name] = { inv: 0, dir: item.city || '', estado: item.state || '' };
+    storeInv[name].inv += item.qty;
+  });
+
+  renderTallaSheet(selectedTalla, storeInv);
+}
+
+function openTallaSheetLocal(selectedTalla) {
   var inventoryKey = null;
   if (productData.length > 0) {
     inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
@@ -3008,6 +3625,10 @@ function openTallaSheet(selectedTalla) {
   });
   // === END FAKE DATA ===
 
+  renderTallaSheet(selectedTalla, storeInv);
+}
+
+function renderTallaSheet(selectedTalla, storeInv) {
   // Sort: current store first, then by region (estado), then by inventory desc
   var regionOrder = ['Nuevo León','Coahuila','Tamaulipas','Tabasco','CDMX','Edo. de México','Hidalgo','Jalisco','Nayarit','Querétaro','Guanajuato','San Luis Potosí','Aguascalientes','Michoacán','Puebla','Morelos','Oaxaca','Quintana Roo','Yucatán','Campeche','Chihuahua','Durango','Sonora','Sinaloa','Baja California','Baja California Sur','Tlaxcala','Veracruz','Chiapas','Guerrero','Zacatecas','Colima'];
   var stores = Object.keys(storeInv).map(function(suc) {
@@ -3557,6 +4178,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   // Enable :active states on iOS Safari
   document.body.addEventListener('touchstart', function(){}, { passive: true });
+
+  // Auto-connect to Track INN Core API
+  apiAutoConnect();
 
   // ============ SWIPE RIGHT TO GO BACK ============
   var swipeStartX = 0;
