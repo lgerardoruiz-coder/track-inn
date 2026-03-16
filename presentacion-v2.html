@@ -222,7 +222,7 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
     <h2 class="section-title">Track INN v1.0 — Ya en produccion</h2>
     <p class="section-desc">La base que ya funciona en piso de venta desde el celular del asociado.</p>
   </div>
-  <div class="cards-grid cols-4 fade-in">
+  <div class="cards-grid cols-4 fade-in" style="max-width:1100px">
     <div class="card">
       <div class="card-icon">📷</div>
       <div class="card-title">Escaner de UPC</div>
@@ -247,6 +247,12 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
       <div class="card-text">Sin instalacion. Funciona sin internet despues de cargar</div>
       <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;line-height:1.4;font-style:italic">PWA = Progressive Web App: se instala como app nativa desde el navegador, sin tiendas de apps</div>
       <div class="card-badge badge-done">Completado</div>
+    </div>
+    <div class="card" style="border-color:rgba(243,156,18,0.3);grid-column:span 4;max-width:400px;justify-self:center">
+      <div class="card-icon">⚙️</div>
+      <div class="card-title">Track INN Core</div>
+      <div class="card-text">Hub central que conecta Teamwork Retail con la app. Reemplaza los archivos Excel con datos en tiempo real: precios, inventario y productos.</div>
+      <div class="card-badge badge-active">En Desarrollo</div>
     </div>
   </div>
 </section>
@@ -500,14 +506,21 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="section-header fade-in">
     <div class="section-tag">Infraestructura</div>
     <h2 class="section-title">Lo unico que necesitas</h2>
-    <p class="section-desc">Sin servidores, sin licencias, sin hardware costoso. La app en el celular del asociado + una impresora de $35 USD.</p>
+    <p class="section-desc">Sin licencias, sin hardware costoso. La app + un hub central + una impresora portatil.</p>
   </div>
-  <div class="cards-grid cols-3 fade-in">
+  <div class="cards-grid cols-4 fade-in" style="max-width:1100px">
     <div class="card">
       <div class="card-icon">📱</div>
       <div class="card-title">Track INN App</div>
-      <div class="card-text">Se instala en el celular del asociado o el de la tienda. Funciona offline despues de la primera carga.</div>
+      <div class="card-text">Se instala en el celular del asociado o el de la tienda. Funciona offline.</div>
       <div style="font-size:28px;font-weight:900;color:var(--green);margin-top:12px">$0</div>
+    </div>
+    <div class="card" style="border-color:rgba(243,156,18,0.3)">
+      <div class="card-icon">⚙️</div>
+      <div class="card-title">Track INN Core</div>
+      <div class="card-text">Hub backend que conecta Teamwork con la app. Precios, inventario y productos en tiempo real.</div>
+      <div style="font-size:28px;font-weight:900;color:var(--orange);margin-top:12px">$15K USD</div>
+      <div style="font-size:11px;color:var(--gray)">Desarrollo unico + ~$100 USD/mes hosting</div>
     </div>
     <div class="card">
       <div class="card-icon">🖨️</div>
@@ -531,55 +544,58 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="slide-number">08</div>
   <div class="section-header fade-in">
     <div class="section-tag">Retorno de Inversion</div>
-    <h2 class="section-title">Track INN vs Solucion Enterprise</h2>
+    <h2 class="section-title">3 caminos, 1 decision</h2>
     <p class="section-desc">Comparativo a 3 anos para 250 tiendas, 1,000 usuarios, 750 impresoras.</p>
   </div>
-  <table class="roi-table fade-in">
+  <table class="roi-table fade-in" style="max-width:1000px">
     <tr>
       <th>Concepto</th>
-      <th>Enterprise (Zebra + Software)</th>
-      <th>Track INN</th>
-      <th>Ahorro</th>
+      <th>Enterprise<br><span style="font-weight:400;font-size:10px">Zebra + Software custom</span></th>
+      <th style="background:var(--orange);color:#000">Intermedia<br><span style="font-weight:400;font-size:10px">SaaS + Zebra ZD421</span></th>
+      <th style="background:var(--green);color:#000">Track INN<br><span style="font-weight:400;font-size:10px">PWA + Core + Phomemo</span></th>
     </tr>
     <tr>
       <td>Desarrollo de software</td>
-      <td>$200,000 USD</td>
-      <td class="highlight">$0</td>
-      <td class="saving">100%</td>
+      <td>$200,000 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$3.5M MXN</span></td>
+      <td>$80,000 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$1.4M MXN</span></td>
+      <td class="highlight">$15,000 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$262K MXN</span></td>
     </tr>
     <tr>
       <td>Hardware (impresoras)</td>
-      <td>$337,500 USD</td>
-      <td class="highlight">$26,250 USD</td>
-      <td class="saving">92%</td>
+      <td>$337,500 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$5.9M MXN</span></td>
+      <td>$262,500 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$4.6M MXN</span></td>
+      <td class="highlight">$26,250 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$459K MXN</span></td>
     </tr>
     <tr>
       <td>Scanners dedicados</td>
-      <td>$150,000 USD</td>
-      <td class="highlight">$0 (usan el cel)</td>
-      <td class="saving">100%</td>
+      <td>$150,000 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$2.6M MXN</span></td>
+      <td>$75,000 USD<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$1.3M MXN</span></td>
+      <td class="highlight">$0 (usan el cel)<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$0 MXN</span></td>
     </tr>
     <tr>
       <td>Licencias anuales</td>
-      <td>$639,000 USD/ano</td>
-      <td class="highlight">$0</td>
-      <td class="saving">100%</td>
+      <td>$639,000 USD/ano<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$11.2M MXN/ano</span></td>
+      <td>$150,000 USD/ano<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$2.6M MXN/ano</span></td>
+      <td class="highlight">$0<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$0 MXN</span></td>
     </tr>
     <tr>
       <td>Servidores / Cloud</td>
-      <td>$9,600 USD/ano</td>
-      <td class="highlight">$0 (GitHub Pages)</td>
-      <td class="saving">100%</td>
+      <td>$9,600 USD/ano<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$168K MXN/ano</span></td>
+      <td>$6,000 USD/ano<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$105K MXN/ano</span></td>
+      <td class="highlight">$1,200 USD/ano<br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$21K MXN/ano</span></td>
     </tr>
-    <tr>
+    <tr style="background:rgba(255,255,255,0.05)">
       <td><strong>Total 3 anos</strong></td>
-      <td><strong>$3,378,300 USD</strong></td>
-      <td class="highlight"><strong>$141,990 USD</strong></td>
-      <td class="saving"><strong>95.8%</strong></td>
+      <td><strong>$3,634,100 USD</strong><br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$63.6M MXN</span></td>
+      <td><strong>$885,500 USD</strong><br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$15.5M MXN</span></td>
+      <td><strong style="color:var(--green)">$44,850 USD</strong><br><span style="color:rgba(255,255,255,0.25);font-style:italic;font-size:11px">$784K MXN</span></td>
     </tr>
   </table>
-  <div style="text-align:center;margin-top:24px;font-size:14px;color:var(--gray)" class="fade-in">
-    Ahorro total: <strong style="color:var(--green);font-size:20px">$3,236,310 USD</strong> — <strong style="color:var(--green);font-size:20px">$56.6M MXN</strong>
+  <div style="text-align:center;margin-top:20px;max-width:1000px;width:100%" class="fade-in">
+    <div style="font-size:14px;color:var(--gray);margin-bottom:6px">
+      Ahorro vs Enterprise: <strong style="color:var(--green);font-size:18px">$3.6M USD</strong> <span style="color:rgba(255,255,255,0.25);font-style:italic">($62.8M MXN)</span> &nbsp;·&nbsp; Ahorro vs Intermedia: <strong style="color:var(--green);font-size:18px">$840K USD</strong> <span style="color:rgba(255,255,255,0.25);font-style:italic">($14.7M MXN)</span>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.3)">Intermedia: SaaS tipo Lightspeed/Pricer + Zebra ZD421 ($350 USD c/u) + scanners handheld ($75 USD c/u) + licencia $50 USD/tienda/mes</div>
   </div>
 </section>
 
@@ -688,7 +704,7 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   <div class="section-header fade-in">
     <div class="section-tag">El panorama completo</div>
     <h2 class="section-title">Track INN no solo ahorra — tambien vende</h2>
-    <p class="section-desc">Dos impactos en una sola herramienta, sin costo de desarrollo, sin licencias, sin infraestructura.</p>
+    <p class="section-desc">Dos impactos en una sola herramienta. Costo minimo, retorno maximo.</p>
   </div>
 
   <div style="display:flex;gap:28px;max-width:900px;width:100%;flex-wrap:wrap;justify-content:center" class="fade-in">
@@ -696,15 +712,15 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
     <div style="flex:1;min-width:340px;background:rgba(230,57,70,0.05);border:1px solid rgba(230,57,70,0.2);border-radius:20px;padding:36px 32px;text-align:center">
       <div style="font-size:40px;margin-bottom:8px">🛡️</div>
       <div style="font-size:12px;color:var(--red);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Ahorro vs Enterprise</div>
-      <div style="font-size:48px;font-weight:900;color:var(--red);line-height:1;margin-bottom:4px">$56.6M</div>
+      <div style="font-size:48px;font-weight:900;color:var(--red);line-height:1;margin-bottom:4px">$62.8M</div>
       <div style="font-size:14px;color:var(--gray);margin-bottom:16px">MXN en 3 anos</div>
       <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:14px;text-align:left">
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--gray)">Desarrollo</span><span style="color:var(--red);font-weight:700">-100%</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--gray)">Desarrollo</span><span style="color:var(--red);font-weight:700">-92%</span></div>
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--gray)">Hardware</span><span style="color:var(--red);font-weight:700">-92%</span></div>
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--gray)">Licencias</span><span style="color:var(--red);font-weight:700">-100%</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray)">Servidores</span><span style="color:var(--red);font-weight:700">-100%</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--gray)">Servidores</span><span style="color:var(--red);font-weight:700">-87%</span></div>
       </div>
-      <div style="margin-top:14px;font-size:12px;color:rgba(255,255,255,0.3)">$3.2M USD ahorrados vs solucion enterprise</div>
+      <div style="margin-top:14px;font-size:12px;color:rgba(255,255,255,0.3)">$3.6M USD ahorrados vs enterprise · $840K vs intermedia</div>
     </div>
 
     <!-- VENTA -->
@@ -725,9 +741,9 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
 
   <div style="max-width:900px;width:100%;text-align:center;margin-top:32px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px 28px" class="fade-in">
     <div style="font-size:14px;color:var(--gray);line-height:1.7">
-      Impacto combinado a 3 anos: <strong style="color:#fff;font-size:18px">ahorro de $56.6M</strong> + <strong style="color:var(--green);font-size:18px">$360M+ en venta incremental</strong>
+      Impacto combinado a 3 anos: <strong style="color:#fff;font-size:18px">ahorro de $62.8M</strong> + <strong style="color:var(--green);font-size:18px">$360M+ en venta incremental</strong>
     </div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:6px">Una herramienta de $0 que genera valor desde el dia 1</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:6px">Inversion total Track INN: $784K MXN — retorno desde el dia 1</div>
   </div>
 </section>
 
@@ -766,14 +782,21 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
     <div class="roadmap-item">
       <div class="roadmap-dot current"></div>
       <div class="roadmap-phase">Fase 5</div>
-      <div class="roadmap-title">Piloto</div>
-      <div class="roadmap-desc">Implementacion en tiendas piloto con feedback</div>
+      <div class="roadmap-title">Track INN Core</div>
+      <div class="roadmap-desc">Teamwork → Core → App. Eliminar Excel, datos en tiempo real</div>
     </div>
     <div class="roadmap-item">
       <div class="roadmap-dot future"></div>
       <div class="roadmap-phase">Fase 6</div>
-      <div class="roadmap-title">Rollout</div>
-      <div class="roadmap-desc">250 tiendas, dashboard, analytics</div>
+      <div class="roadmap-title">Piloto + Rollout</div>
+      <div class="roadmap-desc">Tiendas piloto, feedback, y despliegue a 250 tiendas</div>
+    </div>
+  </div>
+  <div style="max-width:900px;width:100%;margin-top:28px;display:flex;align-items:center;gap:16px;justify-content:center" class="fade-in">
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px 20px;flex:1;max-width:800px">
+      <div style="font-size:13px;color:var(--gray);line-height:1.6">
+        <strong style="color:var(--orange)">Fase 5 — Lo que falta:</strong> Terminar el hub <strong style="color:#fff">Track INN Core</strong> que conecta <span style="color:var(--orange)">Teamwork</span> → <span style="color:var(--red)">Core</span> → <span style="color:var(--green)">App</span>. Esto elimina la dependencia del Excel y habilita datos de precios e inventario en tiempo real para todas las tiendas.
+      </div>
     </div>
   </div>
 </section>
