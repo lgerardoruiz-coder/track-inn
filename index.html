@@ -1869,6 +1869,140 @@ button, .store-select-btn, .size-btn {
   font-family: 'Poppins', sans-serif;
   cursor: pointer;
 }
+
+/* Piezas Unicas Module */
+.pu-body {
+  padding: 8px 12px 30px;
+  overflow-y: auto;
+  height: calc(100vh - 56px);
+  height: calc(100dvh - 56px);
+}
+.pu-filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.pu-filter {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #1a1a2e;
+  color: #fff;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 20px;
+}
+.pu-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.pu-toggle {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #444;
+  flex-shrink: 0;
+}
+.pu-toggle-btn {
+  padding: 6px 12px;
+  background: #1a1a2e;
+  color: var(--gray);
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+}
+.pu-toggle-btn.active {
+  background: #F39C12;
+  color: #000;
+}
+.pu-sort {
+  flex: 1;
+  padding: 6px 4px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #1a1a2e;
+  color: #fff;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+}
+.pu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pu-card {
+  background: var(--dark-gray);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border-left: 4px solid #F39C12;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.pu-card:active { transform: scale(0.98); }
+.pu-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.pu-card-brand {
+  font-size: 11px;
+  color: #F39C12;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.pu-card-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+}
+.pu-card-desc {
+  font-size: 13px;
+  color: #ddd;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pu-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--gray);
+}
+.pu-card-original {
+  text-decoration: line-through;
+  color: #888;
+}
+.pu-card-discount {
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.pu-card-pzas {
+  font-weight: 700;
+  color: #F39C12;
+}
+.pu-card-talla {
+  background: #333;
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -1915,6 +2049,10 @@ button, .store-select-btn, .size-btn {
           <button class="btn-print-batch" onclick="goToScreen(5)">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             IMPRIMIR AHORA
+          </button>
+          <button class="btn-print-batch" onclick="goToScreen(6)" style="border-color:#F39C12;color:#F39C12">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+            PIEZAS UNICAS
           </button>
           <button class="btn-secondary" id="btnLoadData" onclick="document.getElementById('excelInput').click()">
             CARGAR DATOS (EXCEL)
@@ -2071,6 +2209,47 @@ button, .store-select-btn, .size-btn {
         <button class="btn-connect-printer" id="batchConnectBtn" onclick="togglePrinter()" style="max-width:100%;margin-top:8px">
           &#9678; Conectar impresora Phomemo
         </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: PIEZAS UNICAS -->
+    <div class="screen right" id="screen6">
+      <div class="screen-header header-dark">
+        <button class="back-btn" onclick="goToScreen(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="header-title">Piezas Unicas</div>
+        <div id="puCount" style="color:var(--gray);font-size:13px;margin-left:auto;padding-right:12px">0</div>
+      </div>
+      <div class="pu-body">
+        <!-- Filters -->
+        <div class="pu-filters">
+          <select class="pu-filter" id="puFilterMarca" onchange="applyPuFilters()">
+            <option value="">Marca</option>
+          </select>
+          <select class="pu-filter" id="puFilterGenero" onchange="applyPuFilters()">
+            <option value="">Genero</option>
+          </select>
+          <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()">
+            <option value="">Division</option>
+          </select>
+        </div>
+        <div class="pu-controls">
+          <div class="pu-toggle" id="puPzaToggle">
+            <button class="pu-toggle-btn active" onclick="setPuMaxPzas(1)">1 pza</button>
+            <button class="pu-toggle-btn" onclick="setPuMaxPzas(3)">Hasta 3</button>
+          </div>
+          <select class="pu-sort" id="puSort" onchange="applyPuFilters()">
+            <option value="price-desc">Precio ↓</option>
+            <option value="price-asc">Precio ↑</option>
+            <option value="pzas-asc">Menos pzas</option>
+            <option value="pzas-desc">Mas pzas</option>
+          </select>
+        </div>
+        <!-- Results list -->
+        <div id="puList" class="pu-list"></div>
       </div>
     </div>
   </div>
@@ -3844,6 +4023,209 @@ function togglePrinter() {
   }
 }
 
+// ============ PIEZAS UNICAS MODULE ============
+var puMaxPzas = 1;
+var puData = []; // filtered/processed data
+var puAllData = []; // all unique pieces from store
+
+function initPiezasUnicas() {
+  if (productData.length === 0) {
+    document.getElementById('puList').innerHTML = '<div style="text-align:center;color:var(--gray);padding:40px 20px">Carga un Excel primero</div>';
+    document.getElementById('puCount').textContent = '0';
+    return;
+  }
+
+  // Find inventory column
+  var invKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
+  var sucKey = 'Sucursal';
+
+  // Detect current store name from the data
+  var storeName = currentStore;
+  if (!storeName) {
+    // If no GPS store, try to find the most common sucursal or use first one
+    var sucursales = {};
+    productData.forEach(function(r) {
+      var s = String(r[sucKey] || '').trim();
+      if (s) sucursales[s] = (sucursales[s] || 0) + 1;
+    });
+    var sorted = Object.keys(sucursales).sort(function(a, b) { return sucursales[b] - sucursales[a]; });
+    if (sorted.length > 0) storeName = sorted[0];
+  }
+
+  // Get field helper
+  var getField = function(row, search) {
+    if (row[search] !== undefined && row[search] !== '' && row[search] !== null) return row[search];
+    var normalize = function(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[\s_-]/g, ''); };
+    var target = normalize(search);
+    var keys = Object.keys(row);
+    var match = keys.find(function(k) { return normalize(k) === target; });
+    if (match !== undefined && row[match] !== '' && row[match] !== null) return row[match];
+    var partial = keys.find(function(k) { return normalize(k).includes(target) || target.includes(normalize(k)); });
+    if (partial !== undefined && row[partial] !== '' && row[partial] !== null) return row[partial];
+    return '';
+  };
+
+  var cleanPrice = function(v) { return Number(String(v).replace(/[$,\s]/g, '')) || 0; };
+
+  // Filter: rows from current store with low inventory
+  puAllData = [];
+  productData.forEach(function(r) {
+    var suc = String(r[sucKey] || '').trim();
+    if (storeName && suc !== storeName) return;
+    var inv = parseInt(r[invKey]) || 0;
+    if (inv < 1 || inv > 3) return;
+
+    var n1 = cleanPrice(getField(r, 'Precio Nivel 1'));
+    var n2 = cleanPrice(getField(r, 'Precio Nivel 2'));
+    var n3 = cleanPrice(getField(r, 'Precio Final a público - Nivel 3') || getField(r, 'Precio Final a publico - Nivel 3'));
+    var tag = String(getField(r, 'TAG') || '').trim().toUpperCase();
+
+    // Determine final price based on tag
+    var finalPrice = n1;
+    if (tag.indexOf('PROMO') >= 0 && n3 > 0) finalPrice = n3;
+    else if ((tag.indexOf('CP') >= 0 || tag === 'REBAJA') && n2 > 0) finalPrice = n2;
+
+    var pctDiscount = (n1 > 0 && finalPrice < n1) ? Math.round((1 - finalPrice / n1) * 100) : 0;
+
+    puAllData.push({
+      upc: String(r['UPC'] || '').trim(),
+      estilo: String(getField(r, 'Estilo') || '').trim(),
+      description: String(getField(r, 'Descripcion') || getField(r, 'Descripción') || '').trim(),
+      brand: String(getField(r, 'Marca') || getField(r, 'Grupos de Marca') || '').trim(),
+      genero: String(getField(r, 'Genero') || '').trim(),
+      division: String(getField(r, 'Division') || '').trim(),
+      talla: String(getField(r, 'Talla') || '').trim(),
+      n1: n1,
+      finalPrice: finalPrice,
+      pctDiscount: pctDiscount,
+      tag: tag,
+      inv: inv
+    });
+  });
+
+  // Populate filter dropdowns
+  populatePuFilters();
+  applyPuFilters();
+}
+
+function populatePuFilters() {
+  var marcas = {}, generos = {}, divisiones = {};
+  puAllData.forEach(function(item) {
+    if (item.brand) marcas[item.brand] = true;
+    if (item.genero) generos[item.genero] = true;
+    if (item.division) divisiones[item.division] = true;
+  });
+
+  fillPuSelect('puFilterMarca', 'Marca', Object.keys(marcas).sort());
+  fillPuSelect('puFilterGenero', 'Genero', Object.keys(generos).sort());
+  fillPuSelect('puFilterDivision', 'Division', Object.keys(divisiones).sort());
+}
+
+function fillPuSelect(id, label, options) {
+  var sel = document.getElementById(id);
+  var current = sel.value;
+  sel.innerHTML = '<option value="">' + label + ' (' + options.length + ')</option>';
+  options.forEach(function(opt) {
+    sel.innerHTML += '<option value="' + opt + '"' + (opt === current ? ' selected' : '') + '>' + opt + '</option>';
+  });
+}
+
+function setPuMaxPzas(n) {
+  puMaxPzas = n;
+  var btns = document.querySelectorAll('#puPzaToggle .pu-toggle-btn');
+  btns.forEach(function(b, i) {
+    b.classList.toggle('active', (i === 0 && n === 1) || (i === 1 && n === 3));
+  });
+  applyPuFilters();
+}
+
+function applyPuFilters() {
+  var marca = document.getElementById('puFilterMarca').value;
+  var genero = document.getElementById('puFilterGenero').value;
+  var division = document.getElementById('puFilterDivision').value;
+  var sort = document.getElementById('puSort').value;
+
+  puData = puAllData.filter(function(item) {
+    if (item.inv > puMaxPzas) return false;
+    if (marca && item.brand !== marca) return false;
+    if (genero && item.genero !== genero) return false;
+    if (division && item.division !== division) return false;
+    return true;
+  });
+
+  // Sort
+  puData.sort(function(a, b) {
+    if (sort === 'price-desc') return b.finalPrice - a.finalPrice;
+    if (sort === 'price-asc') return a.finalPrice - b.finalPrice;
+    if (sort === 'pzas-asc') return a.inv - b.inv || b.finalPrice - a.finalPrice;
+    if (sort === 'pzas-desc') return b.inv - a.inv || b.finalPrice - a.finalPrice;
+    return 0;
+  });
+
+  renderPuList();
+}
+
+function renderPuList() {
+  var list = document.getElementById('puList');
+  var count = document.getElementById('puCount');
+  count.textContent = puData.length;
+
+  if (puData.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--gray);padding:40px 20px">No se encontraron piezas únicas con estos filtros</div>';
+    return;
+  }
+
+  var formatP = function(n) {
+    var num = Math.round(Number(n));
+    if (isNaN(num) || num === 0) return '$0';
+    var str = String(num);
+    var r = '';
+    for (var i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 === 0) r += ',';
+      r += str[i];
+    }
+    return '$' + r;
+  };
+
+  // Render max 100 at a time for performance
+  var showing = puData.slice(0, 100);
+  var html = '';
+  showing.forEach(function(item, idx) {
+    var discountHTML = item.pctDiscount > 0
+      ? '<span class="pu-card-original">' + formatP(item.n1) + '</span> <span class="pu-card-discount">-' + item.pctDiscount + '%</span>'
+      : '';
+
+    html += '<div class="pu-card" onclick="puGoToProduct(\'' + item.upc.replace(/'/g, "\\'") + '\')">'
+      + '<div class="pu-card-top">'
+      + '<div><span class="pu-card-brand">' + item.brand + '</span></div>'
+      + '<div class="pu-card-price">' + formatP(item.finalPrice) + '</div>'
+      + '</div>'
+      + '<div class="pu-card-desc">' + item.description + '</div>'
+      + '<div class="pu-card-meta">'
+      + '<span>' + item.estilo + '</span>'
+      + '<span class="pu-card-talla">T: ' + item.talla + '</span>'
+      + '<span>' + discountHTML + '</span>'
+      + '<span class="pu-card-pzas">' + item.inv + ' pza</span>'
+      + '</div>'
+      + '</div>';
+  });
+
+  if (puData.length > 100) {
+    html += '<div style="text-align:center;color:var(--gray);padding:16px;font-size:12px">Mostrando 100 de ' + puData.length + ' — usa los filtros para refinar</div>';
+  }
+
+  list.innerHTML = html;
+}
+
+function puGoToProduct(upc) {
+  // Simulate scanning this UPC — go to product detail
+  var rows = lookupBarcode(upc);
+  if (rows && rows.length > 0) {
+    displayProduct(rows, upc);
+    goToScreen(3);
+  }
+}
+
 // ============ BATCH PRINT MODULE ============
 var batchItems = [];
 var batchRowCounter = 0;
@@ -4462,6 +4844,11 @@ function goToScreen(target) {
     setTimeout(function() { initBatchScreen(); }, 300);
   }
 
+  // Initialize piezas unicas when entering
+  if (target === 6) {
+    setTimeout(function() { initPiezasUnicas(); }, 300);
+  }
+
   // Close batch scanner when leaving screen 5
   if (currentScreen === 5 && target !== 5) {
     try { closeBatchScanner(); } catch(e) {}
@@ -4904,7 +5291,8 @@ document.addEventListener('DOMContentLoaded', () => {
     history.pushState(null, '', location.href);
     // Instead of leaving, go back one screen in the app
     if (typeof currentScreen !== 'undefined' && currentScreen > 0) {
-      if (currentScreen === 5) leaveBatchScreen();
+      if (currentScreen === 6) goToScreen(1);
+      else if (currentScreen === 5) leaveBatchScreen();
       else if (currentScreen === 3) goToScreen(2);
       else if (currentScreen === 2) goToScreen(1);
       else if (currentScreen === 1) goToScreen(0);
