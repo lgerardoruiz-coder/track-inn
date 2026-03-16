@@ -3064,8 +3064,8 @@ window._phomemo = (function() {
     if (device) return true; // already paired
     await checkBluetooth();
     device = await navigator.bluetooth.requestDevice({
-      filters: [{ namePrefix: 'M' }],
-      optionalServices: [0xFF00]
+      acceptAllDevices: true,
+      optionalServices: [0xFF00, 0xFFE0, 0xAE30]
     });
     device.addEventListener('gattserverdisconnected', onDisconnected);
     return true;
