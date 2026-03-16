@@ -1631,22 +1631,26 @@ button, .store-select-btn, .size-btn {
 /* Batch Print Module */
 .btn-print-batch {
   width: 100%;
-  padding: 16px;
+  max-width: 320px;
+  padding: 18px 40px;
   background: transparent;
   color: var(--red);
   border: 2px solid var(--red);
-  border-radius: 14px;
+  border-radius: 16px;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   font-family: 'Poppins', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
 }
-.btn-print-batch:active { background: var(--red); color: #fff; }
+.btn-print-batch:active { background: var(--red); color: #fff; transform: scale(0.97); }
 .batch-body {
   padding: 10px 16px 140px;
   overflow-y: auto;
