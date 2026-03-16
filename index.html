@@ -3034,34 +3034,90 @@ window._phomemo = (function() {
   var PRINTER_WIDTH_BYTES = 48; // 384 pixels at 203 DPI
   var CHUNK_SIZE = 128;
   var CHUNK_DELAY = 20;
+  var _reconnecting = false;
 
   function isConnected() {
     return device && device.gatt && device.gatt.connected && writeChar;
   }
 
+  function getDeviceName() {
+    return (device && device.name) ? device.name : 'Phomemo M120';
+  }
+
+  // Step 1: Pair - only opens the BLE picker (fast, user selects device)
+  async function pair() {
+    if (device) return true; // already paired
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: 'M' }],
+      optionalServices: [0xFF00]
+    });
+    device.addEventListener('gattserverdisconnected', onDisconnected);
+    return true;
+  }
+
+  // Step 2: Connect GATT - happens in background, no user interaction needed
+  async function connectGatt() {
+    if (!device) throw new Error('Primero vincula la impresora');
+    if (isConnected()) return true;
+
+    var timeout = new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error('Timeout: la impresora no respondió en 10s')); }, 10000);
+    });
+
+    var doConnect = (async function() {
+      var server = await device.gatt.connect();
+      await new Promise(function(r) { setTimeout(r, 200); });
+      var service = await server.getPrimaryService(0xFF00);
+      writeChar = await service.getCharacteristic(0xFF02);
+      return true;
+    })();
+
+    return Promise.race([doConnect, timeout]);
+  }
+
+  // Full flow: pair + connect
   async function connect() {
     if (isConnected()) return true;
     try {
-      device = await navigator.bluetooth.requestDevice({
-        filters: [{ namePrefix: 'M' }],
-        optionalServices: [0xFF00]
-      });
-      var server = await device.gatt.connect();
-      await new Promise(function(r) { setTimeout(r, 100); });
-      var service = await server.getPrimaryService(0xFF00);
-      writeChar = await service.getCharacteristic(0xFF02);
-      device.addEventListener('gattserverdisconnected', function() {
-        writeChar = null;
-        updatePrinterUI(false);
-      });
+      await pair();
+      updatePrinterUI('connecting');
+      await connectGatt();
       return true;
     } catch(e) {
-      device = null; writeChar = null;
+      writeChar = null;
       throw e;
     }
   }
 
+  // Auto-reconnect when connection drops (no picker needed, device already paired)
+  function onDisconnected() {
+    writeChar = null;
+    if (!device || _reconnecting) return;
+    _reconnecting = true;
+    updatePrinterUI('reconnecting');
+
+    var attempts = 0;
+    var maxAttempts = 3;
+    function tryReconnect() {
+      attempts++;
+      if (!device || attempts > maxAttempts) {
+        _reconnecting = false;
+        updatePrinterUI(false);
+        return;
+      }
+      updatePrinterUI('reconnecting', 'Reconectando... intento ' + attempts + '/' + maxAttempts);
+      connectGatt().then(function() {
+        _reconnecting = false;
+        updatePrinterUI(true);
+      }).catch(function() {
+        setTimeout(tryReconnect, 2000);
+      });
+    }
+    setTimeout(tryReconnect, 1000);
+  }
+
   function disconnect() {
+    _reconnecting = false;
     if (device && device.gatt && device.gatt.connected) {
       device.gatt.disconnect();
     }
@@ -3149,24 +3205,44 @@ window._phomemo = (function() {
     await send(new Uint8Array([0x1F, 0xF0, 0x05, 0x00, 0x1F, 0xF0, 0x03, 0x00]));
   }
 
-  return { connect: connect, disconnect: disconnect, isConnected: isConnected, print: print, canvasToRaster: canvasToRaster, PRINTER_WIDTH_BYTES: PRINTER_WIDTH_BYTES };
+  return {
+    connect: connect, pair: pair, connectGatt: connectGatt,
+    disconnect: disconnect, isConnected: isConnected,
+    getDeviceName: getDeviceName,
+    print: print, canvasToRaster: canvasToRaster,
+    PRINTER_WIDTH_BYTES: PRINTER_WIDTH_BYTES
+  };
 })();
 
-function updatePrinterUI(connected) {
+var _printerSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
+
+function updatePrinterUI(state, customMsg) {
   var btn = document.getElementById('btnPrintLabel');
   var conn = document.getElementById('btnConnectPrinter');
   var status = document.getElementById('printerStatus');
-  if (btn) {
-    btn.className = 'btn-print-label' + (connected ? ' connected' : '');
-    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
-      + (connected ? 'Imprimir etiqueta' : 'Conectar e imprimir');
-  }
-  if (conn) {
-    conn.className = 'btn-connect-printer' + (connected ? ' connected' : '');
-    conn.innerHTML = connected ? '&#9679; Phomemo M120 conectada — Desconectar' : '&#9678; Conectar impresora Phomemo M120';
-  }
-  if (status) {
-    status.textContent = connected ? 'Impresora lista' : 'Sin impresora conectada';
+  var name = window._phomemo.getDeviceName();
+
+  if (state === true || state === 'connected') {
+    // Connected and ready
+    if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = _printerSvg + 'Imprimir etiqueta'; }
+    if (conn) { conn.className = 'btn-connect-printer connected'; conn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
+    if (status) status.textContent = customMsg || 'Impresora lista';
+  } else if (state === 'connecting') {
+    if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Conectando...'; }
+    if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Conectando a ' + name + '...'; }
+    if (status) status.textContent = customMsg || 'Estableciendo conexión BLE...';
+  } else if (state === 'reconnecting') {
+    if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Reconectando...'; }
+    if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Reconectando...'; }
+    if (status) status.textContent = customMsg || 'Conexión perdida, reconectando...';
+  } else if (state === 'printing') {
+    if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Imprimiendo...'; }
+    if (status) status.textContent = customMsg || 'Enviando etiqueta...';
+  } else {
+    // Disconnected
+    if (btn) { btn.className = 'btn-print-label'; btn.innerHTML = _printerSvg + 'Conectar e imprimir'; }
+    if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
+    if (status) status.textContent = customMsg || 'Sin impresora conectada';
   }
 }
 
@@ -3356,66 +3432,59 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
 
 async function printLabel() {
   if (!window._labelData) return;
-  var btn = document.getElementById('btnPrintLabel');
-  var status = document.getElementById('printerStatus');
 
   try {
-    // Connect if needed
+    // If not connected, connect first
     if (!window._phomemo.isConnected()) {
-      if (status) status.textContent = 'Conectando a Phomemo M120...';
       await window._phomemo.connect();
       updatePrinterUI(true);
     }
 
-    // Render label to canvas
-    if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimiendo...'; }
-    if (status) status.textContent = 'Generando etiqueta...';
+    // Now print
+    updatePrinterUI('printing', 'Generando etiqueta...');
 
     var canvas = renderLabelToCanvas();
     if (!canvas) throw new Error('No se pudo generar la etiqueta');
 
-    // Wait for barcode to render (async SVG to canvas)
-    await new Promise(function(r) { setTimeout(r, 500); });
-
-    // Re-render to ensure barcode is drawn
+    // Wait for barcode SVG to render to canvas
+    await new Promise(function(r) { setTimeout(r, 400); });
     canvas = renderLabelToCanvas();
-    await new Promise(function(r) { setTimeout(r, 500); });
+    await new Promise(function(r) { setTimeout(r, 400); });
 
-    if (status) status.textContent = 'Enviando a impresora...';
+    updatePrinterUI('printing', 'Enviando a impresora...');
     await window._phomemo.print(canvas);
 
-    if (status) status.textContent = '¡Etiqueta impresa!';
-    if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir etiqueta'; }
-
-    setTimeout(function() {
-      if (status) status.textContent = 'Impresora lista';
-    }, 3000);
+    updatePrinterUI(true, '¡Etiqueta impresa!');
+    setTimeout(function() { updatePrinterUI(true); }, 3000);
 
   } catch(e) {
     var msg = e.message || String(e);
-    if (msg.indexOf('cancel') >= 0 || msg.indexOf('Cancel') >= 0) {
-      if (status) status.textContent = 'Conexión cancelada';
+    var isCancelled = msg.indexOf('cancel') >= 0 || msg.indexOf('Cancel') >= 0 || msg.indexOf('denied') >= 0;
+    if (isCancelled) {
+      updatePrinterUI(false, 'Conexión cancelada');
     } else {
-      if (status) status.textContent = 'Error: ' + msg;
-      alert('Error de impresión: ' + msg);
+      updatePrinterUI(false, 'Error: ' + msg);
     }
-    if (btn) { btn.className = 'btn-print-label'; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Conectar e imprimir'; }
   }
 }
 
 function togglePrinter() {
   if (window._phomemo.isConnected()) {
     window._phomemo.disconnect();
-    updatePrinterUI(false);
+    updatePrinterUI(false, 'Desconectada');
   } else {
+    // Step 1: pair (shows BLE picker - fast)
+    updatePrinterUI(false, 'Selecciona tu impresora del menú...');
     window._phomemo.connect().then(function() {
       updatePrinterUI(true);
     }).catch(function(e) {
       var msg = e.message || String(e);
-      if (msg.indexOf('cancel') < 0 && msg.indexOf('Cancel') < 0) {
-        alert('No se pudo conectar: ' + msg);
+      var isCancelled = msg.indexOf('cancel') >= 0 || msg.indexOf('Cancel') >= 0 || msg.indexOf('denied') >= 0;
+      if (isCancelled) {
+        updatePrinterUI(false, 'Conexión cancelada');
+      } else {
+        updatePrinterUI(false, 'Error: ' + msg);
       }
-      updatePrinterUI(false);
     });
   }
 }

@@ -1,5 +1,5 @@
-// v26 — Phomemo M120 BLE printing, 40x30mm labels
-const CACHE_NAME = 'trackinn-v26';
+// v27 — BLE reconnect, better UX, timeout
+const CACHE_NAME = 'trackinn-v27';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
