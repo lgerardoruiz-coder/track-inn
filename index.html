@@ -4067,39 +4067,71 @@ function initPiezasUnicas() {
 
   var cleanPrice = function(v) { return Number(String(v).replace(/[$,\s]/g, '')) || 0; };
 
-  // Filter: rows from current store with low inventory
-  puAllData = [];
+  // Step 1: Collect all rows from current store with inventory > 0
+  var storeRows = [];
   productData.forEach(function(r) {
     var suc = String(r[sucKey] || '').trim();
     if (storeName && suc !== storeName) return;
     var inv = parseInt(r[invKey]) || 0;
-    if (inv < 1 || inv > 3) return;
+    if (inv < 1) return;
+    storeRows.push(r);
+  });
 
-    var n1 = cleanPrice(getField(r, 'Precio Nivel 1'));
-    var n2 = cleanPrice(getField(r, 'Precio Nivel 2'));
-    var n3 = cleanPrice(getField(r, 'Precio Final a público - Nivel 3') || getField(r, 'Precio Final a publico - Nivel 3'));
-    var tag = String(getField(r, 'TAG') || '').trim().toUpperCase();
+  // Step 2: Group by Estilo and sum total inventory
+  var estiloGroups = {};
+  storeRows.forEach(function(r) {
+    var estilo = String(getField(r, 'Estilo') || '').trim();
+    if (!estilo) return;
+    var inv = parseInt(r[invKey]) || 0;
+    if (!estiloGroups[estilo]) {
+      estiloGroups[estilo] = { rows: [], totalInv: 0, tallas: [] };
+    }
+    estiloGroups[estilo].rows.push(r);
+    estiloGroups[estilo].totalInv += inv;
+    estiloGroups[estilo].tallas.push({
+      talla: String(getField(r, 'Talla') || '').trim(),
+      inv: inv,
+      upc: String(r['UPC'] || '').trim()
+    });
+  });
 
-    // Determine final price based on tag
+  // Step 3: Keep only estilos with 1-3 total pieces
+  puAllData = [];
+  Object.keys(estiloGroups).forEach(function(estilo) {
+    var g = estiloGroups[estilo];
+    if (g.totalInv < 1 || g.totalInv > 3) return;
+
+    var first = g.rows[0];
+    var n1 = cleanPrice(getField(first, 'Precio Nivel 1'));
+    var n2 = cleanPrice(getField(first, 'Precio Nivel 2'));
+    var n3 = cleanPrice(getField(first, 'Precio Final a público - Nivel 3') || getField(first, 'Precio Final a publico - Nivel 3'));
+    var tag = String(getField(first, 'TAG') || '').trim().toUpperCase();
+
     var finalPrice = n1;
     if (tag.indexOf('PROMO') >= 0 && n3 > 0) finalPrice = n3;
     else if ((tag.indexOf('CP') >= 0 || tag === 'REBAJA') && n2 > 0) finalPrice = n2;
 
     var pctDiscount = (n1 > 0 && finalPrice < n1) ? Math.round((1 - finalPrice / n1) * 100) : 0;
 
+    // Build tallas string (e.g. "26, 27" or just "8.5")
+    var tallasWithInv = g.tallas.filter(function(t) { return t.inv > 0; });
+    var tallasStr = tallasWithInv.map(function(t) { return t.talla; }).join(', ');
+    var firstUpc = tallasWithInv.length > 0 ? tallasWithInv[0].upc : '';
+
     puAllData.push({
-      upc: String(r['UPC'] || '').trim(),
-      estilo: String(getField(r, 'Estilo') || '').trim(),
-      description: String(getField(r, 'Descripcion') || getField(r, 'Descripción') || '').trim(),
-      brand: String(getField(r, 'Marca') || getField(r, 'Grupos de Marca') || '').trim(),
-      genero: String(getField(r, 'Genero') || '').trim(),
-      division: String(getField(r, 'Division') || '').trim(),
-      talla: String(getField(r, 'Talla') || '').trim(),
+      upc: firstUpc,
+      estilo: estilo,
+      description: String(getField(first, 'Descripcion') || getField(first, 'Descripción') || '').trim(),
+      brand: String(getField(first, 'Marca') || getField(first, 'Grupos de Marca') || '').trim(),
+      genero: String(getField(first, 'Genero') || '').trim(),
+      division: String(getField(first, 'Division') || '').trim(),
+      tallas: tallasStr,
+      tallasCount: tallasWithInv.length,
       n1: n1,
       finalPrice: finalPrice,
       pctDiscount: pctDiscount,
       tag: tag,
-      inv: inv
+      totalInv: g.totalInv
     });
   });
 
@@ -4146,7 +4178,7 @@ function applyPuFilters() {
   var sort = document.getElementById('puSort').value;
 
   puData = puAllData.filter(function(item) {
-    if (item.inv > puMaxPzas) return false;
+    if (item.totalInv > puMaxPzas) return false;
     if (marca && item.brand !== marca) return false;
     if (genero && item.genero !== genero) return false;
     if (division && item.division !== division) return false;
@@ -4157,8 +4189,8 @@ function applyPuFilters() {
   puData.sort(function(a, b) {
     if (sort === 'price-desc') return b.finalPrice - a.finalPrice;
     if (sort === 'price-asc') return a.finalPrice - b.finalPrice;
-    if (sort === 'pzas-asc') return a.inv - b.inv || b.finalPrice - a.finalPrice;
-    if (sort === 'pzas-desc') return b.inv - a.inv || b.finalPrice - a.finalPrice;
+    if (sort === 'pzas-asc') return a.totalInv - b.totalInv || b.finalPrice - a.finalPrice;
+    if (sort === 'pzas-desc') return b.totalInv - a.totalInv || b.finalPrice - a.finalPrice;
     return 0;
   });
 
@@ -4195,6 +4227,8 @@ function renderPuList() {
       ? '<span class="pu-card-original">' + formatP(item.n1) + '</span> <span class="pu-card-discount">-' + item.pctDiscount + '%</span>'
       : '';
 
+    var tallasLabel = item.tallasCount === 1 ? 'T: ' + item.tallas : 'T: ' + item.tallas + ' (' + item.tallasCount + ')';
+
     html += '<div class="pu-card" onclick="puGoToProduct(\'' + item.upc.replace(/'/g, "\\'") + '\')">'
       + '<div class="pu-card-top">'
       + '<div><span class="pu-card-brand">' + item.brand + '</span></div>'
@@ -4203,9 +4237,9 @@ function renderPuList() {
       + '<div class="pu-card-desc">' + item.description + '</div>'
       + '<div class="pu-card-meta">'
       + '<span>' + item.estilo + '</span>'
-      + '<span class="pu-card-talla">T: ' + item.talla + '</span>'
+      + '<span class="pu-card-talla">' + tallasLabel + '</span>'
       + '<span>' + discountHTML + '</span>'
-      + '<span class="pu-card-pzas">' + item.inv + ' pza</span>'
+      + '<span class="pu-card-pzas">' + item.totalInv + ' pza</span>'
       + '</div>'
       + '</div>';
   });
