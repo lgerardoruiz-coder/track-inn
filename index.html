@@ -3163,20 +3163,36 @@ window._phomemo = (function() {
   }
 
   // Keepalive: ping printer every 30s to prevent BLE timeout
+  // Auto-disconnect after 10 min of no printing to save battery
   var _keepaliveTimer = null;
+  var _idleTimer = null;
+  var IDLE_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+
   function startKeepalive() {
     stopKeepalive();
     _keepaliveTimer = setInterval(function() {
       if (isConnected()) {
-        // Query battery as keepalive ping
         send(new Uint8Array([0x1F, 0x11, 0x08])).catch(function() {});
       } else {
         stopKeepalive();
       }
     }, 30000);
+    resetIdleTimer();
   }
+
   function stopKeepalive() {
     if (_keepaliveTimer) { clearInterval(_keepaliveTimer); _keepaliveTimer = null; }
+    if (_idleTimer) { clearTimeout(_idleTimer); _idleTimer = null; }
+  }
+
+  function resetIdleTimer() {
+    if (_idleTimer) clearTimeout(_idleTimer);
+    _idleTimer = setTimeout(function() {
+      if (isConnected()) {
+        disconnect();
+        updatePrinterUI(false, 'Desconectada por 10 min sin uso (ahorro de batería)');
+      }
+    }, IDLE_TIMEOUT);
   }
 
   function disconnect() {
@@ -3236,6 +3252,7 @@ window._phomemo = (function() {
 
   async function print(canvas, density) {
     if (!isConnected()) throw new Error('No conectada');
+    resetIdleTimer(); // Reset 10-min idle timer on each print
     density = density || 6;
     var raster = canvasToRaster(canvas);
 
