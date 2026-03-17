@@ -3856,68 +3856,71 @@ function renderLabelToCanvas() {
   ctx.fillRect(0, 0, W, H);
 
   // === TOP SECTION: Prices left, Estilo+Desc right ===
-  var pad = 8;
+  var pad = 12;
 
   // Estilo + Description — top right, small
   ctx.fillStyle = '#000';
   ctx.textAlign = 'right';
-  ctx.font = 'bold 11px Arial';
-  ctx.fillText(d.estilo, W - pad, 14);
-  ctx.font = '10px Arial';
-  ctx.fillText(d.description, W - pad, 28);
+  ctx.font = 'bold 9px Arial';
+  ctx.fillText(d.estilo, W - pad, 12);
+  ctx.font = '8px Arial';
+  ctx.fillText(d.description, W - pad, 22);
 
   // Prices — top left
   ctx.textAlign = 'left';
 
   if (isFullPrice) {
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText(formatP(d.n1), pad, 50);
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText(formatP(d.n1), pad, 42);
   } else if (isCPPromo) {
     ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
+    ctx.font = '9px Arial';
     var t1 = 'De: ' + formatP(d.n1);
-    ctx.fillText(t1, pad, 18);
+    ctx.fillText(t1, pad, 14);
     var tw1 = ctx.measureText(t1).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 14); ctx.lineTo(pad + tw1, 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 11); ctx.lineTo(pad + tw1, 11); ctx.stroke();
 
-    ctx.font = '14px Arial';
+    ctx.font = '10px Arial';
     var t2 = 'CP: ' + formatP(d.n2);
-    ctx.fillText(t2, pad, 36);
+    ctx.fillText(t2, pad, 28);
     var tw2 = ctx.measureText(t2).width;
-    ctx.beginPath(); ctx.moveTo(pad, 32); ctx.lineTo(pad + tw2, 32); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 25); ctx.lineTo(pad + tw2, 25); ctx.stroke();
 
-    ctx.font = 'bold 34px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 72);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('A: ' + formatP(d.n3), pad, 54);
   } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
-    ctx.font = '14px Arial';
+    ctx.font = '10px Arial';
     var t3 = 'De: ' + formatP(d.n1);
-    ctx.fillText(t3, pad, 22);
+    ctx.fillText(t3, pad, 16);
     var tw3 = ctx.measureText(t3).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw3, 18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 13); ctx.lineTo(pad + tw3, 13); ctx.stroke();
 
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 62);
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText('A: ' + formatP(d.n3), pad, 46);
   } else {
     // REBAJA / CP
     ctx.fillStyle = '#000';
-    ctx.font = '14px Arial';
+    ctx.font = '10px Arial';
     var t4 = 'De: ' + formatP(d.n1);
-    ctx.fillText(t4, pad, 22);
+    ctx.fillText(t4, pad, 16);
     var tw4 = ctx.measureText(t4).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw4, 18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 13); ctx.lineTo(pad + tw4, 13); ctx.stroke();
 
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatP(d.n2), pad, 62);
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText('A: ' + formatP(d.n2), pad, 46);
   }
 
-  // === BOTTOM SECTION: Big barcode ===
-  // Barcode takes up from y=80 to y=240 (160px tall), full width
-  renderBarcodeToCanvas(ctx, d.upc, 8, 78, W - 16, 158);
+  // === BOTTOM SECTION: Big barcode, centered ===
+  var barcodeY = 60;
+  var barcodeH = H - barcodeY - 4;
+  var barcodeW = W - (pad * 2);
+  var barcodeX = pad;
+  renderBarcodeToCanvas(ctx, d.upc, barcodeX, barcodeY, barcodeW, barcodeH);
 
   return canvas;
 }
@@ -3929,8 +3932,8 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
     var tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(tmpSvg);
     JsBarcode(tmpSvg, upc.trim(), {
-      format: 'CODE128', width: 3, height: 120,
-      displayValue: true, fontSize: 18, margin: 0,
+      format: 'CODE128', width: 2, height: 100,
+      displayValue: true, fontSize: 14, margin: 0,
       background: 'transparent', lineColor: '#000'
     });
     var svgData = new XMLSerializer().serializeToString(tmpSvg);
