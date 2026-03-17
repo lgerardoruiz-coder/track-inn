@@ -194,6 +194,33 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
 .manual-step-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .manual-step-text { font-size: 12px; color: var(--gray); line-height: 1.5; }
 
+/* DEMO PHONE MOCKUP */
+.demo-phone { position:relative;width:min(340px,34vh);height:min(720px,72vh);background:#1D1D1D;border-radius:36px;border:3px solid #333;overflow:hidden;box-shadow:0 0 0 5px #111,0 30px 100px rgba(0,0,0,0.9); }
+.demo-statusbar { position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:space-between;padding:6px 20px 0;z-index:100;font-size:13px;font-weight:600;color:#fff; }
+.demo-vp { position:relative;width:100%;height:100%;overflow:hidden; }
+.demo-screen { position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;opacity:0;transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1),opacity 0.4s ease; }
+.demo-screen.active { opacity:1;transform:translateX(0);z-index:10; }
+.demo-screen.left { opacity:0;transform:translateX(-100%); }
+.demo-s0 { background:#1D1D1D;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;padding:40px 24px; }
+.demo-storebtn { width:85%;background:#2B2B2B;border:2px solid transparent;border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center;transition:all 0.3s; }
+.demo-storebtn.selected { border-color:var(--red);background:rgba(230,57,70,0.08); }
+.demo-storebtn span { color:#fff;font-size:18px;font-weight:800;letter-spacing:1px; }
+.demo-s1 { background:#1D1D1D; }
+.demo-s2 { background:#1D1D1D;display:flex;flex-direction:column;height:100%; }
+.demo-s3 { display:flex;flex-direction:column;height:100%;overflow:hidden; }
+.demo-hdr { height:50px;display:flex;align-items:center;justify-content:center;padding:0 16px;padding-top:44px; }
+.demo-scanframe { width:220px;height:220px;position:relative;border-radius:8px; }
+.demo-corner { position:absolute;width:30px;height:30px;border-color:var(--red);border-style:solid;border-width:0; }
+.demo-corner.tl { top:0;left:0;border-top-width:3px;border-left-width:3px;border-top-left-radius:10px; }
+.demo-corner.tr { top:0;right:0;border-top-width:3px;border-right-width:3px;border-top-right-radius:10px; }
+.demo-corner.bl { bottom:0;left:0;border-bottom-width:3px;border-left-width:3px;border-bottom-left-radius:10px; }
+.demo-corner.br { bottom:0;right:0;border-bottom-width:3px;border-right-width:3px;border-bottom-right-radius:10px; }
+#dsScanLine { position:absolute;left:30px;right:30px;height:2px;background:linear-gradient(90deg,transparent,#E63946,#E63946,transparent);box-shadow:0 0 12px #E63946;opacity:0.9;top:30px; }
+#dsScanLine.scanning { animation:dsScanAnim 0.5s ease-in-out infinite alternate; }
+@keyframes dsScanAnim { from{top:30px} to{top:calc(100% - 30px)} }
+#dsScanFlash { position:absolute;inset:0;background:rgba(230,57,70,0.3);opacity:0;pointer-events:none;transition:opacity 0.08s;z-index:5; }
+#dsScanFlash.flash { opacity:1; }
+
 /* BACK BTN */
 .back-btn { display:inline-flex;align-items:center;gap:6px;color:var(--gray);font-size:12px;font-weight:600;text-decoration:none;padding:8px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);transition:all 0.3s;position:absolute;top:70px;left:30px;z-index:10; }
 .back-btn:hover { color:#fff;border-color:var(--red);background:rgba(230,57,70,0.1); }
@@ -543,15 +570,101 @@ body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: var(--whi
   </div>
 </section>
 
-<!-- ========== VER APP EN VIVO (después de módulos) ========== -->
-<section class="slide" id="demo" style="min-height:60vh">
-  <div class="portada-content fade-in">
-    <div style="font-size:48px;margin-bottom:16px">📱</div>
-    <h2 style="font-size:32px;font-weight:800;margin-bottom:12px">¿Quieres verlo en accion?</h2>
-    <p style="color:var(--gray);font-size:15px;margin-bottom:28px">Prueba Track INN desde tu celular ahora mismo.</p>
-    <a class="cierre-cta" href="https://lgerardoruiz-coder.github.io/track-inn/" target="_blank">
-      VER APP EN VIVO
-    </a>
+<!-- ========== VER APP EN VIVO — VIDEO + DEMO ANIMADO ========== -->
+<section class="slide" id="demo" style="padding:70px 0 20px;position:relative;overflow:hidden;background:#0a0a0a">
+  <div class="slide-number">🎬</div>
+
+  <!-- VIDEO BACKGROUND -->
+  <div id="demoVideoWrap" style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+    <video id="demoVideo" src="escena1.mp4" playsinline preload="auto" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform 0.6s ease,opacity 0.4s ease"></video>
+
+    <!-- PLAY BUTTON -->
+    <div id="demoPlayBtn" style="position:relative;z-index:15;display:flex;flex-direction:column;align-items:center;gap:16px;cursor:pointer" onclick="startDemo()">
+      <div style="width:80px;height:80px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(230,57,70,0.4)">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><polygon points="8,5 19,12 8,19"/></svg>
+      </div>
+      <div style="color:#fff;font-size:16px;font-weight:700;letter-spacing:1px">VER DEMO EN VIVO</div>
+      <div style="color:var(--gray);font-size:12px">Track INN en accion — 10 segundos</div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div id="demoProgress" style="position:absolute;bottom:0;left:0;height:3px;background:var(--red);width:0%;z-index:25;transition:width 0.2s linear"></div>
+  </div>
+
+  <!-- APP OVERLAY (mockup animado) -->
+  <div id="demoAppOverlay" style="position:absolute;inset:0;z-index:20;opacity:0;pointer-events:none;transition:opacity 0.4s ease;display:flex;align-items:center;justify-content:center;background:#0a0a0a">
+    <div class="demo-phone">
+      <!-- Status bar -->
+      <div class="demo-statusbar"><div>9:41</div><div style="display:flex;gap:4px;align-items:center"><svg width="16" height="12" viewBox="0 0 16 12"><path d="M1 8h2v4H1zM5 5h2v7H5zM9 2h2v10H9zM13 0h2v12h-2z" fill="white"/></svg><div style="width:22px;height:11px;border:1px solid #fff;border-radius:3px;padding:1px"><div style="width:70%;height:100%;background:#2ecc71;border-radius:1px"></div></div></div></div>
+      <!-- Viewport -->
+      <div class="demo-vp">
+        <!-- S0: Seleccion de tienda -->
+        <div class="demo-screen demo-s0 active" id="ds0">
+          <div style="font-size:32px;font-weight:900;letter-spacing:3px;color:#fff">TRACK <span style="color:var(--red)">INN</span></div>
+          <div style="font-size:14px;color:var(--gray);margin-top:8px">Selecciona tu tienda</div>
+          <div class="demo-storebtn" id="dsBtnInnova"><span>INNOVASPORT</span></div>
+          <div class="demo-storebtn"><span>INNVICTUS</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:12px">v2.0 — Escanea. Imprime. Vende.</div>
+        </div>
+        <!-- S1: Splash -->
+        <div class="demo-screen demo-s1" id="ds1">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:40px">
+            <svg width="60" height="60" viewBox="0 0 512 512"><rect width="512" height="512" rx="80" fill="#1D1D1D"/><rect x="77" y="154" width="20" height="204" rx="10" fill="white" opacity="0.6"/><rect x="113" y="128" width="16" height="256" rx="8" fill="white" opacity="0.8"/><rect x="144" y="154" width="26" height="204" rx="10" fill="white"/><rect x="190" y="128" width="16" height="256" rx="8" fill="#E63946"/><rect x="226" y="154" width="31" height="204" rx="10" fill="white"/><rect x="277" y="128" width="16" height="256" rx="8" fill="#E63946" opacity="0.8"/><rect x="313" y="154" width="20" height="204" rx="10" fill="white" opacity="0.6"/><rect x="354" y="179" width="26" height="154" rx="10" fill="white" opacity="0.4"/><rect x="400" y="154" width="36" height="204" rx="10" fill="#E63946" opacity="0.3"/></svg>
+            <div style="font-size:36px;font-weight:900;letter-spacing:4px;color:#fff">TRACK <span style="color:var(--red)">INN</span></div>
+            <div style="font-size:13px;color:var(--gray);letter-spacing:2px">Escanea. Imprime. Vende.</div>
+            <div style="margin-top:auto;width:100%"><div style="width:100%;padding:16px;background:var(--red);color:#fff;border-radius:14px;text-align:center;font-weight:700;font-size:15px">ESCANEAR AHORA</div></div>
+          </div>
+        </div>
+        <!-- S2: Escaner -->
+        <div class="demo-screen demo-s2" id="ds2">
+          <div class="demo-hdr"><div style="font-size:14px;font-weight:700;color:#fff">Escaner</div></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative">
+            <div class="demo-scanframe">
+              <div class="demo-corner tl"></div><div class="demo-corner tr"></div><div class="demo-corner bl"></div><div class="demo-corner br"></div>
+              <div id="dsScanLine"></div>
+              <div id="dsScanFlash"></div>
+            </div>
+            <div style="font-size:12px;color:var(--gray);text-align:center;margin-top:20px;line-height:1.5"><strong style="color:#fff">Apunta al codigo de barras</strong><br>del producto para obtener precio e inventario</div>
+          </div>
+        </div>
+        <!-- S3: Resultado -->
+        <div class="demo-screen demo-s3" id="ds3">
+          <div class="demo-hdr" style="background:#fff;color:#1D1D1D;border-bottom:1px solid #eee"><div style="font-size:14px;font-weight:700;color:#1D1D1D">Resultado</div></div>
+          <div style="flex:1;padding:12px 16px;overflow-y:auto;background:#fff">
+            <!-- Producto -->
+            <div style="background:#f9f9f9;border-radius:16px;height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative">
+              <div style="position:absolute;top:8px;left:8px;background:var(--red);color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700">HOKA</div>
+              <div style="font-size:56px">👟</div>
+            </div>
+            <div style="font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:1px">HOKA</div>
+            <div style="font-size:20px;font-weight:800;color:#1D1D1D;margin-bottom:2px">Bondi 9</div>
+            <div style="font-size:11px;color:var(--gray)">1162D11-GCTC · UPC: 197634740355</div>
+            <!-- Precios -->
+            <div id="dsPriceBlock" style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:14px;padding:14px;margin:12px 0;opacity:0;transform:translateY(10px);transition:all 0.4s ease">
+              <div style="display:flex;gap:6px;margin-bottom:8px">
+                <span style="background:var(--red);color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700">CAMBIO DE PRECIO</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font-size:15px;color:var(--gray);text-decoration:line-through">$4,299</span>
+                <span style="font-size:28px;font-weight:900;color:var(--red)">$3,009</span>
+              </div>
+            </div>
+            <!-- Inventario -->
+            <div id="dsInvBlock" style="opacity:0;transform:translateY(8px);transition:all 0.4s ease 0.1s">
+              <div style="font-size:13px;font-weight:700;color:#1D1D1D;margin-bottom:8px">Inventario</div>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <div style="flex:1;background:#f0faf0;border:1px solid #d0e8d0;border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:#2ecc71">3</div><div style="font-size:10px;color:var(--gray)">Tu tienda</div></div>
+                <div style="flex:1;background:#fff8f0;border:1px solid #f0e0c0;border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--orange)">12</div><div style="font-size:10px;color:var(--gray)">Region</div></div>
+              </div>
+            </div>
+            <!-- Boton imprimir -->
+            <div id="dsPrintBtn" style="opacity:0;transform:translateY(8px);transition:all 0.4s ease 0.2s">
+              <div style="width:100%;padding:14px;background:var(--red);color:#fff;border-radius:12px;text-align:center;font-weight:700;font-size:14px">🖨️ IMPRIMIR ETIQUETA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1360,6 +1473,107 @@ window.addEventListener('scroll', () => {
   document.querySelectorAll('.nav-links a').forEach(a => {
     a.classList.toggle('active', a.getAttribute('href') === '#' + current);
   });
+});
+
+/* ===== DEMO VIDEO + APP ANIMATION ===== */
+let demoStarted = false;
+let demoCurrentScreen = 0;
+
+function startDemo() {
+  if (demoStarted) return;
+  demoStarted = true;
+  const vid = document.getElementById('demoVideo');
+  const playBtn = document.getElementById('demoPlayBtn');
+  const overlay = document.getElementById('demoAppOverlay');
+  const progress = document.getElementById('demoProgress');
+
+  playBtn.style.opacity = '0';
+  playBtn.style.pointerEvents = 'none';
+  vid.currentTime = 0;
+  vid.play();
+
+  // Progress bar
+  const progressInterval = setInterval(() => {
+    if (vid.paused) { clearInterval(progressInterval); return; }
+    progress.style.width = (vid.currentTime / vid.duration * 100) + '%';
+  }, 100);
+
+  // At second 8: zoom into the phone area
+  setTimeout(() => {
+    vid.style.transform = 'scale(3) translate(-15%, 5%)';
+    vid.style.opacity = '0.3';
+  }, 8000);
+
+  // At second 9: show app overlay and start animation
+  setTimeout(() => {
+    vid.pause();
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'all';
+    runDemoAppFlow();
+  }, 9000);
+}
+
+function demoGoScreen(n) {
+  const screens = document.querySelectorAll('.demo-screen');
+  screens.forEach((s, i) => {
+    if (i === n) { s.classList.add('active'); s.classList.remove('left'); }
+    else if (i < n) { s.classList.remove('active'); s.classList.add('left'); }
+    else { s.classList.remove('active', 'left'); }
+  });
+  demoCurrentScreen = n;
+}
+
+function runDemoAppFlow() {
+  // 300ms: Select INNOVASPORT
+  setTimeout(() => {
+    document.getElementById('dsBtnInnova').classList.add('selected');
+  }, 300);
+  // 900ms: Go to splash
+  setTimeout(() => demoGoScreen(1), 900);
+  // 1500ms: Go to scanner
+  setTimeout(() => {
+    demoGoScreen(2);
+    setTimeout(() => document.getElementById('dsScanLine').classList.add('scanning'), 300);
+  }, 1500);
+  // 2500ms: Flash (barcode detected)
+  setTimeout(() => {
+    document.getElementById('dsScanLine').classList.remove('scanning');
+    const sf = document.getElementById('dsScanFlash');
+    sf.classList.add('flash');
+    setTimeout(() => sf.classList.remove('flash'), 120);
+    setTimeout(() => { sf.classList.add('flash'); setTimeout(() => sf.classList.remove('flash'), 100); }, 200);
+  }, 2500);
+  // 2900ms: Show results
+  setTimeout(() => demoGoScreen(3), 2900);
+  // 3200ms: Price block
+  setTimeout(() => { document.getElementById('dsPriceBlock').style.opacity = '1'; document.getElementById('dsPriceBlock').style.transform = 'translateY(0)'; }, 3200);
+  // 3600ms: Inventory
+  setTimeout(() => { document.getElementById('dsInvBlock').style.opacity = '1'; document.getElementById('dsInvBlock').style.transform = 'translateY(0)'; }, 3600);
+  // 4000ms: Print button
+  setTimeout(() => { document.getElementById('dsPrintBtn').style.opacity = '1'; document.getElementById('dsPrintBtn').style.transform = 'translateY(0)'; }, 4000);
+}
+
+// Reset demo when scrolling away
+window.addEventListener('scroll', () => {
+  const demoSection = document.getElementById('demo');
+  if (!demoSection) return;
+  const rect = demoSection.getBoundingClientRect();
+  if ((rect.bottom < 0 || rect.top > window.innerHeight) && demoStarted) {
+    demoStarted = false;
+    const vid = document.getElementById('demoVideo');
+    vid.pause(); vid.currentTime = 0; vid.style.transform = ''; vid.style.opacity = '1';
+    document.getElementById('demoPlayBtn').style.opacity = '1';
+    document.getElementById('demoPlayBtn').style.pointerEvents = 'all';
+    document.getElementById('demoAppOverlay').style.opacity = '0';
+    document.getElementById('demoAppOverlay').style.pointerEvents = 'none';
+    document.getElementById('demoProgress').style.width = '0%';
+    document.querySelectorAll('.demo-screen').forEach((s, i) => { s.classList.toggle('active', i === 0); s.classList.remove('left'); });
+    document.getElementById('dsBtnInnova').classList.remove('selected');
+    document.getElementById('dsPriceBlock').style.opacity = '0'; document.getElementById('dsPriceBlock').style.transform = 'translateY(10px)';
+    document.getElementById('dsInvBlock').style.opacity = '0'; document.getElementById('dsInvBlock').style.transform = 'translateY(8px)';
+    document.getElementById('dsPrintBtn').style.opacity = '0'; document.getElementById('dsPrintBtn').style.transform = 'translateY(8px)';
+    document.getElementById('dsScanLine').classList.remove('scanning');
+  }
 });
 
 function toggleFullscreen() {
