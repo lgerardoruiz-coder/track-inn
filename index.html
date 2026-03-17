@@ -4478,33 +4478,9 @@ function updateBatchAddBtn() {
 // Batch scanner
 function openBatchScanner(rowId) {
   batchScanTargetId = rowId;
-  document.getElementById('batchScannerOverlay').style.display = 'flex';
-  document.getElementById('batchManualInput').value = '';
-
-  // Stop main scanner if running
-  try { if (typeof stopScanner === 'function') stopScanner(); } catch(e) {}
-
-  var reader = document.getElementById('batchScannerReader');
-  reader.innerHTML = '';
-
-  batchScannerInstance = new Html5Qrcode('batchScannerReader');
-  batchScannerInstance.start(
-    { facingMode: 'environment' },
-    { fps: 10, qrbox: { width: 250, height: 100 } },
-    function(decoded) {
-      // Cooldown
-      if (batchScannerInstance._lastScan && Date.now() - batchScannerInstance._lastScan < 2000) return;
-      batchScannerInstance._lastScan = Date.now();
-
-      var input = document.getElementById('batchInput' + batchScanTargetId);
-      if (input) input.value = decoded;
-      closeBatchScanner();
-      batchLookupCode(batchScanTargetId);
-    },
-    function() {} // ignore errors
-  ).catch(function(e) {
-    console.log('Batch scanner error:', e);
-  });
+  // Use the main scanner (screen 2) instead of the small modal
+  window._batchScanMode = true;
+  goToScreen(2);
 }
 
 function closeBatchScanner() {
@@ -5268,7 +5244,12 @@ function toggleTorch() {
 
 function stopScannerAndGoBack() {
   try { stopScanner(); } catch(e) {}
-  goToScreen(1);
+  if (window._batchScanMode) {
+    window._batchScanMode = false;
+    goToScreen(5);
+  } else {
+    goToScreen(1);
+  }
 }
 
 let materialRetryCount = 0;
@@ -5292,6 +5273,19 @@ function onScanSuccess(decodedText, decodedResult) {
     if (navigator.vibrate) navigator.vibrate(100);
     materialRetryCount = 0;
     lastScanInfo.innerHTML = 'Encontrado: <strong>' + decodedText + '</strong> (' + fmt + ')';
+
+    // If in batch scan mode, return to batch screen with the code
+    if (window._batchScanMode) {
+      window._batchScanMode = false;
+      var input = document.getElementById('batchInput' + batchScanTargetId);
+      if (input) input.value = decodedText;
+      stopScanner();
+      goToScreen(5);
+      batchLookupCode(batchScanTargetId);
+      setTimeout(() => { scanCooldown = false; }, 2000);
+      return;
+    }
+
     displayProduct(rows, decodedText);
     goToScreen(3);
     setTimeout(() => { scanCooldown = false; }, 2000);
@@ -5345,6 +5339,16 @@ function processBarcode(code) {
   const rows = lookupBarcode(code);
 
   if (rows && rows.length > 0) {
+    // If in batch scan mode, return to batch
+    if (window._batchScanMode) {
+      window._batchScanMode = false;
+      var input = document.getElementById('batchInput' + batchScanTargetId);
+      if (input) input.value = code;
+      stopScanner();
+      goToScreen(5);
+      batchLookupCode(batchScanTargetId);
+      return;
+    }
     displayProduct(rows, code);
     goToScreen(3);
   } else {
