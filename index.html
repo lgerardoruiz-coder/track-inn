@@ -3719,7 +3719,7 @@ window._phomemo = (function() {
     var pixels = ctx.getImageData(0, 0, w, h).data;
     var canvasBytesPerRow = Math.ceil(w / 8);
     var output = new Uint8Array(PRINTER_WIDTH_BYTES * h);
-    var offset = Math.floor((PRINTER_WIDTH_BYTES - canvasBytesPerRow) / 2);
+    var offset = PRINTER_WIDTH_BYTES - canvasBytesPerRow;
     if (offset < 0) offset = 0;
 
     for (var y = 0; y < h; y++) {
