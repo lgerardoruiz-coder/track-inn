@@ -3862,9 +3862,9 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#000';
   ctx.textAlign = 'right';
   ctx.font = 'bold 9px Arial';
-  ctx.fillText(d.estilo, W - pad, 12);
+  ctx.fillText(d.estilo, W - 40, 12);
   ctx.font = '8px Arial';
-  ctx.fillText(d.description, W - pad, 22);
+  ctx.fillText(d.description, W - 40, 22);
 
   // Prices — top left
   ctx.textAlign = 'left';
@@ -3916,10 +3916,10 @@ function renderLabelToCanvas() {
   }
 
   // === BOTTOM SECTION: Big barcode, centered ===
-  var barcodeY = 60;
-  var barcodeH = H - barcodeY - 4;
-  var barcodeW = W - (pad * 2);
-  var barcodeX = pad;
+  var barcodeY = 56;
+  var barcodeH = H - barcodeY - 2;
+  var barcodeW = W - 8;
+  var barcodeX = 4;
   renderBarcodeToCanvas(ctx, d.upc, barcodeX, barcodeY, barcodeW, barcodeH);
 
   return canvas;
@@ -3932,8 +3932,8 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
     var tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(tmpSvg);
     JsBarcode(tmpSvg, upc.trim(), {
-      format: 'CODE128', width: 1.8, height: 90,
-      displayValue: true, fontSize: 13, margin: 0,
+      format: 'CODE128', width: 2.5, height: 130,
+      displayValue: true, fontSize: 16, margin: 0,
       background: 'transparent', lineColor: '#000'
     });
     var svgData = new XMLSerializer().serializeToString(tmpSvg);
