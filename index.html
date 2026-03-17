@@ -4894,7 +4894,7 @@ function goToScreen(target) {
   if (target === 2) {
     setTimeout(function() {
       if (currentScreen === 2) startScanner();
-    }, 600);
+    }, 100);
   }
 
   // Stop scanner/camera when leaving screen 2
@@ -4936,14 +4936,14 @@ function setScanMode(mode) {
     if (captureBtn) captureBtn.style.display = 'none';
     // Restart scanner if not running
     if (!scannerRunning) {
-      setTimeout(() => startScanner(), 300);
+      setTimeout(() => startScanner(), 50);
     }
   } else {
     instr.innerHTML = '<strong>Modo Material</strong> — Apunta a la sticker y toca Capturar';
     if (captureBtn) captureBtn.style.display = 'flex';
     // Keep the scanner running for the camera feed — onScanSuccess handles mode logic
     if (!scannerRunning) {
-      setTimeout(() => startScanner(), 300);
+      setTimeout(() => startScanner(), 50);
     }
   }
 }
@@ -4971,7 +4971,7 @@ function startScanner() {
   // Wait for any pending stop to finish before starting
   if (_stopPromise) {
     _stopPromise.finally(function() {
-      setTimeout(startScanner, 300);
+      setTimeout(startScanner, 50);
     });
     return;
   }
@@ -4983,7 +4983,7 @@ function startScanner() {
 
   const isMaterial = scanMode === 'material';
   const config = {
-    fps: isMaterial ? 25 : 15,
+    fps: isMaterial ? 30 : 20,
     qrbox: { width: 340, height: 220 },
     aspectRatio: 1.0,
     disableFlip: false,
