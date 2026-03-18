@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -2021,6 +2021,42 @@ button, .store-select-btn, .size-btn {
   padding: 1px 8px;
   border-radius: 4px;
   font-weight: 600;
+}
+
+/* ===== iOS SAFE AREAS & SCANNER FIX ===== */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .phone-frame {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .screen-header {
+    padding-top: env(safe-area-inset-top);
+  }
+  .scanner-frame {
+    height: calc(55dvh - env(safe-area-inset-top));
+  }
+}
+
+/* iOS Safari: force video to fill scanner frame properly */
+@supports (-webkit-touch-callout: none) {
+  .scanner-frame {
+    height: 50dvh;
+  }
+  #scanner-reader video {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  #scanner-reader {
+    overflow: hidden !important;
+  }
+  /* Fix iOS bottom bar eating space */
+  .splash-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  .bottom-ctas {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
 }
 </style>
 </head>
@@ -4985,14 +5021,15 @@ function startScanner() {
   html5QrCode = new Html5Qrcode('scanner-reader');
 
   const isMaterial = scanMode === 'material';
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const config = {
     fps: isMaterial ? 30 : 20,
-    qrbox: { width: 340, height: 220 },
-    aspectRatio: 1.0,
+    qrbox: isIOS ? { width: 280, height: 180 } : { width: 340, height: 220 },
+    aspectRatio: isIOS ? undefined : 1.0,
     disableFlip: false,
     formatsToSupport: getFormatsForMode(scanMode),
     experimentalFeatures: {
-      useBarCodeDetectorIfSupported: true
+      useBarCodeDetectorIfSupported: !isIOS
     }
   };
 
