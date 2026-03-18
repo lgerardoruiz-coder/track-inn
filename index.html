@@ -2082,6 +2082,22 @@ button, .store-select-btn, .size-btn {
   .batch-body, .pu-body {
     padding-bottom: env(safe-area-inset-bottom, 20px);
   }
+  /* Splash: reduce sizes so logo doesn't get cut */
+  .screen-splash {
+    padding-top: calc(20px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .splash-content {
+    margin-bottom: 20px;
+  }
+  .logo-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 10px;
+  }
+  .logo-text {
+    font-size: 40px;
+  }
 }
 </style>
 </head>
