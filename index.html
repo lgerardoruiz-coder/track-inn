@@ -2099,6 +2099,56 @@ button, .store-select-btn, .size-btn {
     font-size: 40px;
   }
 }
+
+/* ===== iPad: expand to full screen ===== */
+@supports (-webkit-touch-callout: none) {
+  @media (min-width: 768px) {
+    body {
+      background: var(--black) !important;
+    }
+    .phone-frame {
+      max-width: 100% !important;
+      max-height: 100% !important;
+      height: 100dvh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .scanner-frame {
+      height: 55dvh;
+    }
+    .logo-icon {
+      width: 100px;
+      height: 100px;
+    }
+    .logo-text {
+      font-size: 56px;
+    }
+    .tagline {
+      font-size: 20px;
+    }
+    .btn-primary {
+      font-size: 18px;
+      padding: 18px 40px;
+    }
+    .btn-print-batch {
+      font-size: 16px;
+      padding: 16px 30px;
+    }
+    .header-title {
+      font-size: 22px;
+    }
+    .scanner-body {
+      max-height: calc(100dvh - 70px - env(safe-area-inset-top, 0px));
+    }
+    .splash-content {
+      margin-bottom: 40px;
+    }
+    .screen-splash {
+      padding-top: calc(40px + env(safe-area-inset-top, 0px));
+    }
+  }
+}
 </style>
 </head>
 <body>
