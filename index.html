@@ -5112,15 +5112,16 @@ function startScanner() {
   html5QrCode = new Html5Qrcode('scanner-reader');
 
   const isMaterial = scanMode === 'material';
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isIPad = isIOS && (window.innerWidth >= 768);
   const config = {
     fps: isMaterial ? 30 : 20,
-    qrbox: isIOS ? { width: 280, height: 180 } : { width: 340, height: 220 },
+    qrbox: isIPad ? { width: 400, height: 260 } : (isIOS ? { width: 280, height: 180 } : { width: 340, height: 220 }),
     aspectRatio: isIOS ? undefined : 1.0,
     disableFlip: false,
     formatsToSupport: getFormatsForMode(scanMode),
     experimentalFeatures: {
-      useBarCodeDetectorIfSupported: !isIOS
+      useBarCodeDetectorIfSupported: true
     }
   };
 
