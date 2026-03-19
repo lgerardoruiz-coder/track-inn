@@ -3986,16 +3986,16 @@ window._phomemo = (function() {
 
     // Set speed
     await send(new Uint8Array([0x1B, 0x4E, 0x0D, 0x07]));
-    await new Promise(function(r) { setTimeout(r, 30); });
+    await new Promise(function(r) { setTimeout(r, 5); });
 
     // Set density
     var d = Math.round(5 + density * 1.25);
     await send(new Uint8Array([0x1B, 0x4E, 0x04, d]));
-    await new Promise(function(r) { setTimeout(r, 30); });
+    await new Promise(function(r) { setTimeout(r, 5); });
 
     // Set media type: labels with gaps
     await send(new Uint8Array([0x1F, 0x11, 0x0A]));
-    await new Promise(function(r) { setTimeout(r, 30); });
+    await new Promise(function(r) { setTimeout(r, 5); });
 
     // Raster header: GS v 0 \0 + width(2B LE) + height(2B LE)
     var wb = raster.widthBytes;
@@ -4010,7 +4010,7 @@ window._phomemo = (function() {
     await sendChunked(raster.data);
 
     // Footer
-    await new Promise(function(r) { setTimeout(r, 300); });
+    await new Promise(function(r) { setTimeout(r, 50); });
     await send(new Uint8Array([0x1F, 0xF0, 0x05, 0x00, 0x1F, 0xF0, 0x03, 0x00]));
   }
 
@@ -4250,9 +4250,9 @@ async function printLabel() {
     if (!canvas) throw new Error('No se pudo generar la etiqueta');
 
     // Wait for barcode SVG to render
-    await new Promise(function(r) { setTimeout(r, 400); });
+    await new Promise(function(r) { setTimeout(r, 150); });
     canvas = renderLabelToCanvas();
-    await new Promise(function(r) { setTimeout(r, 400); });
+    await new Promise(function(r) { setTimeout(r, 150); });
 
     // Print N copies
     for (var i = 0; i < qty; i++) {
@@ -4799,10 +4799,10 @@ async function batchPrintAll() {
       window._labelData = item.labelData;
       var canvas = renderLabelToCanvas();
       if (!canvas) continue;
-      await new Promise(function(r) { setTimeout(r, 400); });
+      await new Promise(function(r) { setTimeout(r, 150); });
       window._labelData = item.labelData;
       canvas = renderLabelToCanvas();
-      await new Promise(function(r) { setTimeout(r, 400); });
+      await new Promise(function(r) { setTimeout(r, 150); });
 
       for (var c = 0; c < item.qty; c++) {
         printed++;
@@ -5411,7 +5411,7 @@ async function captureMaterial() {
         await new Promise(r => setTimeout(r, 100));
         await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
         btn.textContent = 'Enfocando...';
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 150));
       }
     } catch(e) {} // Focus not supported — continue anyway
 
@@ -5773,7 +5773,7 @@ async function cpPrintSelected() {
     for (var q = 0; q < qty; q++) {
       printed++;
       btn.innerHTML = _printerSvg + ' Imprimiendo ' + printed + '/' + totalLabels + '...';
-      await new Promise(function(r) { setTimeout(r, 400); });
+      await new Promise(function(r) { setTimeout(r, 150); });
       try {
         await window._phomemo.print(canvas);
       } catch(e) {
