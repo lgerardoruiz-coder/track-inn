@@ -4114,7 +4114,7 @@ function renderLabelToCanvas() {
     ctx.fillStyle = '#000';
     ctx.font = 'bold 26px Arial';
     ctx.fillText(formatP(d.n1), pad, 50);
-    priceBottom = 54;
+    priceBottom = 28;
   } else if (isCPPromo) {
     ctx.fillStyle = '#000';
     ctx.font = '13px Arial';
@@ -4132,7 +4132,7 @@ function renderLabelToCanvas() {
 
     ctx.font = 'bold 24px Arial';
     ctx.fillText('A: ' + formatP(d.n3), pad, 64);
-    priceBottom = 68;
+    priceBottom = 44;
   } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
     ctx.font = '13px Arial';
@@ -4144,7 +4144,7 @@ function renderLabelToCanvas() {
 
     ctx.font = 'bold 26px Arial';
     ctx.fillText('A: ' + formatP(d.n3), pad, 54);
-    priceBottom = 58;
+    priceBottom = 32;
   } else {
     // REBAJA / CP
     ctx.fillStyle = '#000';
@@ -4157,7 +4157,7 @@ function renderLabelToCanvas() {
 
     ctx.font = 'bold 26px Arial';
     ctx.fillText('A: ' + formatP(d.n2), pad, 54);
-    priceBottom = 58;
+    priceBottom = 32;
   }
 
   // === BOTTOM SECTION: Barcode starts right after price ===
