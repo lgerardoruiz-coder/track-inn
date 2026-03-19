@@ -2167,6 +2167,9 @@ button, .store-select-btn, .size-btn {
         <button class="store-select-btn" onclick="selectStore('innvictus')">
           <img src="https://www.innvictus.com/_ui/responsive/theme-rga_innvictus/css/img/logo-innvictus.svg" alt="Innvictus" onerror="this.outerHTML='<span style=color:#fff;font-size:24px;font-weight:800;letter-spacing:1px>INNVICTUS</span>'">
         </button>
+        <button class="store-select-btn" onclick="selectStore('overtime')">
+          <span style="color:#fff;font-size:24px;font-weight:800;letter-spacing:1px">OVERTIME</span>
+        </button>
         <div class="store-select-label">Cada tienda usa su propio Excel</div>
       </div>
     </div>
@@ -2197,7 +2200,7 @@ button, .store-select-btn, .size-btn {
             IMPRIMIR AHORA
           </button>
           <button class="btn-print-batch" onclick="goToScreen(6)" style="border-color:#F39C12;color:#F39C12">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18L5 8l4 2 3-6 3 6 4-2 3 10z"/><path d="M2 18h20"/></svg>
             PIEZAS UNICAS
           </button>
           <button class="btn-secondary" id="btnLoadData" onclick="document.getElementById('excelInput').click()">
@@ -2627,7 +2630,8 @@ function selectStore(business) {
   // Update tagline with store name
   var tagline = document.querySelector('#screen1 .tagline');
   if (tagline) {
-    tagline.textContent = business === 'innovasport' ? 'Innovasport' : 'Innvictus';
+    var names = { innovasport: 'Innovasport', innvictus: 'Innvictus', overtime: 'Overtime' };
+    tagline.textContent = names[business] || business;
   }
 
   // Load data for this store from cache
