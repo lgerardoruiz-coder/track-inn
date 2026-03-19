@@ -4099,11 +4099,7 @@ function renderLabelToCanvas() {
   // === TOP SECTION: Prices left, Description right ===
   var pad = 12;
 
-  // Description — top right, small
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'right';
-  ctx.font = '8px Arial';
-  ctx.fillText(d.description, W - 40, 12);
+  // (Description and Estilo moved to bottom)
 
   // Prices — top left
   ctx.textAlign = 'left';
@@ -4161,11 +4157,16 @@ function renderLabelToCanvas() {
   var barcodeX = 4;
   renderBarcodeToCanvas(ctx, d.upc, barcodeX, barcodeY, barcodeW, barcodeH);
 
-  // Estilo — below UPC at the very bottom
+  // Description — centered below UPC
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
-  ctx.font = 'bold 9px Arial';
-  ctx.fillText(d.estilo, W / 2, H - 4);
+  ctx.font = '8px Arial';
+  ctx.fillText(d.description, W / 2, H - 12);
+
+  // Estilo — bottom right corner
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 8px Arial';
+  ctx.fillText(d.estilo, W - pad, H - 2);
 
   return canvas;
 }
