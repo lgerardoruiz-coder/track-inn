@@ -5814,31 +5814,34 @@ async function cpPrintSelected() {
 }
 
 // ============ DEMO DATA ============
+var _demoBase = { 'Vigencia': '31/12/2026' };
 var demoProducts = {
-  'DEMO001': [{
-    'UPC': '194956623456', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT',
-    'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear',
-    'Género': 'Caballero', 'Talla': '27',
-    'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0,
-    'TAG': 'FULL PRICE', 'IMPULSO': '', 'Vigencia': '31/12/2026',
-    'Inventario': 5, 'Sucursal': 'Demo Store'
-  }],
-  'DEMO002': [{
-    'UPC': '194957834567', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC',
-    'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear',
-    'Género': 'Caballero', 'Talla': '28',
-    'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699,
-    'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Vigencia': '30/04/2026',
-    'Inventario': 2, 'Sucursal': 'Demo Store'
-  }],
-  'DEMO003': [{
-    'UPC': '194958945678', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001',
-    'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear',
-    'Género': 'Dama', 'Talla': '25',
-    'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519,
-    'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Vigencia': '15/04/2026',
-    'Inventario': 1, 'Sucursal': 'Demo Store'
-  }]
+  'DEMO001': [
+    { ..._demoBase, 'UPC': '194956623456', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '25', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 3, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623457', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '26', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 5, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623458', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 2, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623459', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 0, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623460', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '29', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623461', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '26', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 4, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194956623462', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 3, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194956623463', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 2, 'Sucursal': 'Innovasport Interlomas' }
+  ],
+  'DEMO002': [
+    { ..._demoBase, 'UPC': '194957834567', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '26', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 0, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834568', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 2, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834569', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834570', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '29', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 3, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834571', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 1, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194957834572', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 2, 'Sucursal': 'Innovasport Coyoacán' }
+  ],
+  'DEMO003': [
+    { ..._demoBase, 'UPC': '194958945678', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '22', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945679', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '23', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 2, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945680', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '24', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 0, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945681', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '25', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945682', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '23', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 3, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194958945683', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '24', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 1, 'Sucursal': 'Innovasport Interlomas' }
+  ]
 };
 
 function showDemoSuggestions() {
