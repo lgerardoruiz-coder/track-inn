@@ -4193,8 +4193,7 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
         var scale = Math.min(maxW / img.width, maxH / img.height, 1);
         var dw = img.width * scale;
         var dh = img.height * scale;
-        var cx = x + (maxW - dw) / 2;
-        ctx.drawImage(img, cx, y, dw, dh);
+        ctx.drawImage(img, x, y, dw, dh);
         // Draw description right below barcode+UPC
         if (window._labelData && window._labelData.description) {
           ctx.fillStyle = '#000';
