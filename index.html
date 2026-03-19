@@ -3788,8 +3788,8 @@ window._phomemo = (function() {
   var device = null;
   var writeChar = null;
   var PRINTER_WIDTH_BYTES = 48; // 384 pixels at 203 DPI
-  var CHUNK_SIZE = 128;
-  var CHUNK_DELAY = 20;
+  var CHUNK_SIZE = 512;
+  var CHUNK_DELAY = 5;
   var _reconnecting = false;
 
   function isConnected() {
@@ -3985,7 +3985,7 @@ window._phomemo = (function() {
     var raster = canvasToRaster(canvas);
 
     // Set speed
-    await send(new Uint8Array([0x1B, 0x4E, 0x0D, 0x05]));
+    await send(new Uint8Array([0x1B, 0x4E, 0x0D, 0x07]));
     await new Promise(function(r) { setTimeout(r, 30); });
 
     // Set density
