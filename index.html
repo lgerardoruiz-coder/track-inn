@@ -2044,6 +2044,9 @@ button, .store-select-btn, .size-btn {
 .cp-old { font-size:11px;color:var(--gray);text-decoration:line-through; }
 .cp-new { font-size:16px;font-weight:800;color:#5bb8ff; }
 .cp-tag { font-size:9px;background:rgba(230,57,70,0.15);color:var(--red);padding:2px 6px;border-radius:4px;font-weight:600;margin-top:2px;display:inline-block; }
+.cp-qty { display:flex;align-items:center;gap:4px;margin-top:4px; }
+.cp-qty-btn { width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif; }
+.cp-qty-val { width:32px;text-align:center;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#fff;font-size:12px;font-weight:700;padding:2px 0;font-family:'Poppins',sans-serif; }
 
 /* Demo UPC suggestions */
 .demo-upc-btn {
@@ -2493,6 +2496,10 @@ button, .store-select-btn, .size-btn {
             IMPRIMIR (0)
           </button>
         </div>
+        <!-- Printer -->
+        <button class="btn-connect-printer" id="cpConnectBtn" onclick="togglePrinter()" style="max-width:100%;margin-bottom:10px">
+          &#9678; Conectar impresora Phomemo
+        </button>
         <!-- List -->
         <div id="cpList" class="cp-list"></div>
       </div>
@@ -5567,11 +5574,14 @@ var cpDemoData = [
   { estilo:'01FM-08IN-BQ', desc:'Under Armour Curry 11', marca:'UA', gen:'Caballero', div:'Footwear', oldPrice:3899, newPrice:2729, tag:'CP', upc:'194966723011' },
   { estilo:'IF4031', desc:'Adidas Samba OG', marca:'ADIDAS', gen:'Dama', div:'Footwear', oldPrice:2499, newPrice:1999, tag:'CP', upc:'194967834012' }
 ];
-var cpSelected = {};
+var cpSelected = {}; // upc: true
+var cpQty = {}; // upc: number
 var cpFiltered = [];
 
 function initCambiosPrecio() {
   cpSelected = {};
+  cpQty = {};
+  cpDemoData.forEach(function(p) { cpQty[p.upc] = 1; });
   var marcas = {}, generos = {}, divs = {};
   cpDemoData.forEach(function(p) {
     marcas[p.marca] = 1; generos[p.gen] = 1; divs[p.div] = 1;
@@ -5607,23 +5617,47 @@ function renderCpList() {
     var sel = cpSelected[p.upc] ? ' selected' : '';
     var check = cpSelected[p.upc] ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : '';
     var discount = Math.round((1 - p.newPrice / p.oldPrice) * 100);
-    html += '<div class="cp-item' + sel + '" onclick="toggleCpItem(\'' + p.upc + '\')">'
-      + '<div class="cp-check">' + check + '</div>'
-      + '<div class="cp-info">'
+    var qty = cpQty[p.upc] || 1;
+    html += '<div class="cp-item' + sel + '">'
+      + '<div class="cp-check" onclick="toggleCpItem(\'' + p.upc + '\')">' + check + '</div>'
+      + '<div class="cp-info" onclick="toggleCpItem(\'' + p.upc + '\')">'
       + '<div class="cp-brand">' + p.marca + '</div>'
       + '<div class="cp-name">' + p.desc + '</div>'
       + '<div class="cp-style">' + p.estilo + ' <span class="cp-tag">' + p.tag + '</span></div>'
       + '</div>'
+      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">'
       + '<div class="cp-prices">'
       + '<div class="cp-old">$' + p.oldPrice.toLocaleString() + '</div>'
       + '<div class="cp-new">$' + p.newPrice.toLocaleString() + '</div>'
       + '<div style="font-size:9px;color:var(--red);font-weight:700">-' + discount + '%</div>'
+      + '</div>'
+      + '<div class="cp-qty">'
+      + '<button class="cp-qty-btn" onclick="event.stopPropagation();changeCpQty(\'' + p.upc + '\',-1)">−</button>'
+      + '<input class="cp-qty-val" type="number" value="' + qty + '" min="1" max="99" onchange="event.stopPropagation();setCpQty(\'' + p.upc + '\',this.value)" onclick="event.stopPropagation()">'
+      + '<button class="cp-qty-btn" onclick="event.stopPropagation();changeCpQty(\'' + p.upc + '\',1)">+</button>'
+      + '</div>'
       + '</div>'
       + '</div>';
   });
   document.getElementById('cpList').innerHTML = html;
   document.getElementById('cpCount').textContent = cpFiltered.length;
   updateCpPrintBtn();
+}
+
+function changeCpQty(upc, delta) {
+  var q = (cpQty[upc] || 1) + delta;
+  if (q < 1) q = 1;
+  if (q > 99) q = 99;
+  cpQty[upc] = q;
+  renderCpList();
+}
+
+function setCpQty(upc, val) {
+  var q = parseInt(val) || 1;
+  if (q < 1) q = 1;
+  if (q > 99) q = 99;
+  cpQty[upc] = q;
+  renderCpList();
 }
 
 function toggleCpItem(upc) {
@@ -5646,10 +5680,11 @@ function toggleCpSelectAll() {
 }
 
 function updateCpPrintBtn() {
-  var count = Object.keys(cpSelected).length;
+  var items = 0, labels = 0;
+  Object.keys(cpSelected).forEach(function(upc) { items++; labels += (cpQty[upc] || 1); });
   var btn = document.getElementById('cpPrintBtn');
-  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> IMPRIMIR (' + count + ')';
-  btn.disabled = count === 0;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> IMPRIMIR (' + items + ' prod, ' + labels + ' etiq)';
+  btn.disabled = items === 0;
   // Update select all button state
   var allSelected = cpFiltered.length > 0 && cpFiltered.every(function(p) { return cpSelected[p.upc]; });
   document.getElementById('cpSelectAll').classList.toggle('active', allSelected);
@@ -5658,7 +5693,9 @@ function updateCpPrintBtn() {
 async function cpPrintSelected() {
   var selected = cpDemoData.filter(function(p) { return cpSelected[p.upc]; });
   if (selected.length === 0) return;
-  showToast('Demo: Se imprimirian ' + selected.length + ' etiquetas');
+  var totalLabels = 0;
+  selected.forEach(function(p) { totalLabels += (cpQty[p.upc] || 1); });
+  showToast('Demo: Se imprimirian ' + totalLabels + ' etiquetas de ' + selected.length + ' productos');
 }
 
 // ============ DEMO DATA ============
