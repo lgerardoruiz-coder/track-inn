@@ -3144,10 +3144,22 @@ function lookupBarcode(code) {
 // Find related products (same Estilo = same model, different sizes)
 function findRelatedByEstilo(estilo) {
   if (!estilo || estilo === '(Sin valor)') return [];
-  return productData.filter(r =>
+  // Search in productData first
+  var results = productData.filter(r =>
     String(r['Estilo'] || '').trim() === String(estilo).trim() &&
     String(r['Estilo']).trim() !== '(Sin valor)'
   );
+  // If no results, search in demo data
+  if (results.length === 0) {
+    Object.keys(demoProducts).forEach(function(key) {
+      demoProducts[key].forEach(function(r) {
+        if (String(r['Estilo'] || '').trim() === String(estilo).trim()) {
+          results.push(r);
+        }
+      });
+    });
+  }
+  return results;
 }
 
 // ============ PRODUCT DISPLAY ============
@@ -4843,15 +4855,18 @@ function selectSize(btn) {
 
   // Update store inventory numbers for the selected talla
   var selectedTalla = btn.textContent.trim();
-  var inventoryKey = null;
+  var inventoryKey = 'Inventario';
   if (productData.length > 0) {
     inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
   }
-  if (!inventoryKey || !window._currentEstilo) return;
+  if (!window._currentEstilo) return;
 
   // Find all rows for this estilo + selected talla, grouped by sucursal
   var tallaInv = {};
-  productData.forEach(function(r) {
+  var allData = productData.slice();
+  // Also search demo data
+  Object.keys(demoProducts).forEach(function(key) { demoProducts[key].forEach(function(r) { allData.push(r); }); });
+  allData.forEach(function(r) {
     if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
     if (String(r['Talla'] || '').trim() !== selectedTalla) return;
     var suc = r['Sucursal'] || '';
@@ -4921,15 +4936,17 @@ async function openTallaSheetFromAPI(selectedTalla) {
 }
 
 function openTallaSheetLocal(selectedTalla) {
-  var inventoryKey = null;
+  var inventoryKey = 'Inventario';
   if (productData.length > 0) {
     inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
   }
-  if (!inventoryKey || !window._currentEstilo) return;
+  if (!window._currentEstilo) return;
 
-  // Gather inventory for this talla across ALL stores
+  // Gather inventory for this talla across ALL stores (productData + demo)
   var storeInv = {};
-  productData.forEach(function(r) {
+  var allData = productData.slice();
+  Object.keys(demoProducts).forEach(function(key) { demoProducts[key].forEach(function(r) { allData.push(r); }); });
+  allData.forEach(function(r) {
     if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
     if (String(r['Talla'] || '').trim() !== selectedTalla) return;
     var suc = r['Sucursal'] || '';
