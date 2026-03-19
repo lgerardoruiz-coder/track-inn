@@ -3723,14 +3723,14 @@ function generateLabelPreview() {
   if (isFullPrice) {
     pricesHTML = '<div class="label-price-main" style="font-size:24px;margin-top:2px">' + formatP(d.n1) + '</div>';
   } else if (isCPPromo) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:9px">De: ' + formatP(d.n1) + '</div>'
-      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">CP: ' + formatP(d.n2) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:12px">CP: ' + formatP(d.n2) + '</div>'
       + '<div class="label-price-main" style="font-size:22px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
   } else if (isPromoOnly) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:12px">De: ' + formatP(d.n1) + '</div>'
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
   } else {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:12px">De: ' + formatP(d.n1) + '</div>'
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n2) + '</div>';
   }
 
@@ -3739,10 +3739,10 @@ function generateLabelPreview() {
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     + '<div>' + pricesHTML + '</div>'
     + '<div style="text-align:right;flex-shrink:0;max-width:45%">'
-    + '<div style="font-size:9px;font-weight:700;color:#000">' + d.estilo + '</div>'
-    + '<div style="font-size:8px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">' + d.description + '</div>'
+    + '<div style="font-size:11px;font-weight:700;color:#000">' + d.estilo + '</div>'
     + '</div></div>'
     + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;align-items:center;justify-content:center"><svg id="labelBarcode"></svg></div>'
+    + '<div style="text-align:center;font-size:11px;color:#333;margin-top:-2px">' + d.description + '</div>'
     + '</div></div>';
 
   // Quantity selector
