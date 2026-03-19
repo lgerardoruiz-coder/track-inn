@@ -4108,10 +4108,13 @@ function renderLabelToCanvas() {
   // Prices — top left
   ctx.textAlign = 'left';
 
+  var priceBottom = 0;
+
   if (isFullPrice) {
     ctx.fillStyle = '#000';
     ctx.font = 'bold 26px Arial';
     ctx.fillText(formatP(d.n1), pad, 50);
+    priceBottom = 54;
   } else if (isCPPromo) {
     ctx.fillStyle = '#000';
     ctx.font = '13px Arial';
@@ -4129,6 +4132,7 @@ function renderLabelToCanvas() {
 
     ctx.font = 'bold 24px Arial';
     ctx.fillText('A: ' + formatP(d.n3), pad, 64);
+    priceBottom = 68;
   } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
     ctx.font = '13px Arial';
@@ -4140,6 +4144,7 @@ function renderLabelToCanvas() {
 
     ctx.font = 'bold 26px Arial';
     ctx.fillText('A: ' + formatP(d.n3), pad, 54);
+    priceBottom = 58;
   } else {
     // REBAJA / CP
     ctx.fillStyle = '#000';
@@ -4152,10 +4157,11 @@ function renderLabelToCanvas() {
 
     ctx.font = 'bold 26px Arial';
     ctx.fillText('A: ' + formatP(d.n2), pad, 54);
+    priceBottom = 58;
   }
 
-  // === BOTTOM SECTION: Barcode pushed down, UPC stays low ===
-  var barcodeY = 70;
+  // === BOTTOM SECTION: Barcode starts right after price ===
+  var barcodeY = priceBottom;
   var barcodeH = H - barcodeY - 18;
   var barcodeW = W - 8;
   var barcodeX = 4;
