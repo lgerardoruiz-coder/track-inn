@@ -4199,7 +4199,7 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
           ctx.fillStyle = '#000';
           ctx.textAlign = 'center';
           ctx.font = '14px Arial';
-          ctx.fillText(window._labelData.description, x + maxW / 2, y + dh + 16);
+          ctx.fillText(window._labelData.description, x + dw / 2, y + dh + 16);
         }
         URL.revokeObjectURL(url);
         resolve();
