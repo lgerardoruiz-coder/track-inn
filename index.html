@@ -5718,9 +5718,63 @@ function resetCambiosPrecio() {
 async function cpPrintSelected() {
   var selected = cpDemoData.filter(function(p) { return cpSelected[p.upc]; });
   if (selected.length === 0) return;
+
+  // Check printer
+  if (!window._phomemo || !window._phomemo.isConnected()) {
+    showToast('Conecta la impresora primero');
+    return;
+  }
+
   var totalLabels = 0;
   selected.forEach(function(p) { totalLabels += (cpQty[p.upc] || 1); });
-  showToast('Demo: Se imprimirian ' + totalLabels + ' etiquetas de ' + selected.length + ' productos');
+
+  var btn = document.getElementById('cpPrintBtn');
+  var originalText = btn.innerHTML;
+  var printed = 0;
+
+  for (var i = 0; i < selected.length; i++) {
+    var p = selected[i];
+    var qty = cpQty[p.upc] || 1;
+
+    // Build label data from demo product
+    var isCP = p.tag.indexOf('CP') >= 0;
+    var isPromo = p.tag.indexOf('PROMO') >= 0;
+    var labelTag = '';
+    if (isCP && isPromo) labelTag = 'CP+PROMO';
+    else if (isCP) labelTag = 'REBAJA';
+    else if (isPromo) labelTag = 'PROMO';
+
+    window._labelData = {
+      description: p.desc,
+      estilo: p.estilo,
+      brand: p.marca,
+      n1: p.oldPrice,
+      n2: isCP ? p.newPrice : 0,
+      n3: isPromo ? p.newPrice : 0,
+      tag: labelTag,
+      impulso: '',
+      upc: p.upc
+    };
+
+    var canvas = renderLabelToCanvas();
+    if (!canvas) continue;
+
+    for (var q = 0; q < qty; q++) {
+      printed++;
+      btn.innerHTML = _printerSvg + ' Imprimiendo ' + printed + '/' + totalLabels + '...';
+      await new Promise(function(r) { setTimeout(r, 400); });
+      try {
+        await window._phomemo.print(canvas);
+      } catch(e) {
+        showToast('Error: ' + e.message);
+        btn.innerHTML = originalText;
+        return;
+      }
+    }
+  }
+
+  btn.innerHTML = originalText;
+  showToast(printed + ' etiquetas impresas');
 }
 
 // ============ DEMO DATA ============
