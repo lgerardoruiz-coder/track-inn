@@ -2496,10 +2496,16 @@ button, .store-select-btn, .size-btn {
             IMPRIMIR (0)
           </button>
         </div>
-        <!-- Printer -->
-        <button class="btn-connect-printer" id="cpConnectBtn" onclick="togglePrinter()" style="max-width:100%;margin-bottom:10px">
-          &#9678; Conectar impresora Phomemo
-        </button>
+        <!-- Printer + Reset -->
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <button class="btn-connect-printer" id="cpConnectBtn" onclick="togglePrinter()" style="flex:1">
+            &#9678; Conectar impresora Phomemo
+          </button>
+          <button onclick="resetCambiosPrecio()" style="padding:8px 12px;background:#333;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--gray);font-size:10px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;white-space:nowrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+            Borrar
+          </button>
+        </div>
         <!-- List -->
         <div id="cpList" class="cp-list"></div>
       </div>
@@ -5578,7 +5584,10 @@ var cpSelected = {}; // upc: true
 var cpQty = {}; // upc: number
 var cpFiltered = [];
 
+var cpInitialized = false;
 function initCambiosPrecio() {
+  if (cpInitialized) return;
+  cpInitialized = true;
   cpSelected = {};
   cpQty = {};
   cpDemoData.forEach(function(p) { cpQty[p.upc] = 1; });
@@ -5688,6 +5697,17 @@ function updateCpPrintBtn() {
   // Update select all button state
   var allSelected = cpFiltered.length > 0 && cpFiltered.every(function(p) { return cpSelected[p.upc]; });
   document.getElementById('cpSelectAll').classList.toggle('active', allSelected);
+}
+
+function resetCambiosPrecio() {
+  cpSelected = {};
+  cpQty = {};
+  cpDemoData.forEach(function(p) { cpQty[p.upc] = 1; });
+  document.getElementById('cpFilterMarca').value = '';
+  document.getElementById('cpFilterGenero').value = '';
+  document.getElementById('cpFilterDiv').value = '';
+  applyCpFilters();
+  showToast('Selecciones y cantidades reiniciadas');
 }
 
 async function cpPrintSelected() {
