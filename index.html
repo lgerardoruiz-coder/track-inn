@@ -4177,7 +4177,7 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
     var tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(tmpSvg);
     JsBarcode(tmpSvg, upc.trim(), {
-      format: 'CODE128', width: 2.5, height: 104,
+      format: 'CODE128', width: 2.5, height: 140,
       displayValue: true, fontSize: 16, margin: 0,
       background: 'transparent', lineColor: '#000'
     });
