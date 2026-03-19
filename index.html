@@ -4030,22 +4030,26 @@ function updatePrinterUI(state, customMsg) {
   var conn = document.getElementById('btnConnectPrinter');
   var status = document.getElementById('printerStatus');
   var batchConn = document.getElementById('batchConnectBtn');
+  var cpConn = document.getElementById('cpConnectBtn');
   var name = window._phomemo.getDeviceName();
 
   if (state === true || state === 'connected') {
     if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = _printerSvg + 'Imprimir etiqueta'; }
     if (conn) { conn.className = 'btn-connect-printer connected'; conn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer connected'; batchConn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
+    if (cpConn) { cpConn.className = 'btn-connect-printer connected'; cpConn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
     if (status) status.textContent = customMsg || 'Impresora lista';
   } else if (state === 'connecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Conectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Conectando a ' + name + '...'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Conectando...'; }
+    if (cpConn) { cpConn.className = 'btn-connect-printer'; cpConn.innerHTML = '&#9676; Conectando...'; }
     if (status) status.textContent = customMsg || 'Estableciendo conexión BLE...';
   } else if (state === 'reconnecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Reconectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Reconectando...'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Reconectando...'; }
+    if (cpConn) { cpConn.className = 'btn-connect-printer'; cpConn.innerHTML = '&#9676; Reconectando...'; }
     if (status) status.textContent = customMsg || 'Conexión perdida, reconectando...';
   } else if (state === 'printing') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Imprimiendo...'; }
@@ -4054,6 +4058,7 @@ function updatePrinterUI(state, customMsg) {
     if (btn) { btn.className = 'btn-print-label'; btn.innerHTML = _printerSvg + 'Conectar e imprimir'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
+    if (cpConn) { cpConn.className = 'btn-connect-printer'; cpConn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
     if (status) status.textContent = customMsg || 'Sin impresora conectada';
   }
 }
