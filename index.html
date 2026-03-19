@@ -1457,9 +1457,9 @@ button, .store-select-btn, .size-btn {
   gap: 16px;
 }
 .label-frame {
-  /* 40mm x 30mm at ~3.78px/mm ≈ 151x113, scaled up for preview */
+  /* 40mm x 30mm scaled up for preview */
   width: 240px;
-  height: 180px;
+  height: 200px;
   border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden;
@@ -3741,8 +3741,8 @@ function generateLabelPreview() {
     + '<div style="text-align:right;flex-shrink:0;max-width:45%">'
     + '<div style="font-size:11px;font-weight:700;color:#000">' + d.estilo + '</div>'
     + '</div></div>'
-    + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;align-items:center;justify-content:center"><svg id="labelBarcode"></svg></div>'
-    + '<div style="text-align:center;font-size:11px;color:#333;margin-top:-2px">' + d.description + '</div>'
+    + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:center"><svg id="labelBarcode"></svg></div>'
+    + '<div style="text-align:center;font-size:10px;color:#333;padding:2px 0 1px;flex-shrink:0">' + d.description + '</div>'
     + '</div></div>';
 
   // Quantity selector
