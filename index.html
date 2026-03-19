@@ -2496,14 +2496,17 @@ button, .store-select-btn, .size-btn {
             IMPRIMIR (0)
           </button>
         </div>
-        <!-- Printer + Reset -->
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-          <button class="btn-connect-printer" id="cpConnectBtn" onclick="togglePrinter()" style="flex:1">
-            &#9678; Conectar impresora Phomemo
+        <!-- Search + Printer icon + Reset icon -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
+          <div style="flex:1;position:relative">
+            <input type="text" id="cpSearchInput" placeholder="Buscar estilo..." oninput="cpSearchFilter()" style="width:100%;padding:9px 12px 9px 32px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:12px;font-family:'Poppins',sans-serif;outline:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+          <button id="cpConnectBtn" onclick="togglePrinter()" style="width:36px;height:36px;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Conectar impresora">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           </button>
-          <button onclick="resetCambiosPrecio()" style="padding:8px 12px;background:#333;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--gray);font-size:10px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;white-space:nowrap">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
-            Borrar
+          <button onclick="resetCambiosPrecio()" style="width:36px;height:36px;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Borrar todo">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
           </button>
         </div>
         <!-- List -->
@@ -4037,19 +4040,19 @@ function updatePrinterUI(state, customMsg) {
     if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = _printerSvg + 'Imprimir etiqueta'; }
     if (conn) { conn.className = 'btn-connect-printer connected'; conn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer connected'; batchConn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
-    if (cpConn) { cpConn.className = 'btn-connect-printer connected'; cpConn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
+    if (cpConn) { cpConn.style.borderColor = 'var(--green)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--green)'); }
     if (status) status.textContent = customMsg || 'Impresora lista';
   } else if (state === 'connecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Conectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Conectando a ' + name + '...'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Conectando...'; }
-    if (cpConn) { cpConn.className = 'btn-connect-printer'; cpConn.innerHTML = '&#9676; Conectando...'; }
+    if (cpConn) { cpConn.style.borderColor = 'var(--orange)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--orange)'); }
     if (status) status.textContent = customMsg || 'Estableciendo conexión BLE...';
   } else if (state === 'reconnecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Reconectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Reconectando...'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Reconectando...'; }
-    if (cpConn) { cpConn.className = 'btn-connect-printer'; cpConn.innerHTML = '&#9676; Reconectando...'; }
+    if (cpConn) { cpConn.style.borderColor = 'var(--orange)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--orange)'); }
     if (status) status.textContent = customMsg || 'Conexión perdida, reconectando...';
   } else if (state === 'printing') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Imprimiendo...'; }
@@ -4058,7 +4061,7 @@ function updatePrinterUI(state, customMsg) {
     if (btn) { btn.className = 'btn-print-label'; btn.innerHTML = _printerSvg + 'Conectar e imprimir'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
-    if (cpConn) { cpConn.className = 'btn-connect-printer'; cpConn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
+    if (cpConn) { cpConn.style.borderColor = 'rgba(255,255,255,0.15)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--gray)'); }
     if (status) status.textContent = customMsg || 'Sin impresora conectada';
   }
 }
@@ -5715,6 +5718,22 @@ function updateCpPrintBtn() {
   document.getElementById('cpSelectAll').classList.toggle('active', allSelected);
 }
 
+function cpSearchFilter() {
+  var query = document.getElementById('cpSearchInput').value.trim().toUpperCase();
+  if (!query) { applyCpFilters(); return; }
+  var marca = document.getElementById('cpFilterMarca').value;
+  var gen = document.getElementById('cpFilterGenero').value;
+  var div = document.getElementById('cpFilterDiv').value;
+  cpFiltered = cpDemoData.filter(function(p) {
+    if (marca && p.marca !== marca) return false;
+    if (gen && p.gen !== gen) return false;
+    if (div && p.div !== div) return false;
+    var match = p.estilo.toUpperCase().indexOf(query) >= 0 || p.desc.toUpperCase().indexOf(query) >= 0;
+    return match;
+  });
+  renderCpList();
+}
+
 function resetCambiosPrecio() {
   cpSelected = {};
   cpQty = {};
@@ -5722,6 +5741,7 @@ function resetCambiosPrecio() {
   document.getElementById('cpFilterMarca').value = '';
   document.getElementById('cpFilterGenero').value = '';
   document.getElementById('cpFilterDiv').value = '';
+  document.getElementById('cpSearchInput').value = '';
   applyCpFilters();
   showToast('Selecciones y cantidades reiniciadas');
 }
