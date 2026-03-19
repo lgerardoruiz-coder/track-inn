@@ -2432,23 +2432,27 @@ button, .store-select-btn, .size-btn {
         <div id="puCount" style="color:var(--gray);font-size:13px;margin-left:auto;padding-right:12px">0</div>
       </div>
       <div class="pu-body">
+        <!-- Search -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
+          <div style="flex:1;position:relative">
+            <input type="text" id="puSearchInput" placeholder="Buscar estilo..." oninput="applyPuFilters()" style="width:100%;padding:9px 12px 9px 32px;background:rgba(243,156,18,0.08);border:1px solid rgba(243,156,18,0.25);border-radius:8px;color:#fff;font-size:12px;font-family:'Poppins',sans-serif;outline:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+        </div>
         <!-- Filters -->
         <div class="pu-filters">
-          <select class="pu-filter" id="puFilterMarca" onchange="applyPuFilters()">
-            <option value="">Mar</option>
+          <select class="pu-filter" id="puFilterMarca" onchange="applyPuFilters()" style="border-color:rgba(243,156,18,0.3);background:#1a1a10">
+            <option value="">Marca</option>
           </select>
-          <select class="pu-filter" id="puFilterGenero" onchange="applyPuFilters()">
+          <select class="pu-filter" id="puFilterGenero" onchange="applyPuFilters()" style="border-color:rgba(243,156,18,0.3);background:#1a1a10">
             <option value="">Gen</option>
           </select>
-          <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()">
+          <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()" style="border-color:rgba(243,156,18,0.3);background:#1a1a10">
             <option value="">Div</option>
-          </select>
-          <select class="pu-filter" id="puFilterVigencia" onchange="applyPuFilters()">
-            <option value="">Vig</option>
           </select>
         </div>
         <div class="pu-controls">
-          <div class="pu-toggle" id="puPzaToggle">
+          <div class="pu-toggle" id="puPzaToggle" style="border-color:rgba(243,156,18,0.3)">
             <button class="pu-toggle-btn active" onclick="setPuMaxPzas(1)">1 pza</button>
             <button class="pu-toggle-btn" onclick="setPuMaxPzas(3)">Hasta 3</button>
           </div>
@@ -2458,7 +2462,7 @@ button, .store-select-btn, .size-btn {
             <option value="pzas-asc">Menos pzas</option>
             <option value="pzas-desc">Mas pzas</option>
           </select>
-          <button class="pu-clear-btn" onclick="clearPuFilters()">Limpiar filtros</button>
+          <button class="pu-clear-btn" onclick="clearPuFilters()" style="border-color:rgba(243,156,18,0.3);color:#F39C12">Limpiar</button>
         </div>
         <!-- Results list -->
         <div id="puList" class="pu-list"></div>
@@ -4443,10 +4447,9 @@ function populatePuFilters() {
     if (sortedMarcas.indexOf(m) < 0) sortedMarcas.push(m);
   });
 
-  fillPuSelect('puFilterMarca', 'Mar', sortedMarcas, true);
+  fillPuSelect('puFilterMarca', 'Marca', sortedMarcas, true);
   fillPuSelect('puFilterGenero', 'Gen', Object.keys(generos).sort());
   fillPuSelect('puFilterDivision', 'Div', Object.keys(divisiones).sort());
-  fillPuSelect('puFilterVigencia', 'Vig', Object.keys(vigencias).sort());
 }
 
 function fillPuSelect(id, label, options, preserveOrder) {
@@ -4463,8 +4466,9 @@ function clearPuFilters() {
   document.getElementById('puFilterMarca').value = '';
   document.getElementById('puFilterGenero').value = '';
   document.getElementById('puFilterDivision').value = '';
-  document.getElementById('puFilterVigencia').value = '';
   document.getElementById('puSort').value = 'price-desc';
+  var searchEl = document.getElementById('puSearchInput');
+  if (searchEl) searchEl.value = '';
   setPuMaxPzas(1);
 }
 
@@ -4481,15 +4485,16 @@ function applyPuFilters() {
   var marca = document.getElementById('puFilterMarca').value;
   var genero = document.getElementById('puFilterGenero').value;
   var division = document.getElementById('puFilterDivision').value;
-  var vigencia = document.getElementById('puFilterVigencia').value;
   var sort = document.getElementById('puSort').value;
+  var searchEl = document.getElementById('puSearchInput');
+  var search = searchEl ? searchEl.value.trim().toUpperCase() : '';
 
   puData = puAllData.filter(function(item) {
     if (item.totalInv > puMaxPzas) return false;
     if (marca && item.brand !== marca) return false;
     if (genero && item.genero !== genero) return false;
     if (division && item.division !== division) return false;
-    if (vigencia && item.vigencia !== vigencia) return false;
+    if (search && item.estilo.toUpperCase().indexOf(search) < 0 && item.desc.toUpperCase().indexOf(search) < 0) return false;
     return true;
   });
 
