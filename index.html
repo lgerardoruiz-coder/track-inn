@@ -4099,7 +4099,11 @@ function renderLabelToCanvas() {
   // === TOP SECTION: Prices left, Description right ===
   var pad = 12;
 
-  // (Description and Estilo moved to bottom)
+  // Estilo — top right, bigger, less cornered
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 14px Arial';
+  ctx.fillText(d.estilo, W - 20, 18);
 
   // Prices — top left
   ctx.textAlign = 'left';
@@ -4107,66 +4111,55 @@ function renderLabelToCanvas() {
   if (isFullPrice) {
     ctx.fillStyle = '#000';
     ctx.font = 'bold 26px Arial';
-    ctx.fillText(formatP(d.n1), pad, 42);
+    ctx.fillText(formatP(d.n1), pad, 50);
   } else if (isCPPromo) {
     ctx.fillStyle = '#000';
-    ctx.font = '9px Arial';
+    ctx.font = '13px Arial';
     var t1 = 'De: ' + formatP(d.n1);
-    ctx.fillText(t1, pad, 14);
+    ctx.fillText(t1, pad, 20);
     var tw1 = ctx.measureText(t1).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 11); ctx.lineTo(pad + tw1, 11); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 17); ctx.lineTo(pad + tw1, 17); ctx.stroke();
 
-    ctx.font = '10px Arial';
+    ctx.font = '14px Arial';
     var t2 = 'CP: ' + formatP(d.n2);
-    ctx.fillText(t2, pad, 28);
+    ctx.fillText(t2, pad, 38);
     var tw2 = ctx.measureText(t2).width;
-    ctx.beginPath(); ctx.moveTo(pad, 25); ctx.lineTo(pad + tw2, 25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 35); ctx.lineTo(pad + tw2, 35); ctx.stroke();
 
     ctx.font = 'bold 24px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 54);
+    ctx.fillText('A: ' + formatP(d.n3), pad, 64);
   } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
-    ctx.font = '10px Arial';
+    ctx.font = '13px Arial';
     var t3 = 'De: ' + formatP(d.n1);
-    ctx.fillText(t3, pad, 16);
+    ctx.fillText(t3, pad, 22);
     var tw3 = ctx.measureText(t3).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 13); ctx.lineTo(pad + tw3, 13); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 19); ctx.lineTo(pad + tw3, 19); ctx.stroke();
 
     ctx.font = 'bold 26px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 46);
+    ctx.fillText('A: ' + formatP(d.n3), pad, 54);
   } else {
     // REBAJA / CP
     ctx.fillStyle = '#000';
-    ctx.font = '10px Arial';
+    ctx.font = '13px Arial';
     var t4 = 'De: ' + formatP(d.n1);
-    ctx.fillText(t4, pad, 16);
+    ctx.fillText(t4, pad, 22);
     var tw4 = ctx.measureText(t4).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 13); ctx.lineTo(pad + tw4, 13); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 19); ctx.lineTo(pad + tw4, 19); ctx.stroke();
 
     ctx.font = 'bold 26px Arial';
-    ctx.fillText('A: ' + formatP(d.n2), pad, 46);
+    ctx.fillText('A: ' + formatP(d.n2), pad, 54);
   }
 
-  // === BOTTOM SECTION: Big barcode, centered ===
-  var barcodeY = 56;
+  // === BOTTOM SECTION: Barcode pushed down, UPC stays low ===
+  var barcodeY = 70;
   var barcodeH = H - barcodeY - 18;
   var barcodeW = W - 8;
   var barcodeX = 4;
   renderBarcodeToCanvas(ctx, d.upc, barcodeX, barcodeY, barcodeW, barcodeH);
-
-  // Description — centered below UPC
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'center';
-  ctx.font = '8px Arial';
-  ctx.fillText(d.description, W / 2, H - 12);
-
-  // Estilo — bottom right corner
-  ctx.textAlign = 'right';
-  ctx.font = 'bold 8px Arial';
-  ctx.fillText(d.estilo, W - pad, H - 2);
 
   return canvas;
 }
@@ -4194,7 +4187,15 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
         var scale = Math.min(maxW / img.width, maxH / img.height, 1);
         var dw = img.width * scale;
         var dh = img.height * scale;
-        ctx.drawImage(img, x, y, dw, dh);
+        var cx = x + (maxW - dw) / 2;
+        ctx.drawImage(img, cx, y, dw, dh);
+        // Draw description right below barcode+UPC
+        if (window._labelData && window._labelData.description) {
+          ctx.fillStyle = '#000';
+          ctx.textAlign = 'center';
+          ctx.font = '14px Arial';
+          ctx.fillText(window._labelData.description, x + maxW / 2, y + dh + 14);
+        }
         URL.revokeObjectURL(url);
         resolve();
       };
