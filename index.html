@@ -2023,6 +2023,21 @@ button, .store-select-btn, .size-btn {
   font-weight: 600;
 }
 
+/* Demo UPC suggestions */
+.demo-upc-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.demo-upc-btn:active { background: rgba(230,57,70,0.15); border-color: var(--red); }
+
 /* ===== iOS SAFE AREAS & SCANNER FIX ===== */
 @supports (padding-top: env(safe-area-inset-top)) {
   .phone-frame {
@@ -2264,8 +2279,23 @@ button, .store-select-btn, .size-btn {
         <div class="manual-input-section">
           <div class="manual-label">o ingresa el codigo manualmente</div>
           <div class="manual-input-row">
-            <input type="text" id="manualBarcode" placeholder="UPC, Estilo o Material..." inputmode="text">
+            <input type="text" id="manualBarcode" placeholder="UPC, Estilo o Material..." inputmode="text" onfocus="showDemoSuggestions()" onblur="setTimeout(hideDemoSuggestions,200)">
             <button onclick="manualSearch()">Buscar</button>
+          </div>
+          <div id="demoSuggestions" style="display:none;margin-top:6px;width:100%;max-width:340px">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Ejemplos demo</div>
+            <div class="demo-upc-btn" onclick="selectDemoUPC('DEMO001')">
+              <span style="font-size:12px;font-weight:600;color:#fff">DEMO001</span>
+              <span style="font-size:10px;color:var(--green)">Full Price</span>
+            </div>
+            <div class="demo-upc-btn" onclick="selectDemoUPC('DEMO002')">
+              <span style="font-size:12px;font-weight:600;color:#fff">DEMO002</span>
+              <span style="font-size:10px;color:var(--orange)">Cambio de Precio + Promo</span>
+            </div>
+            <div class="demo-upc-btn" onclick="selectDemoUPC('DEMO003')">
+              <span style="font-size:12px;font-weight:600;color:#fff">DEMO003</span>
+              <span style="font-size:10px;color:var(--red)">Promo</span>
+            </div>
           </div>
         </div>
         <div id="locationBadge" class="location-badge nearby">
@@ -5456,6 +5486,45 @@ function onScanSuccess(decodedText, decodedResult) {
   }
 }
 
+// ============ DEMO DATA ============
+var demoProducts = {
+  'DEMO001': [{
+    'UPC': '194956623456', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT',
+    'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear',
+    'Género': 'Caballero', 'Talla': '27',
+    'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0,
+    'TAG': 'FULL PRICE', 'IMPULSO': '', 'Vigencia': '31/12/2026',
+    'Inventario': 5, 'Sucursal': 'Demo Store'
+  }],
+  'DEMO002': [{
+    'UPC': '194957834567', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC',
+    'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear',
+    'Género': 'Caballero', 'Talla': '28',
+    'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699,
+    'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Vigencia': '30/04/2026',
+    'Inventario': 2, 'Sucursal': 'Demo Store'
+  }],
+  'DEMO003': [{
+    'UPC': '194958945678', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001',
+    'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear',
+    'Género': 'Dama', 'Talla': '25',
+    'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519,
+    'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Vigencia': '15/04/2026',
+    'Inventario': 1, 'Sucursal': 'Demo Store'
+  }]
+};
+
+function showDemoSuggestions() {
+  document.getElementById('demoSuggestions').style.display = 'block';
+}
+function hideDemoSuggestions() {
+  document.getElementById('demoSuggestions').style.display = 'none';
+}
+function selectDemoUPC(code) {
+  document.getElementById('manualBarcode').value = code;
+  hideDemoSuggestions();
+}
+
 function manualSearch() {
   const input = document.getElementById('manualBarcode');
   const code = input.value.trim();
@@ -5468,6 +5537,12 @@ function manualSearch() {
 }
 
 function processBarcode(code) {
+  // Check demo data first
+  if (demoProducts[code]) {
+    displayProduct(demoProducts[code], code);
+    goToScreen(3);
+    return;
+  }
   if (productData.length === 0) {
     showToast('Carga un archivo Excel primero');
     return;
