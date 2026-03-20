@@ -5233,14 +5233,15 @@ function setScanMode(mode) {
 }
 
 function getFormatsForMode(mode) {
-  // Only retail-relevant formats — ITF/CODABAR/QR/DataMatrix removed to prevent misreads
+  // Retail formats + ITF (ITF allowed but treated as unreliable in onScanSuccess)
   return [
     Html5QrcodeSupportedFormats.EAN_13,
     Html5QrcodeSupportedFormats.EAN_8,
     Html5QrcodeSupportedFormats.UPC_A,
     Html5QrcodeSupportedFormats.UPC_E,
     Html5QrcodeSupportedFormats.CODE_128,
-    Html5QrcodeSupportedFormats.CODE_39
+    Html5QrcodeSupportedFormats.CODE_39,
+    Html5QrcodeSupportedFormats.ITF
   ];
 }
 
@@ -5544,12 +5545,15 @@ function onScanSuccess(decodedText, decodedResult) {
   // Get detected format name for diagnostics
   const fmt = (decodedResult && decodedResult.result && decodedResult.result.format && decodedResult.result.format.formatName) || 'unknown';
 
-  // Block unwanted formats — BarcodeDetector nativo ignora formatsToSupport
-  const blockedFormats = ['ITF', 'CODABAR', 'QR_CODE', 'DATA_MATRIX', 'CODE_93', 'AZTEC', 'PDF_417'];
+  // Block formats that never appear in retail
+  const blockedFormats = ['CODABAR', 'QR_CODE', 'DATA_MATRIX', 'CODE_93', 'AZTEC', 'PDF_417'];
   if (blockedFormats.some(f => fmt.toUpperCase().includes(f))) {
     console.warn('Formato bloqueado:', fmt, decodedText);
     return;
   }
+
+  // ITF is unreliable — only accept if it finds a match in DB, otherwise ignore silently
+  const isUnreliableFormat = fmt.toUpperCase().includes('ITF');
 
   const lastScanInfo = document.getElementById('lastScanInfo');
 
@@ -5578,6 +5582,11 @@ function onScanSuccess(decodedText, decodedResult) {
     displayProduct(rows, decodedText);
     goToScreen(3);
     setTimeout(() => { scanCooldown = false; }, 2000);
+  } else if (isUnreliableFormat) {
+    // ITF not found — ignore silently and keep scanning for a better read
+    lastScanInfo.innerHTML = 'Reintentando... ' + decodedText + ' (' + fmt + ')';
+    scanCooldown = true;
+    setTimeout(() => { scanCooldown = false; }, 300);
   } else if (scanMode === 'material') {
     // MATERIAL MODE: code not found — keep scanning silently
     materialRetryCount++;
