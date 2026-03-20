@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1457,9 +1457,9 @@ button, .store-select-btn, .size-btn {
   gap: 16px;
 }
 .label-frame {
-  /* 40mm x 30mm at ~3.78px/mm ≈ 151x113, scaled up for preview */
+  /* 40mm x 30mm scaled up for preview */
   width: 240px;
-  height: 180px;
+  height: 200px;
   border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden;
@@ -2022,6 +2022,173 @@ button, .store-select-btn, .size-btn {
   border-radius: 4px;
   font-weight: 600;
 }
+
+/* Cambios de Precio module */
+.cp-body { padding: 8px 12px; overflow-y: auto; height: calc(100vh - 60px); height: calc(100dvh - 60px); }
+.cp-top-bar { display:flex;gap:8px;align-items:center;margin-bottom:8px; }
+.cp-actions { display:flex;gap:8px;align-items:center;margin-bottom:10px; }
+.cp-select-all { display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer; }
+.cp-select-all.active { background:rgba(91,184,255,0.15);border-color:#5bb8ff;color:#5bb8ff; }
+.cp-print-btn { display:flex;align-items:center;gap:4px;padding:8px 16px;background:#5bb8ff;border:none;border-radius:8px;color:#000;font-size:11px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-left:auto; }
+.cp-print-btn:disabled { opacity:0.4; }
+.cp-list { display:flex;flex-direction:column;gap:6px;padding-bottom:20px; }
+.cp-item { display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 12px;transition:all 0.2s; }
+.cp-item.selected { background:rgba(91,184,255,0.08);border-color:rgba(91,184,255,0.3); }
+.cp-check { width:22px;height:22px;min-width:22px;border-radius:6px;border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s; }
+.cp-item.selected .cp-check { background:#5bb8ff;border-color:#5bb8ff; }
+.cp-info { flex:1;min-width:0; }
+.cp-brand { font-size:10px;color:#5bb8ff;font-weight:600;text-transform:uppercase;letter-spacing:0.5px; }
+.cp-name { font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.cp-style { font-size:10px;color:var(--gray); }
+.cp-prices { text-align:right;min-width:80px; }
+.cp-old { font-size:11px;color:var(--gray);text-decoration:line-through; }
+.cp-new { font-size:16px;font-weight:800;color:#5bb8ff; }
+.cp-tag { font-size:9px;background:rgba(230,57,70,0.15);color:var(--red);padding:2px 6px;border-radius:4px;font-weight:600;margin-top:2px;display:inline-block; }
+.cp-qty { display:flex;align-items:center;gap:4px;margin-top:4px; }
+.cp-qty-btn { width:24px;height:24px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif; }
+.cp-qty-val { width:32px;text-align:center;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#fff;font-size:12px;font-weight:700;padding:2px 0;font-family:'Poppins',sans-serif; }
+
+/* Demo UPC suggestions */
+.demo-upc-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.demo-upc-btn:active { background: rgba(230,57,70,0.15); border-color: var(--red); }
+
+/* ===== iOS SAFE AREAS & SCANNER FIX ===== */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .phone-frame {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .screen-header {
+    padding-top: env(safe-area-inset-top);
+  }
+  .scanner-frame {
+    height: calc(55dvh - env(safe-area-inset-top));
+  }
+}
+
+/* iOS Safari: force video to fill scanner frame properly */
+@supports (-webkit-touch-callout: none) {
+  .scanner-body {
+    max-height: calc(100dvh - 60px - env(safe-area-inset-top, 0px));
+  }
+  .scanner-frame {
+    height: 48dvh;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scanner-frame #scanner-reader {
+    position: relative;
+    width: 100% !important;
+    height: 100% !important;
+    inset: auto;
+  }
+  #scanner-reader video {
+    object-fit: cover !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+  }
+  #scanner-reader {
+    overflow: hidden !important;
+    border-radius: 0 !important;
+    max-width: none !important;
+  }
+  #scanner-reader__scan_region {
+    border-radius: 0 !important;
+  }
+  /* Fix iOS bottom bar eating space */
+  .splash-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  .bottom-ctas {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  /* Batch and piezas body scroll fix */
+  .batch-body, .pu-body {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  /* Splash: reduce sizes so logo doesn't get cut */
+  .screen-splash {
+    padding-top: calc(20px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .splash-content {
+    margin-bottom: 20px;
+  }
+  .logo-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 10px;
+  }
+  .logo-text {
+    font-size: 40px;
+  }
+}
+
+/* ===== iPad: expand to full screen ===== */
+@supports (-webkit-touch-callout: none) {
+  @media (min-width: 768px) {
+    body {
+      background: var(--black) !important;
+    }
+    .phone-frame {
+      max-width: 100% !important;
+      max-height: 100% !important;
+      height: 100dvh !important;
+      border-radius: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .scanner-frame {
+      height: 55dvh;
+    }
+    .logo-icon {
+      width: 100px;
+      height: 100px;
+    }
+    .logo-text {
+      font-size: 56px;
+    }
+    .tagline {
+      font-size: 20px;
+    }
+    .btn-primary {
+      font-size: 18px;
+      padding: 18px 40px;
+    }
+    .btn-print-batch {
+      font-size: 16px;
+      padding: 16px 30px;
+    }
+    .header-title {
+      font-size: 22px;
+    }
+    .scanner-body {
+      max-height: calc(100dvh - 70px - env(safe-area-inset-top, 0px));
+    }
+    .splash-content {
+      margin-bottom: 40px;
+    }
+    .screen-splash {
+      padding-top: calc(40px + env(safe-area-inset-top, 0px));
+    }
+  }
+}
 </style>
 </head>
 <body>
@@ -2039,6 +2206,9 @@ button, .store-select-btn, .size-btn {
         </button>
         <button class="store-select-btn" onclick="selectStore('innvictus')">
           <img src="https://www.innvictus.com/_ui/responsive/theme-rga_innvictus/css/img/logo-innvictus.svg" alt="Innvictus" onerror="this.outerHTML='<span style=color:#fff;font-size:24px;font-weight:800;letter-spacing:1px>INNVICTUS</span>'">
+        </button>
+        <button class="store-select-btn" onclick="selectStore('overtime')">
+          <span style="color:#fff;font-size:32px;font-weight:900;letter-spacing:3px">OVERTIME</span>
         </button>
         <div class="store-select-label">Cada tienda usa su propio Excel</div>
       </div>
@@ -2070,8 +2240,12 @@ button, .store-select-btn, .size-btn {
             IMPRIMIR AHORA
           </button>
           <button class="btn-print-batch" onclick="goToScreen(6)" style="border-color:#F39C12;color:#F39C12">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor"><path d="M228.65,129.11l-60.73-20.24a24,24,0,0,1-14.32-13L130.39,41.6s0-.07,0-.1A16,16,0,0,0,110.25,33L34.53,60.49A16.05,16.05,0,0,0,24,75.53V192a16,16,0,0,0,16,16H240a16,16,0,0,0,16-16V167.06A40,40,0,0,0,228.65,129.11ZM115.72,48l7.11,16.63-21.56,7.85A8,8,0,0,0,104,88a7.91,7.91,0,0,0,2.73-.49l22.4-8.14,4.74,11.07-16.6,6A8,8,0,0,0,120,112a7.91,7.91,0,0,0,2.73-.49l17.6-6.4a40.24,40.24,0,0,0,7.68,10l-14.74,5.36A8,8,0,0,0,136,136a8.14,8.14,0,0,0,2.73-.48l28-10.18,56.87,18.95A24,24,0,0,1,238.93,160H40V75.53ZM40,192h0V176H240v16Z"/></svg>
             PIEZAS UNICAS
+          </button>
+          <button class="btn-print-batch" onclick="goToScreen(7)" style="border-color:#5bb8ff;color:#5bb8ff">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a10 10 0 010 20"/><path d="M12 2a10 10 0 000 20"/></svg>
+            CAMBIOS DE PRECIO
           </button>
           <button class="btn-secondary" id="btnLoadData" onclick="document.getElementById('excelInput').click()">
             CARGAR DATOS (EXCEL)
@@ -2112,7 +2286,6 @@ button, .store-select-btn, .size-btn {
         <div class="scanner-frame">
           <div id="scanner-reader"></div>
           <div id="materialTempDecoder" style="display:none"></div>
-          <div id="hdTempDecoder" style="display:none"></div>
           <div class="scanner-overlay">
             <div class="corner corner-tl"></div>
             <div class="corner corner-tr"></div>
@@ -2122,17 +2295,36 @@ button, .store-select-btn, .size-btn {
           </div>
         </div>
         <div class="scan-mode-toggle" id="scanModeToggle">
-          <button class="scan-mode-btn active" id="btnModeUPC" onclick="setScanMode('upc')">UPC</button>
-          <button class="scan-mode-btn" id="btnModeUPC2" onclick="setScanMode('upc2')">UPC 2 (HD)</button>
+          <button class="scan-mode-btn active" id="btnModeUPC" onclick="setScanMode('upc')">UPC (Marca)</button>
+          <button class="scan-mode-btn" id="btnModeMaterial" onclick="setScanMode('material')">Material (Sticker)</button>
         </div>
+        <button class="material-capture-btn" id="materialCaptureBtn" style="display:none" onclick="captureMaterial()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+          Capturar
+        </button>
         <div class="scanner-instruction" id="scannerInstruction">
-          <strong>Modo UPC</strong> — Escaneo estandar
+          <strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca
         </div>
         <div class="manual-input-section">
           <div class="manual-label">o ingresa el codigo manualmente</div>
           <div class="manual-input-row">
-            <input type="text" id="manualBarcode" placeholder="UPC, Estilo o Material..." inputmode="text">
+            <input type="text" id="manualBarcode" placeholder="UPC, Estilo o Material..." inputmode="text" onfocus="showDemoSuggestions()" onblur="setTimeout(hideDemoSuggestions,200)">
             <button onclick="manualSearch()">Buscar</button>
+          </div>
+          <div id="demoSuggestions" style="display:none;margin-top:6px;width:100%;max-width:340px">
+            <div style="font-size:10px;color:var(--gray);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Ejemplos demo</div>
+            <div class="demo-upc-btn" onclick="selectDemoUPC('DEMO001')">
+              <span style="font-size:12px;font-weight:600;color:#fff">DEMO001</span>
+              <span style="font-size:10px;color:var(--green)">Full Price</span>
+            </div>
+            <div class="demo-upc-btn" onclick="selectDemoUPC('DEMO002')">
+              <span style="font-size:12px;font-weight:600;color:#fff">DEMO002</span>
+              <span style="font-size:10px;color:var(--orange)">Cambio de Precio + Promo</span>
+            </div>
+            <div class="demo-upc-btn" onclick="selectDemoUPC('DEMO003')">
+              <span style="font-size:12px;font-weight:600;color:#fff">DEMO003</span>
+              <span style="font-size:10px;color:var(--red)">Promo</span>
+            </div>
           </div>
         </div>
         <div id="locationBadge" class="location-badge nearby">
@@ -2240,23 +2432,27 @@ button, .store-select-btn, .size-btn {
         <div id="puCount" style="color:var(--gray);font-size:13px;margin-left:auto;padding-right:12px">0</div>
       </div>
       <div class="pu-body">
+        <!-- Search -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
+          <div style="flex:1;position:relative">
+            <input type="text" id="puSearchInput" placeholder="Buscar estilo..." oninput="applyPuFilters()" style="width:100%;padding:9px 12px 9px 32px;background:rgba(243,156,18,0.08);border:1px solid rgba(243,156,18,0.25);border-radius:8px;color:#fff;font-size:12px;font-family:'Poppins',sans-serif;outline:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F39C12" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+        </div>
         <!-- Filters -->
         <div class="pu-filters">
-          <select class="pu-filter" id="puFilterMarca" onchange="applyPuFilters()">
-            <option value="">Mar</option>
+          <select class="pu-filter" id="puFilterMarca" onchange="applyPuFilters()" style="border-color:rgba(243,156,18,0.3);background:#1a1a10">
+            <option value="">Marca</option>
           </select>
-          <select class="pu-filter" id="puFilterGenero" onchange="applyPuFilters()">
+          <select class="pu-filter" id="puFilterGenero" onchange="applyPuFilters()" style="border-color:rgba(243,156,18,0.3);background:#1a1a10">
             <option value="">Gen</option>
           </select>
-          <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()">
+          <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()" style="border-color:rgba(243,156,18,0.3);background:#1a1a10">
             <option value="">Div</option>
-          </select>
-          <select class="pu-filter" id="puFilterVigencia" onchange="applyPuFilters()">
-            <option value="">Vig</option>
           </select>
         </div>
         <div class="pu-controls">
-          <div class="pu-toggle" id="puPzaToggle">
+          <div class="pu-toggle" id="puPzaToggle" style="border-color:rgba(243,156,18,0.3)">
             <button class="pu-toggle-btn active" onclick="setPuMaxPzas(1)">1 pza</button>
             <button class="pu-toggle-btn" onclick="setPuMaxPzas(3)">Hasta 3</button>
           </div>
@@ -2266,10 +2462,59 @@ button, .store-select-btn, .size-btn {
             <option value="pzas-asc">Menos pzas</option>
             <option value="pzas-desc">Mas pzas</option>
           </select>
-          <button class="pu-clear-btn" onclick="clearPuFilters()">Limpiar filtros</button>
+          <button class="pu-clear-btn" onclick="clearPuFilters()" style="border-color:rgba(243,156,18,0.3);color:#F39C12">Limpiar</button>
         </div>
         <!-- Results list -->
         <div id="puList" class="pu-list"></div>
+      </div>
+    </div>
+  </div>
+
+    <!-- SCREEN 7: CAMBIOS DE PRECIO -->
+    <div class="screen right" id="screen7">
+      <div class="screen-header header-dark">
+        <button class="back-btn" onclick="goToScreen(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="header-title">Cambios de Precio</div>
+        <div id="cpCount" style="color:var(--gray);font-size:13px;margin-left:auto;padding-right:12px">0</div>
+      </div>
+      <div class="cp-body">
+        <!-- Filters + Print -->
+        <div class="cp-top-bar">
+          <div class="pu-filters" style="margin-bottom:0;flex:1">
+            <select class="pu-filter" id="cpFilterMarca" onchange="applyCpFilters()"><option value="">Marca</option></select>
+            <select class="pu-filter" id="cpFilterGenero" onchange="applyCpFilters()"><option value="">Gen</option></select>
+            <select class="pu-filter" id="cpFilterDiv" onchange="applyCpFilters()"><option value="">Div</option></select>
+          </div>
+        </div>
+        <div class="cp-actions">
+          <button class="cp-select-all" id="cpSelectAll" onclick="toggleCpSelectAll()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+            Seleccionar todo
+          </button>
+          <button class="cp-print-btn" id="cpPrintBtn" onclick="cpPrintSelected()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            IMPRIMIR (0)
+          </button>
+        </div>
+        <!-- Search + Printer icon + Reset icon -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
+          <div style="flex:1;position:relative">
+            <input type="text" id="cpSearchInput" placeholder="Buscar estilo..." oninput="cpSearchFilter()" style="width:100%;padding:9px 12px 9px 32px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:12px;font-family:'Poppins',sans-serif;outline:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+          <button id="cpConnectBtn" onclick="togglePrinter()" style="width:36px;height:36px;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Conectar impresora">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </button>
+          <button onclick="resetCambiosPrecio()" style="width:36px;height:36px;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Borrar todo">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          </button>
+        </div>
+        <!-- List -->
+        <div id="cpList" class="cp-list"></div>
       </div>
     </div>
   </div>
@@ -2497,7 +2742,8 @@ function selectStore(business) {
   // Update tagline with store name
   var tagline = document.querySelector('#screen1 .tagline');
   if (tagline) {
-    tagline.textContent = business === 'innovasport' ? 'Innovasport' : 'Innvictus';
+    var names = { innovasport: 'Innovasport', innvictus: 'Innvictus', overtime: 'Overtime' };
+    tagline.textContent = names[business] || business;
   }
 
   // Load data for this store from cache
@@ -2898,10 +3144,22 @@ function lookupBarcode(code) {
 // Find related products (same Estilo = same model, different sizes)
 function findRelatedByEstilo(estilo) {
   if (!estilo || estilo === '(Sin valor)') return [];
-  return productData.filter(r =>
+  // Search in productData first
+  var results = productData.filter(r =>
     String(r['Estilo'] || '').trim() === String(estilo).trim() &&
     String(r['Estilo']).trim() !== '(Sin valor)'
   );
+  // If no results, search in demo data
+  if (results.length === 0) {
+    Object.keys(demoProducts).forEach(function(key) {
+      demoProducts[key].forEach(function(r) {
+        if (String(r['Estilo'] || '').trim() === String(estilo).trim()) {
+          results.push(r);
+        }
+      });
+    });
+  }
+  return results;
 }
 
 // ============ PRODUCT DISPLAY ============
@@ -3484,14 +3742,14 @@ function generateLabelPreview() {
   if (isFullPrice) {
     pricesHTML = '<div class="label-price-main" style="font-size:24px;margin-top:2px">' + formatP(d.n1) + '</div>';
   } else if (isCPPromo) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:9px">De: ' + formatP(d.n1) + '</div>'
-      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">CP: ' + formatP(d.n2) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:12px">CP: ' + formatP(d.n2) + '</div>'
       + '<div class="label-price-main" style="font-size:22px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
   } else if (isPromoOnly) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:12px">De: ' + formatP(d.n1) + '</div>'
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
   } else {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:12px">De: ' + formatP(d.n1) + '</div>'
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n2) + '</div>';
   }
 
@@ -3500,10 +3758,10 @@ function generateLabelPreview() {
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     + '<div>' + pricesHTML + '</div>'
     + '<div style="text-align:right;flex-shrink:0;max-width:45%">'
-    + '<div style="font-size:9px;font-weight:700;color:#000">' + d.estilo + '</div>'
-    + '<div style="font-size:8px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">' + d.description + '</div>'
+    + '<div style="font-size:11px;font-weight:700;color:#000">' + d.estilo + '</div>'
     + '</div></div>'
-    + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;align-items:center;justify-content:center"><svg id="labelBarcode"></svg></div>'
+    + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:center"><svg id="labelBarcode"></svg></div>'
+    + '<div style="text-align:center;font-size:10px;color:#333;padding:4px 0 2px;flex-shrink:0">' + d.description + '</div>'
     + '</div></div>';
 
   // Quantity selector
@@ -3716,7 +3974,7 @@ window._phomemo = (function() {
     var pixels = ctx.getImageData(0, 0, w, h).data;
     var canvasBytesPerRow = Math.ceil(w / 8);
     var output = new Uint8Array(PRINTER_WIDTH_BYTES * h);
-    var offset = Math.floor((PRINTER_WIDTH_BYTES - canvasBytesPerRow) / 2);
+    var offset = PRINTER_WIDTH_BYTES - canvasBytesPerRow;
     if (offset < 0) offset = 0;
 
     for (var y = 0; y < h; y++) {
@@ -3791,22 +4049,26 @@ function updatePrinterUI(state, customMsg) {
   var conn = document.getElementById('btnConnectPrinter');
   var status = document.getElementById('printerStatus');
   var batchConn = document.getElementById('batchConnectBtn');
+  var cpConn = document.getElementById('cpConnectBtn');
   var name = window._phomemo.getDeviceName();
 
   if (state === true || state === 'connected') {
     if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = _printerSvg + 'Imprimir etiqueta'; }
     if (conn) { conn.className = 'btn-connect-printer connected'; conn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer connected'; batchConn.innerHTML = '&#9679; ' + name + ' conectada — Desconectar'; }
+    if (cpConn) { cpConn.style.borderColor = 'var(--green)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--green)'); }
     if (status) status.textContent = customMsg || 'Impresora lista';
   } else if (state === 'connecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Conectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Conectando a ' + name + '...'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Conectando...'; }
+    if (cpConn) { cpConn.style.borderColor = 'var(--orange)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--orange)'); }
     if (status) status.textContent = customMsg || 'Estableciendo conexión BLE...';
   } else if (state === 'reconnecting') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Reconectando...'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9676; Reconectando...'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9676; Reconectando...'; }
+    if (cpConn) { cpConn.style.borderColor = 'var(--orange)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--orange)'); }
     if (status) status.textContent = customMsg || 'Conexión perdida, reconectando...';
   } else if (state === 'printing') {
     if (btn) { btn.className = 'btn-print-label printing'; btn.innerHTML = _printerSvg + 'Imprimiendo...'; }
@@ -3815,6 +4077,7 @@ function updatePrinterUI(state, customMsg) {
     if (btn) { btn.className = 'btn-print-label'; btn.innerHTML = _printerSvg + 'Conectar e imprimir'; }
     if (conn) { conn.className = 'btn-connect-printer'; conn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
     if (batchConn) { batchConn.className = 'btn-connect-printer'; batchConn.innerHTML = '&#9678; Conectar impresora Phomemo'; }
+    if (cpConn) { cpConn.style.borderColor = 'rgba(255,255,255,0.15)'; cpConn.querySelector('svg').setAttribute('stroke', 'var(--gray)'); }
     if (status) status.textContent = customMsg || 'Sin impresora conectada';
   }
 }
@@ -3852,69 +4115,76 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
 
-  // === TOP SECTION: Prices left, Estilo+Desc right ===
-  var pad = 8;
+  // === TOP SECTION: Prices left, Description right ===
+  var pad = 12;
 
-  // Estilo + Description — top right, small
+  // Estilo — top right, bigger, less cornered
   ctx.fillStyle = '#000';
   ctx.textAlign = 'right';
-  ctx.font = 'bold 11px Arial';
-  ctx.fillText(d.estilo, W - pad, 14);
-  ctx.font = '10px Arial';
-  ctx.fillText(d.description, W - pad, 28);
+  ctx.font = 'bold 14px Arial';
+  ctx.fillText(d.estilo, W - 20, 18);
 
   // Prices — top left
   ctx.textAlign = 'left';
 
+  var priceBottom = 0;
+
   if (isFullPrice) {
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 36px Arial';
+    ctx.font = 'bold 26px Arial';
     ctx.fillText(formatP(d.n1), pad, 50);
+    priceBottom = 54;
   } else if (isCPPromo) {
     ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
+    ctx.font = '13px Arial';
     var t1 = 'De: ' + formatP(d.n1);
-    ctx.fillText(t1, pad, 18);
+    ctx.fillText(t1, pad, 20);
     var tw1 = ctx.measureText(t1).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 14); ctx.lineTo(pad + tw1, 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 17); ctx.lineTo(pad + tw1, 17); ctx.stroke();
 
     ctx.font = '14px Arial';
     var t2 = 'CP: ' + formatP(d.n2);
-    ctx.fillText(t2, pad, 36);
+    ctx.fillText(t2, pad, 38);
     var tw2 = ctx.measureText(t2).width;
-    ctx.beginPath(); ctx.moveTo(pad, 32); ctx.lineTo(pad + tw2, 32); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 35); ctx.lineTo(pad + tw2, 35); ctx.stroke();
 
-    ctx.font = 'bold 34px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 72);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('A: ' + formatP(d.n3), pad, 64);
+    priceBottom = 68;
   } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
-    ctx.font = '14px Arial';
+    ctx.font = '13px Arial';
     var t3 = 'De: ' + formatP(d.n1);
     ctx.fillText(t3, pad, 22);
     var tw3 = ctx.measureText(t3).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw3, 18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 19); ctx.lineTo(pad + tw3, 19); ctx.stroke();
 
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 62);
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText('A: ' + formatP(d.n3), pad, 54);
+    priceBottom = 58;
   } else {
     // REBAJA / CP
     ctx.fillStyle = '#000';
-    ctx.font = '14px Arial';
+    ctx.font = '13px Arial';
     var t4 = 'De: ' + formatP(d.n1);
     ctx.fillText(t4, pad, 22);
     var tw4 = ctx.measureText(t4).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw4, 18); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad, 19); ctx.lineTo(pad + tw4, 19); ctx.stroke();
 
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatP(d.n2), pad, 62);
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText('A: ' + formatP(d.n2), pad, 54);
+    priceBottom = 58;
   }
 
-  // === BOTTOM SECTION: Big barcode ===
-  // Barcode takes up from y=80 to y=240 (160px tall), full width
-  renderBarcodeToCanvas(ctx, d.upc, 8, 78, W - 16, 158);
+  // === BOTTOM SECTION: Barcode starts right after price ===
+  var barcodeY = priceBottom;
+  var barcodeH = H - barcodeY - 18;
+  var barcodeW = W - 8;
+  var barcodeX = 4;
+  renderBarcodeToCanvas(ctx, d.upc, barcodeX, barcodeY, barcodeW, barcodeH);
 
   return canvas;
 }
@@ -3926,8 +4196,8 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
     var tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(tmpSvg);
     JsBarcode(tmpSvg, upc.trim(), {
-      format: 'CODE128', width: 3, height: 120,
-      displayValue: true, fontSize: 18, margin: 0,
+      format: 'CODE128', width: 2.5, height: 104,
+      displayValue: true, fontSize: 16, margin: 0,
       background: 'transparent', lineColor: '#000'
     });
     var svgData = new XMLSerializer().serializeToString(tmpSvg);
@@ -3943,6 +4213,13 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
         var dw = img.width * scale;
         var dh = img.height * scale;
         ctx.drawImage(img, x, y, dw, dh);
+        // Draw description right below barcode+UPC
+        if (window._labelData && window._labelData.description) {
+          ctx.fillStyle = '#000';
+          ctx.textAlign = 'center';
+          ctx.font = '14px Arial';
+          ctx.fillText(window._labelData.description, x + dw / 2, y + dh + 16);
+        }
         URL.revokeObjectURL(url);
         resolve();
       };
@@ -4182,10 +4459,9 @@ function populatePuFilters() {
     if (sortedMarcas.indexOf(m) < 0) sortedMarcas.push(m);
   });
 
-  fillPuSelect('puFilterMarca', 'Mar', sortedMarcas, true);
+  fillPuSelect('puFilterMarca', 'Marca', sortedMarcas, true);
   fillPuSelect('puFilterGenero', 'Gen', Object.keys(generos).sort());
   fillPuSelect('puFilterDivision', 'Div', Object.keys(divisiones).sort());
-  fillPuSelect('puFilterVigencia', 'Vig', Object.keys(vigencias).sort());
 }
 
 function fillPuSelect(id, label, options, preserveOrder) {
@@ -4202,8 +4478,9 @@ function clearPuFilters() {
   document.getElementById('puFilterMarca').value = '';
   document.getElementById('puFilterGenero').value = '';
   document.getElementById('puFilterDivision').value = '';
-  document.getElementById('puFilterVigencia').value = '';
   document.getElementById('puSort').value = 'price-desc';
+  var searchEl = document.getElementById('puSearchInput');
+  if (searchEl) searchEl.value = '';
   setPuMaxPzas(1);
 }
 
@@ -4220,15 +4497,16 @@ function applyPuFilters() {
   var marca = document.getElementById('puFilterMarca').value;
   var genero = document.getElementById('puFilterGenero').value;
   var division = document.getElementById('puFilterDivision').value;
-  var vigencia = document.getElementById('puFilterVigencia').value;
   var sort = document.getElementById('puSort').value;
+  var searchEl = document.getElementById('puSearchInput');
+  var search = searchEl ? searchEl.value.trim().toUpperCase() : '';
 
   puData = puAllData.filter(function(item) {
     if (item.totalInv > puMaxPzas) return false;
     if (marca && item.brand !== marca) return false;
     if (genero && item.genero !== genero) return false;
     if (division && item.division !== division) return false;
-    if (vigencia && item.vigencia !== vigencia) return false;
+    if (search && item.estilo.toUpperCase().indexOf(search) < 0 && item.desc.toUpperCase().indexOf(search) < 0) return false;
     return true;
   });
 
@@ -4348,6 +4626,8 @@ function buildLabelData(rows, scannedCode) {
 }
 
 function initBatchScreen() {
+  // Only initialize if empty — preserve data when returning
+  if (batchItems.length > 0) return;
   batchItems = [];
   batchRowCounter = 0;
   document.getElementById('batchList').innerHTML = '';
@@ -4472,33 +4752,9 @@ function updateBatchAddBtn() {
 // Batch scanner
 function openBatchScanner(rowId) {
   batchScanTargetId = rowId;
-  document.getElementById('batchScannerOverlay').style.display = 'flex';
-  document.getElementById('batchManualInput').value = '';
-
-  // Stop main scanner if running
-  try { if (typeof stopScanner === 'function') stopScanner(); } catch(e) {}
-
-  var reader = document.getElementById('batchScannerReader');
-  reader.innerHTML = '';
-
-  batchScannerInstance = new Html5Qrcode('batchScannerReader');
-  batchScannerInstance.start(
-    { facingMode: 'environment' },
-    { fps: 10, qrbox: { width: 250, height: 100 } },
-    function(decoded) {
-      // Cooldown
-      if (batchScannerInstance._lastScan && Date.now() - batchScannerInstance._lastScan < 2000) return;
-      batchScannerInstance._lastScan = Date.now();
-
-      var input = document.getElementById('batchInput' + batchScanTargetId);
-      if (input) input.value = decoded;
-      closeBatchScanner();
-      batchLookupCode(batchScanTargetId);
-    },
-    function() {} // ignore errors
-  ).catch(function(e) {
-    console.log('Batch scanner error:', e);
-  });
+  // Use the main scanner (screen 2) instead of the small modal
+  window._batchScanMode = true;
+  goToScreen(2);
 }
 
 function closeBatchScanner() {
@@ -4532,6 +4788,7 @@ function clearBatchAll() {
 }
 
 function leaveBatchScreen() {
+  // Only close scanner, keep batch data intact
   closeBatchScanner();
   goToScreen(1);
 }
@@ -4598,15 +4855,18 @@ function selectSize(btn) {
 
   // Update store inventory numbers for the selected talla
   var selectedTalla = btn.textContent.trim();
-  var inventoryKey = null;
+  var inventoryKey = 'Inventario';
   if (productData.length > 0) {
     inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
   }
-  if (!inventoryKey || !window._currentEstilo) return;
+  if (!window._currentEstilo) return;
 
   // Find all rows for this estilo + selected talla, grouped by sucursal
   var tallaInv = {};
-  productData.forEach(function(r) {
+  var allData = productData.slice();
+  // Also search demo data
+  Object.keys(demoProducts).forEach(function(key) { demoProducts[key].forEach(function(r) { allData.push(r); }); });
+  allData.forEach(function(r) {
     if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
     if (String(r['Talla'] || '').trim() !== selectedTalla) return;
     var suc = r['Sucursal'] || '';
@@ -4676,15 +4936,17 @@ async function openTallaSheetFromAPI(selectedTalla) {
 }
 
 function openTallaSheetLocal(selectedTalla) {
-  var inventoryKey = null;
+  var inventoryKey = 'Inventario';
   if (productData.length > 0) {
     inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
   }
-  if (!inventoryKey || !window._currentEstilo) return;
+  if (!window._currentEstilo) return;
 
-  // Gather inventory for this talla across ALL stores
+  // Gather inventory for this talla across ALL stores (productData + demo)
   var storeInv = {};
-  productData.forEach(function(r) {
+  var allData = productData.slice();
+  Object.keys(demoProducts).forEach(function(key) { demoProducts[key].forEach(function(r) { allData.push(r); }); });
+  allData.forEach(function(r) {
     if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
     if (String(r['Talla'] || '').trim() !== selectedTalla) return;
     var suc = r['Sucursal'] || '';
@@ -4911,11 +5173,8 @@ function goToScreen(target) {
   // Start scanner when entering screen 2 (used for both UPC and Material modes)
   if (target === 2) {
     setTimeout(function() {
-      if (currentScreen === 2) {
-        startScanner();
-        if (scanMode === 'upc2') startHDScanning();
-      }
-    }, 600);
+      if (currentScreen === 2) startScanner();
+    }, 100);
   }
 
   // Stop scanner/camera when leaving screen 2
@@ -4933,6 +5192,10 @@ function goToScreen(target) {
     setTimeout(function() { initPiezasUnicas(); }, 300);
   }
 
+  if (target === 7) {
+    setTimeout(function() { initCambiosPrecio(); }, 300);
+  }
+
   // Close batch scanner when leaving screen 5
   if (currentScreen === 5 && target !== 5) {
     try { closeBatchScanner(); } catch(e) {}
@@ -4942,112 +5205,30 @@ function goToScreen(target) {
 }
 
 // ============ BARCODE SCANNER ============
-let scanMode = 'upc'; // 'upc' or 'upc2'
+let scanMode = 'upc'; // 'upc' or 'material'
 let retryingWithMaterial = false;
-let hdScanInterval = null; // HD background scanning for UPC2
 
 function setScanMode(mode) {
   scanMode = mode;
   materialRetryCount = 0;
   document.getElementById('btnModeUPC').classList.toggle('active', mode === 'upc');
-  document.getElementById('btnModeUPC2').classList.toggle('active', mode === 'upc2');
+  document.getElementById('btnModeMaterial').classList.toggle('active', mode === 'material');
   const instr = document.getElementById('scannerInstruction');
+  const captureBtn = document.getElementById('materialCaptureBtn');
   if (mode === 'upc') {
-    instr.innerHTML = '<strong>Modo UPC</strong> — Escaneo estandar';
-    stopHDScanning();
+    instr.innerHTML = '<strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca';
+    if (captureBtn) captureBtn.style.display = 'none';
+    // Restart scanner if not running
+    if (!scannerRunning) {
+      setTimeout(() => startScanner(), 50);
+    }
   } else {
-    instr.innerHTML = '<strong>Modo UPC 2 (HD)</strong> — Escaneo con captura HD automatica';
-    startHDScanning();
-  }
-  // Restart scanner if not running
-  if (!scannerRunning) {
-    setTimeout(() => startScanner(), 300);
-  }
-}
-
-// ============ UPC 2: HD BACKGROUND SCANNING ============
-function startHDScanning() {
-  stopHDScanning();
-  // Wait a bit for camera to be ready
-  setTimeout(() => {
-    hdScanInterval = setInterval(hdCaptureAndDecode, 800);
-  }, 1000);
-}
-
-function stopHDScanning() {
-  if (hdScanInterval) {
-    clearInterval(hdScanInterval);
-    hdScanInterval = null;
-  }
-}
-
-async function hdCaptureAndDecode() {
-  // Don't run if scanner isn't active or we're in cooldown
-  if (!scannerRunning || scanCooldown) return;
-
-  const video = document.querySelector('#scanner-reader video');
-  if (!video || !video.srcObject) return;
-
-  try {
-    const track = video.srcObject.getVideoTracks()[0];
-    let imageBitmap = null;
-
-    // Method 1: ImageCapture API — full sensor resolution photo
-    if (typeof ImageCapture !== 'undefined') {
-      try {
-        const imgCapture = new ImageCapture(track);
-        const blob = await imgCapture.takePhoto();
-        imageBitmap = await createImageBitmap(blob);
-      } catch(e) {
-        imageBitmap = null;
-      }
+    instr.innerHTML = '<strong>Modo Material</strong> — Apunta a la sticker y toca Capturar';
+    if (captureBtn) captureBtn.style.display = 'flex';
+    // Keep the scanner running for the camera feed — onScanSuccess handles mode logic
+    if (!scannerRunning) {
+      setTimeout(() => startScanner(), 50);
     }
-
-    // Fallback: grab from video (still better than nothing with our 1080p request)
-    if (!imageBitmap) {
-      imageBitmap = await createImageBitmap(video);
-    }
-
-    // Use native BarcodeDetector if available (Chrome Android has it)
-    if (typeof BarcodeDetector !== 'undefined') {
-      const detector = new BarcodeDetector({
-        formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39']
-      });
-      const barcodes = await detector.detect(imageBitmap);
-      imageBitmap.close();
-
-      if (barcodes.length > 0 && !scanCooldown) {
-        const code = barcodes[0].rawValue;
-        if (code && code.length >= 4) {
-          // Found a barcode via HD — trigger same flow as normal scan
-          const lastScanInfo = document.getElementById('lastScanInfo');
-          if (lastScanInfo) lastScanInfo.innerHTML = 'HD detect: ' + code;
-          onScanSuccess(code);
-        }
-      }
-    } else {
-      // No native BarcodeDetector — use html5-qrcode scanFile as fallback
-      if (imageBitmap) {
-        const canvas = document.createElement('canvas');
-        canvas.width = imageBitmap.width;
-        canvas.height = imageBitmap.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(imageBitmap, 0, 0);
-        imageBitmap.close();
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.95));
-        const file = new File([blob], 'hd.jpg', { type: 'image/jpeg' });
-        const tempScanner = new Html5Qrcode('hdTempDecoder');
-        try {
-          const result = await tempScanner.scanFileV2(file, true);
-          if (result && result.decodedText && !scanCooldown) {
-            onScanSuccess(result.decodedText);
-          }
-        } catch(e) { /* no barcode found in this frame */ }
-        tempScanner.clear();
-      }
-    }
-  } catch(e) {
-    // Silent fail — next interval will try again
   }
 }
 
@@ -5074,7 +5255,7 @@ function startScanner() {
   // Wait for any pending stop to finish before starting
   if (_stopPromise) {
     _stopPromise.finally(function() {
-      setTimeout(startScanner, 300);
+      setTimeout(startScanner, 50);
     });
     return;
   }
@@ -5084,11 +5265,13 @@ function startScanner() {
 
   html5QrCode = new Html5Qrcode('scanner-reader');
 
-  const isMaterial = false; // UPC and UPC2 both use UPC config
+  const isMaterial = scanMode === 'material';
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isIPad = isIOS && (window.innerWidth >= 768);
   const config = {
-    fps: scanMode === 'upc2' ? 25 : 20,
-    qrbox: { width: 340, height: 220 },
-    aspectRatio: 1.0,
+    fps: isMaterial ? 30 : 20,
+    qrbox: isIPad ? { width: 400, height: 260 } : (isIOS ? { width: 280, height: 180 } : { width: 340, height: 220 }),
+    aspectRatio: isIOS ? undefined : 1.0,
     disableFlip: false,
     formatsToSupport: getFormatsForMode(scanMode),
     experimentalFeatures: {
@@ -5096,15 +5279,8 @@ function startScanner() {
     }
   };
 
-  // Request high resolution — critical for small UPC barcodes
-  const cameraConfig = {
-    facingMode: 'environment',
-    width: { ideal: 1920 },
-    height: { ideal: 1080 }
-  };
-
   html5QrCode.start(
-    cameraConfig,
+    { facingMode: 'environment' },
     config,
     onScanSuccess,
     () => {} // ignore scan failures
@@ -5113,6 +5289,7 @@ function startScanner() {
     // Align red overlay to actual qrbox — 500ms for render, retry at 1000ms
     setTimeout(alignOverlayToQrbox, 500);
     setTimeout(alignOverlayToQrbox, 1000);
+    setTimeout(alignOverlayToQrbox, 2000);
     // Apply advanced camera settings for better focus
     try {
       const videoEl = document.querySelector('#scanner-reader video');
@@ -5124,15 +5301,9 @@ function startScanner() {
         if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
           advanced.focusMode = 'continuous';
         }
-        // Close-range focus for small UPC barcodes
-        if (!isMaterial && capabilities.focusDistance) {
-          // Set short focus distance to help with small codes up close
-          const minDist = capabilities.focusDistance.min || 0.05;
-          advanced.focusDistance = Math.max(minDist, 0.1); // ~10cm
-        }
         // Material mode: less zoom for wider barcodes; UPC mode: more zoom
         if (capabilities.zoom) {
-          advanced.zoom = Math.min(isMaterial ? 1.2 : 2.0, capabilities.zoom.max);
+          advanced.zoom = Math.min(isMaterial ? 1.2 : 1.8, capabilities.zoom.max);
         }
         // Torch support - save track for later
         if (capabilities.torch) {
@@ -5219,7 +5390,6 @@ function alignOverlayToQrbox() {
 var _stopPromise = null;
 function stopScanner() {
   scannerRunning = false;
-  stopHDScanning();
   if (html5QrCode) {
     var q = html5QrCode;
     html5QrCode = null;
@@ -5361,7 +5531,12 @@ function toggleTorch() {
 
 function stopScannerAndGoBack() {
   try { stopScanner(); } catch(e) {}
-  goToScreen(1);
+  if (window._batchScanMode) {
+    window._batchScanMode = false;
+    goToScreen(5);
+  } else {
+    goToScreen(1);
+  }
 }
 
 let materialRetryCount = 0;
@@ -5385,14 +5560,27 @@ function onScanSuccess(decodedText, decodedResult) {
     if (navigator.vibrate) navigator.vibrate(100);
     materialRetryCount = 0;
     lastScanInfo.innerHTML = 'Encontrado: <strong>' + decodedText + '</strong> (' + fmt + ')';
+
+    // If in batch scan mode, return to batch screen with the code
+    if (window._batchScanMode) {
+      window._batchScanMode = false;
+      var input = document.getElementById('batchInput' + batchScanTargetId);
+      if (input) input.value = decodedText;
+      stopScanner();
+      goToScreen(5);
+      batchLookupCode(batchScanTargetId);
+      setTimeout(() => { scanCooldown = false; }, 2000);
+      return;
+    }
+
     displayProduct(rows, decodedText);
     goToScreen(3);
     setTimeout(() => { scanCooldown = false; }, 2000);
-  } else if (scanMode === 'upc2') {
-    // UPC2 MODE: code not found — keep scanning silently (HD might find it)
+  } else if (scanMode === 'material') {
+    // MATERIAL MODE: code not found — keep scanning silently
     materialRetryCount++;
     materialLastBadCode = decodedText;
-    lastScanInfo.innerHTML = 'HD buscando... descartado: ' + decodedText + ' (' + fmt + ') — intento ' + materialRetryCount + '/' + MATERIAL_MAX_RETRIES;
+    lastScanInfo.innerHTML = 'Buscando... descartado: ' + decodedText + ' (' + fmt + ') — intento ' + materialRetryCount + '/' + MATERIAL_MAX_RETRIES;
 
     if (materialRetryCount >= MATERIAL_MAX_RETRIES) {
       // Too many bad reads — give up and show not found
@@ -5418,6 +5606,272 @@ function onScanSuccess(decodedText, decodedResult) {
   }
 }
 
+// ============ CAMBIOS DE PRECIO MODULE ============
+var cpDemoData = [
+  { estilo:'DV2599-WHT', desc:'Nike Air Force 1 07', marca:'NIKE', gen:'Caballero', div:'Footwear', oldPrice:2299, newPrice:1839, tag:'CP', upc:'194956623001' },
+  { estilo:'1162D11-GCTC', desc:'Hoka Bondi 9', marca:'HOKA', gen:'Caballero', div:'Footwear', oldPrice:4299, newPrice:3009, tag:'CP+PROMO', upc:'194957834002' },
+  { estilo:'FB2207-001', desc:'Nike Revolution 7', marca:'NIKE', gen:'Dama', div:'Footwear', oldPrice:1899, newPrice:1519, tag:'CP', upc:'194958945003' },
+  { estilo:'GY9353', desc:'Adidas Ultraboost 22', marca:'ADIDAS', gen:'Caballero', div:'Footwear', oldPrice:3999, newPrice:2799, tag:'CP+PROMO', upc:'194959056004' },
+  { estilo:'38478902-BLK', desc:'Puma RS-X', marca:'PUMA', gen:'Caballero', div:'Footwear', oldPrice:2499, newPrice:1999, tag:'CP', upc:'194960167005' },
+  { estilo:'BB5476', desc:'Adidas Superstar', marca:'ADIDAS', gen:'Dama', div:'Footwear', oldPrice:2199, newPrice:1759, tag:'CP', upc:'194961278006' },
+  { estilo:'CD0881-102', desc:'Nike Air Max 90', marca:'NIKE', gen:'Caballero', div:'Footwear', oldPrice:3299, newPrice:2639, tag:'CP+PROMO', upc:'194962389007' },
+  { estilo:'FY2831', desc:'Adidas NMD R1', marca:'ADIDAS', gen:'Dama', div:'Footwear', oldPrice:3499, newPrice:2449, tag:'CP', upc:'194963490008' },
+  { estilo:'1134052-BBLC', desc:'Hoka Clifton 9', marca:'HOKA', gen:'Caballero', div:'Footwear', oldPrice:3699, newPrice:2959, tag:'CP', upc:'194964501009' },
+  { estilo:'DH2987-100', desc:'Nike Dunk Low Retro', marca:'NIKE', gen:'Dama', div:'Footwear', oldPrice:2599, newPrice:1819, tag:'CP+PROMO', upc:'194965612010' },
+  { estilo:'01FM-08IN-BQ', desc:'Under Armour Curry 11', marca:'UA', gen:'Caballero', div:'Footwear', oldPrice:3899, newPrice:2729, tag:'CP', upc:'194966723011' },
+  { estilo:'IF4031', desc:'Adidas Samba OG', marca:'ADIDAS', gen:'Dama', div:'Footwear', oldPrice:2499, newPrice:1999, tag:'CP', upc:'194967834012' }
+];
+var cpSelected = {}; // upc: true
+var cpQty = {}; // upc: number
+var cpFiltered = [];
+
+var cpInitialized = false;
+function initCambiosPrecio() {
+  if (cpInitialized) return;
+  cpInitialized = true;
+  cpSelected = {};
+  cpQty = {};
+  cpDemoData.forEach(function(p) { cpQty[p.upc] = 1; });
+  var marcas = {}, generos = {}, divs = {};
+  cpDemoData.forEach(function(p) {
+    marcas[p.marca] = 1; generos[p.gen] = 1; divs[p.div] = 1;
+  });
+  var mSel = document.getElementById('cpFilterMarca');
+  var gSel = document.getElementById('cpFilterGenero');
+  var dSel = document.getElementById('cpFilterDiv');
+  mSel.innerHTML = '<option value="">Marca</option>';
+  gSel.innerHTML = '<option value="">Gen</option>';
+  dSel.innerHTML = '<option value="">Div</option>';
+  Object.keys(marcas).sort().forEach(function(m) { mSel.innerHTML += '<option>' + m + '</option>'; });
+  Object.keys(generos).sort().forEach(function(g) { gSel.innerHTML += '<option>' + g + '</option>'; });
+  Object.keys(divs).sort().forEach(function(d) { dSel.innerHTML += '<option>' + d + '</option>'; });
+  applyCpFilters();
+}
+
+function applyCpFilters() {
+  var marca = document.getElementById('cpFilterMarca').value;
+  var gen = document.getElementById('cpFilterGenero').value;
+  var div = document.getElementById('cpFilterDiv').value;
+  cpFiltered = cpDemoData.filter(function(p) {
+    if (marca && p.marca !== marca) return false;
+    if (gen && p.gen !== gen) return false;
+    if (div && p.div !== div) return false;
+    return true;
+  });
+  renderCpList();
+}
+
+function renderCpList() {
+  var html = '';
+  cpFiltered.forEach(function(p, i) {
+    var sel = cpSelected[p.upc] ? ' selected' : '';
+    var check = cpSelected[p.upc] ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : '';
+    var discount = Math.round((1 - p.newPrice / p.oldPrice) * 100);
+    var qty = cpQty[p.upc] || 1;
+    html += '<div class="cp-item' + sel + '">'
+      + '<div class="cp-check" onclick="toggleCpItem(\'' + p.upc + '\')">' + check + '</div>'
+      + '<div class="cp-info" onclick="toggleCpItem(\'' + p.upc + '\')">'
+      + '<div class="cp-brand">' + p.marca + '</div>'
+      + '<div class="cp-name">' + p.desc + '</div>'
+      + '<div class="cp-style">' + p.estilo + ' <span class="cp-tag">' + p.tag + '</span></div>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">'
+      + '<div class="cp-prices">'
+      + '<div class="cp-old">$' + p.oldPrice.toLocaleString() + '</div>'
+      + '<div class="cp-new">$' + p.newPrice.toLocaleString() + '</div>'
+      + '<div style="font-size:9px;color:var(--red);font-weight:700">-' + discount + '%</div>'
+      + '</div>'
+      + '<div class="cp-qty">'
+      + '<button class="cp-qty-btn" onclick="event.stopPropagation();changeCpQty(\'' + p.upc + '\',-1)">−</button>'
+      + '<input class="cp-qty-val" type="number" value="' + qty + '" min="1" max="99" onchange="event.stopPropagation();setCpQty(\'' + p.upc + '\',this.value)" onclick="event.stopPropagation()">'
+      + '<button class="cp-qty-btn" onclick="event.stopPropagation();changeCpQty(\'' + p.upc + '\',1)">+</button>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  });
+  document.getElementById('cpList').innerHTML = html;
+  document.getElementById('cpCount').textContent = cpFiltered.length;
+  updateCpPrintBtn();
+}
+
+function changeCpQty(upc, delta) {
+  var q = (cpQty[upc] || 1) + delta;
+  if (q < 1) q = 1;
+  if (q > 99) q = 99;
+  cpQty[upc] = q;
+  renderCpList();
+}
+
+function setCpQty(upc, val) {
+  var q = parseInt(val) || 1;
+  if (q < 1) q = 1;
+  if (q > 99) q = 99;
+  cpQty[upc] = q;
+  renderCpList();
+}
+
+function toggleCpItem(upc) {
+  if (cpSelected[upc]) { delete cpSelected[upc]; }
+  else { cpSelected[upc] = true; }
+  renderCpList();
+}
+
+function toggleCpSelectAll() {
+  var btn = document.getElementById('cpSelectAll');
+  var allSelected = cpFiltered.every(function(p) { return cpSelected[p.upc]; });
+  if (allSelected) {
+    cpFiltered.forEach(function(p) { delete cpSelected[p.upc]; });
+    btn.classList.remove('active');
+  } else {
+    cpFiltered.forEach(function(p) { cpSelected[p.upc] = true; });
+    btn.classList.add('active');
+  }
+  renderCpList();
+}
+
+function updateCpPrintBtn() {
+  var items = 0, labels = 0;
+  Object.keys(cpSelected).forEach(function(upc) { items++; labels += (cpQty[upc] || 1); });
+  var btn = document.getElementById('cpPrintBtn');
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> IMPRIMIR (' + items + ' prod, ' + labels + ' etiq)';
+  btn.disabled = items === 0;
+  // Update select all button state
+  var allSelected = cpFiltered.length > 0 && cpFiltered.every(function(p) { return cpSelected[p.upc]; });
+  document.getElementById('cpSelectAll').classList.toggle('active', allSelected);
+}
+
+function cpSearchFilter() {
+  var query = document.getElementById('cpSearchInput').value.trim().toUpperCase();
+  if (!query) { applyCpFilters(); return; }
+  var marca = document.getElementById('cpFilterMarca').value;
+  var gen = document.getElementById('cpFilterGenero').value;
+  var div = document.getElementById('cpFilterDiv').value;
+  cpFiltered = cpDemoData.filter(function(p) {
+    if (marca && p.marca !== marca) return false;
+    if (gen && p.gen !== gen) return false;
+    if (div && p.div !== div) return false;
+    var match = p.estilo.toUpperCase().indexOf(query) >= 0 || p.desc.toUpperCase().indexOf(query) >= 0;
+    return match;
+  });
+  renderCpList();
+}
+
+function resetCambiosPrecio() {
+  cpSelected = {};
+  cpQty = {};
+  cpDemoData.forEach(function(p) { cpQty[p.upc] = 1; });
+  document.getElementById('cpFilterMarca').value = '';
+  document.getElementById('cpFilterGenero').value = '';
+  document.getElementById('cpFilterDiv').value = '';
+  document.getElementById('cpSearchInput').value = '';
+  applyCpFilters();
+  showToast('Selecciones y cantidades reiniciadas');
+}
+
+async function cpPrintSelected() {
+  var selected = cpDemoData.filter(function(p) { return cpSelected[p.upc]; });
+  if (selected.length === 0) return;
+
+  // Check printer
+  if (!window._phomemo || !window._phomemo.isConnected()) {
+    showToast('Conecta la impresora primero');
+    return;
+  }
+
+  var totalLabels = 0;
+  selected.forEach(function(p) { totalLabels += (cpQty[p.upc] || 1); });
+
+  var btn = document.getElementById('cpPrintBtn');
+  var originalText = btn.innerHTML;
+  var printed = 0;
+
+  for (var i = 0; i < selected.length; i++) {
+    var p = selected[i];
+    var qty = cpQty[p.upc] || 1;
+
+    // Build label data from demo product
+    var isCP = p.tag.indexOf('CP') >= 0;
+    var isPromo = p.tag.indexOf('PROMO') >= 0;
+    var labelTag = '';
+    if (isCP && isPromo) labelTag = 'CP+PROMO';
+    else if (isCP) labelTag = 'REBAJA';
+    else if (isPromo) labelTag = 'PROMO';
+
+    window._labelData = {
+      description: p.desc,
+      estilo: p.estilo,
+      brand: p.marca,
+      n1: p.oldPrice,
+      n2: isCP ? p.newPrice : 0,
+      n3: isPromo ? p.newPrice : 0,
+      tag: labelTag,
+      impulso: '',
+      upc: p.upc
+    };
+
+    var canvas = renderLabelToCanvas();
+    if (!canvas) continue;
+
+    for (var q = 0; q < qty; q++) {
+      printed++;
+      btn.innerHTML = _printerSvg + ' Imprimiendo ' + printed + '/' + totalLabels + '...';
+      await new Promise(function(r) { setTimeout(r, 400); });
+      try {
+        await window._phomemo.print(canvas);
+      } catch(e) {
+        showToast('Error: ' + e.message);
+        btn.innerHTML = originalText;
+        return;
+      }
+    }
+  }
+
+  btn.innerHTML = originalText;
+  showToast(printed + ' etiquetas impresas');
+}
+
+// ============ DEMO DATA ============
+var _demoBase = { 'Vigencia': '31/12/2026' };
+var demoProducts = {
+  'DEMO001': [
+    { ..._demoBase, 'UPC': '194956623456', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '25', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 3, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623457', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '26', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 5, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623458', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 2, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623459', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 0, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623460', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '29', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194956623461', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '26', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 4, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194956623462', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 3, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194956623463', 'Genérico Talla': 'DEMO001', 'Estilo': 'DV2599-WHT', 'Descripción Estilo': 'Nike Air Force 1 07', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 2299, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 0, 'TAG': 'FULL PRICE', 'IMPULSO': '', 'Inventario': 2, 'Sucursal': 'Innovasport Interlomas' }
+  ],
+  'DEMO002': [
+    { ..._demoBase, 'UPC': '194957834567', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '26', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 0, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834568', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 2, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834569', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834570', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '29', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 3, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194957834571', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '27', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 1, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194957834572', 'Genérico Talla': 'DEMO002', 'Estilo': '1162D11-GCTC', 'Descripción Estilo': 'Hoka Bondi 9', 'Marca': 'HOKA', 'División': 'Footwear', 'Género': 'Caballero', 'Talla': '28', 'Precio Nivel 1': 4299, 'Precio Nivel 2': 3009, 'Precio Final a público - Nivel 3': 2699, 'TAG': 'CP+PROMO', 'IMPULSO': '20% OFF ADICIONAL', 'Inventario': 2, 'Sucursal': 'Innovasport Coyoacán' }
+  ],
+  'DEMO003': [
+    { ..._demoBase, 'UPC': '194958945678', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '22', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945679', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '23', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 2, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945680', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '24', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 0, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945681', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '25', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 1, 'Sucursal': 'Innovasport Perisur' },
+    { ..._demoBase, 'UPC': '194958945682', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '23', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 3, 'Sucursal': 'Innovasport Santa Fe' },
+    { ..._demoBase, 'UPC': '194958945683', 'Genérico Talla': 'DEMO003', 'Estilo': 'FB2207-001', 'Descripción Estilo': 'Nike Revolution 7', 'Marca': 'NIKE', 'División': 'Footwear', 'Género': 'Dama', 'Talla': '24', 'Precio Nivel 1': 1899, 'Precio Nivel 2': 0, 'Precio Final a público - Nivel 3': 1519, 'TAG': 'PROMO', 'IMPULSO': 'ÚLTIMAS PIEZAS', 'Inventario': 1, 'Sucursal': 'Innovasport Interlomas' }
+  ]
+};
+
+function showDemoSuggestions() {
+  document.getElementById('demoSuggestions').style.display = 'block';
+}
+function hideDemoSuggestions() {
+  document.getElementById('demoSuggestions').style.display = 'none';
+}
+function selectDemoUPC(code) {
+  document.getElementById('manualBarcode').value = code;
+  hideDemoSuggestions();
+}
+
 function manualSearch() {
   const input = document.getElementById('manualBarcode');
   const code = input.value.trim();
@@ -5430,6 +5884,12 @@ function manualSearch() {
 }
 
 function processBarcode(code) {
+  // Check demo data first
+  if (demoProducts[code]) {
+    displayProduct(demoProducts[code], code);
+    goToScreen(3);
+    return;
+  }
   if (productData.length === 0) {
     showToast('Carga un archivo Excel primero');
     return;
@@ -5438,6 +5898,16 @@ function processBarcode(code) {
   const rows = lookupBarcode(code);
 
   if (rows && rows.length > 0) {
+    // If in batch scan mode, return to batch
+    if (window._batchScanMode) {
+      window._batchScanMode = false;
+      var input = document.getElementById('batchInput' + batchScanTargetId);
+      if (input) input.value = code;
+      stopScanner();
+      goToScreen(5);
+      batchLookupCode(batchScanTargetId);
+      return;
+    }
     displayProduct(rows, code);
     goToScreen(3);
   } else {
@@ -5521,9 +5991,10 @@ document.addEventListener('DOMContentLoaded', () => {
             switchTab('producto'); return;
           }
         }
-        var backMap = { 1: 0, 2: 1, 3: 2, 4: 3 };
+        var backMap = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 1, 6: 1, 7: 1 };
         var backTo = backMap[currentScreen];
         if (backTo !== undefined) {
+          if (currentScreen === 5) { leaveBatchScreen(); return; }
           goToScreen(backTo);
         }
       } else {
