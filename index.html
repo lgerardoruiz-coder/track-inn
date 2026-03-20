@@ -5544,6 +5544,13 @@ function onScanSuccess(decodedText, decodedResult) {
   // Get detected format name for diagnostics
   const fmt = (decodedResult && decodedResult.result && decodedResult.result.format && decodedResult.result.format.formatName) || 'unknown';
 
+  // Block unwanted formats — BarcodeDetector nativo ignora formatsToSupport
+  const blockedFormats = ['ITF', 'CODABAR', 'QR_CODE', 'DATA_MATRIX', 'CODE_93', 'AZTEC', 'PDF_417'];
+  if (blockedFormats.some(f => fmt.toUpperCase().includes(f))) {
+    console.warn('Formato bloqueado:', fmt, decodedText);
+    return;
+  }
+
   const lastScanInfo = document.getElementById('lastScanInfo');
 
   // Check if code exists in DB
