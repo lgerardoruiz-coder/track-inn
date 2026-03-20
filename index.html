@@ -2286,6 +2286,7 @@ button, .store-select-btn, .size-btn {
         <div class="scanner-frame">
           <div id="scanner-reader"></div>
           <div id="materialTempDecoder" style="display:none"></div>
+          <div id="hdTempDecoder" style="display:none"></div>
           <div class="scanner-overlay">
             <div class="corner corner-tl"></div>
             <div class="corner corner-tr"></div>
@@ -2295,15 +2296,11 @@ button, .store-select-btn, .size-btn {
           </div>
         </div>
         <div class="scan-mode-toggle" id="scanModeToggle">
-          <button class="scan-mode-btn active" id="btnModeUPC" onclick="setScanMode('upc')">UPC (Marca)</button>
-          <button class="scan-mode-btn" id="btnModeMaterial" onclick="setScanMode('material')">Material (Sticker)</button>
+          <button class="scan-mode-btn active" id="btnModeUPC" onclick="setScanMode('upc')">UPC</button>
+          <button class="scan-mode-btn" id="btnModeUPC2" onclick="setScanMode('upc2')">UPC 2 (HD)</button>
         </div>
-        <button class="material-capture-btn" id="materialCaptureBtn" style="display:none" onclick="captureMaterial()">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
-          Capturar
-        </button>
         <div class="scanner-instruction" id="scannerInstruction">
-          <strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca
+          <strong>Modo UPC</strong> — Escaneo estandar
         </div>
         <div class="manual-input-section">
           <div class="manual-label">o ingresa el codigo manualmente</div>
@@ -5173,7 +5170,10 @@ function goToScreen(target) {
   // Start scanner when entering screen 2 (used for both UPC and Material modes)
   if (target === 2) {
     setTimeout(function() {
-      if (currentScreen === 2) startScanner();
+      if (currentScreen === 2) {
+        startScanner();
+        if (scanMode === 'upc2') startHDScanning();
+      }
     }, 100);
   }
 
@@ -5205,30 +5205,109 @@ function goToScreen(target) {
 }
 
 // ============ BARCODE SCANNER ============
-let scanMode = 'upc'; // 'upc' or 'material'
+let scanMode = 'upc'; // 'upc' or 'upc2'
 let retryingWithMaterial = false;
+let hdScanInterval = null; // HD background scanning for UPC2
 
 function setScanMode(mode) {
   scanMode = mode;
   materialRetryCount = 0;
   document.getElementById('btnModeUPC').classList.toggle('active', mode === 'upc');
-  document.getElementById('btnModeMaterial').classList.toggle('active', mode === 'material');
+  document.getElementById('btnModeUPC2').classList.toggle('active', mode === 'upc2');
   const instr = document.getElementById('scannerInstruction');
-  const captureBtn = document.getElementById('materialCaptureBtn');
   if (mode === 'upc') {
-    instr.innerHTML = '<strong>Modo UPC</strong> — Escanea el codigo de barras de la etiqueta de marca';
-    if (captureBtn) captureBtn.style.display = 'none';
-    // Restart scanner if not running
-    if (!scannerRunning) {
-      setTimeout(() => startScanner(), 50);
-    }
+    instr.innerHTML = '<strong>Modo UPC</strong> — Escaneo estandar';
+    stopHDScanning();
   } else {
-    instr.innerHTML = '<strong>Modo Material</strong> — Apunta a la sticker y toca Capturar';
-    if (captureBtn) captureBtn.style.display = 'flex';
-    // Keep the scanner running for the camera feed — onScanSuccess handles mode logic
-    if (!scannerRunning) {
-      setTimeout(() => startScanner(), 50);
+    instr.innerHTML = '<strong>Modo UPC 2 (HD)</strong> — Escaneo con captura HD automatica';
+    startHDScanning();
+  }
+  // Restart scanner if not running
+  if (!scannerRunning) {
+    setTimeout(() => startScanner(), 50);
+  }
+}
+
+// ============ UPC 2: HD BACKGROUND SCANNING ============
+function startHDScanning() {
+  stopHDScanning();
+  setTimeout(() => {
+    hdScanInterval = setInterval(hdCaptureAndDecode, 800);
+  }, 1000);
+}
+
+function stopHDScanning() {
+  if (hdScanInterval) {
+    clearInterval(hdScanInterval);
+    hdScanInterval = null;
+  }
+}
+
+async function hdCaptureAndDecode() {
+  if (!scannerRunning || scanCooldown) return;
+
+  const video = document.querySelector('#scanner-reader video');
+  if (!video || !video.srcObject) return;
+
+  try {
+    const track = video.srcObject.getVideoTracks()[0];
+    let imageBitmap = null;
+
+    // Method 1: ImageCapture API — full sensor resolution photo
+    if (typeof ImageCapture !== 'undefined') {
+      try {
+        const imgCapture = new ImageCapture(track);
+        const blob = await imgCapture.takePhoto();
+        imageBitmap = await createImageBitmap(blob);
+      } catch(e) {
+        imageBitmap = null;
+      }
     }
+
+    // Fallback: grab from video frame
+    if (!imageBitmap) {
+      imageBitmap = await createImageBitmap(video);
+    }
+
+    // Use native BarcodeDetector if available (Chrome Android has it)
+    if (typeof BarcodeDetector !== 'undefined') {
+      const detector = new BarcodeDetector({
+        formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39']
+      });
+      const barcodes = await detector.detect(imageBitmap);
+      imageBitmap.close();
+
+      if (barcodes.length > 0 && !scanCooldown) {
+        const code = barcodes[0].rawValue;
+        if (code && code.length >= 4) {
+          const lastScanInfo = document.getElementById('lastScanInfo');
+          if (lastScanInfo) lastScanInfo.innerHTML = 'HD detect: ' + code;
+          onScanSuccess(code);
+        }
+      }
+    } else {
+      // No native BarcodeDetector — use html5-qrcode scanFile as fallback
+      if (imageBitmap) {
+        const canvas = document.createElement('canvas');
+        canvas.width = imageBitmap.width;
+        canvas.height = imageBitmap.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imageBitmap, 0, 0);
+        imageBitmap.close();
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.95));
+        const file = new File([blob], 'hd.jpg', { type: 'image/jpeg' });
+        const tempScanner = new Html5Qrcode('hdTempDecoder');
+        try {
+          const result = await tempScanner.scanFileV2(file, true);
+          if (result && result.decodedText && !scanCooldown) {
+            onScanSuccess(result.decodedText);
+          }
+        } catch(e) { /* no barcode in this frame */ }
+        tempScanner.clear();
+      }
+    }
+  } catch(e) {
+    // Silent fail — next interval will try again
   }
 }
 
@@ -5265,11 +5344,11 @@ function startScanner() {
 
   html5QrCode = new Html5Qrcode('scanner-reader');
 
-  const isMaterial = scanMode === 'material';
+  const isUPC2 = scanMode === 'upc2';
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isIPad = isIOS && (window.innerWidth >= 768);
   const config = {
-    fps: isMaterial ? 30 : 20,
+    fps: isUPC2 ? 25 : 20,
     qrbox: isIPad ? { width: 400, height: 260 } : (isIOS ? { width: 280, height: 180 } : { width: 340, height: 220 }),
     aspectRatio: isIOS ? undefined : 1.0,
     disableFlip: false,
@@ -5279,8 +5358,15 @@ function startScanner() {
     }
   };
 
+  // Request high resolution — critical for small UPC barcodes
+  const cameraConfig = {
+    facingMode: 'environment',
+    width: { ideal: 1920 },
+    height: { ideal: 1080 }
+  };
+
   html5QrCode.start(
-    { facingMode: 'environment' },
+    cameraConfig,
     config,
     onScanSuccess,
     () => {} // ignore scan failures
@@ -5301,9 +5387,14 @@ function startScanner() {
         if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
           advanced.focusMode = 'continuous';
         }
-        // Material mode: less zoom for wider barcodes; UPC mode: more zoom
+        // Close-range focus for small UPC barcodes (UPC2 mode)
+        if (isUPC2 && capabilities.focusDistance) {
+          var minDist = capabilities.focusDistance.min || 0.05;
+          advanced.focusDistance = Math.max(minDist, 0.1); // ~10cm
+        }
+        // UPC2: more zoom for tiny barcodes
         if (capabilities.zoom) {
-          advanced.zoom = Math.min(isMaterial ? 1.2 : 1.8, capabilities.zoom.max);
+          advanced.zoom = Math.min(isUPC2 ? 2.2 : 1.8, capabilities.zoom.max);
         }
         // Torch support - save track for later
         if (capabilities.torch) {
@@ -5390,6 +5481,7 @@ function alignOverlayToQrbox() {
 var _stopPromise = null;
 function stopScanner() {
   scannerRunning = false;
+  stopHDScanning();
   if (html5QrCode) {
     var q = html5QrCode;
     html5QrCode = null;
@@ -5576,11 +5668,11 @@ function onScanSuccess(decodedText, decodedResult) {
     displayProduct(rows, decodedText);
     goToScreen(3);
     setTimeout(() => { scanCooldown = false; }, 2000);
-  } else if (scanMode === 'material') {
-    // MATERIAL MODE: code not found — keep scanning silently
+  } else if (scanMode === 'upc2') {
+    // UPC2 MODE: code not found — keep scanning silently (HD might find it)
     materialRetryCount++;
     materialLastBadCode = decodedText;
-    lastScanInfo.innerHTML = 'Buscando... descartado: ' + decodedText + ' (' + fmt + ') — intento ' + materialRetryCount + '/' + MATERIAL_MAX_RETRIES;
+    lastScanInfo.innerHTML = 'HD buscando... descartado: ' + decodedText + ' (' + fmt + ') — intento ' + materialRetryCount + '/' + MATERIAL_MAX_RETRIES;
 
     if (materialRetryCount >= MATERIAL_MAX_RETRIES) {
       // Too many bad reads — give up and show not found
