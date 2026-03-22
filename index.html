@@ -3517,7 +3517,15 @@ function updatePrinterUI(state, customMsg) {
   var conn = document.getElementById('btnConnectPrinter');
   var status = document.getElementById('printerStatus');
   var batchConn = document.getElementById('batchConnectBtn');
+  var cpConn = document.getElementById('cpConnectBtn');
   var name = window._phomemo.getDeviceName();
+
+  // Cambios de Precio printer icon — green when connected
+  if (cpConn) {
+    var cpSvg = cpConn.querySelector('svg');
+    if (cpSvg) cpSvg.setAttribute('stroke', (state === true || state === 'connected') ? '#2ECC71' : 'var(--gray)');
+    cpConn.style.borderColor = (state === true || state === 'connected') ? '#2ECC71' : 'rgba(255,255,255,0.15)';
+  }
 
   if (state === true || state === 'connected') {
     if (btn) { btn.className = 'btn-print-label connected'; btn.innerHTML = _printerSvg + 'Imprimir etiqueta'; }
