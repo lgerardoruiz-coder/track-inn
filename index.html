@@ -3001,6 +3001,7 @@ function displayProduct(rows, scannedCode) {
   });
 
   const totalInv = rows.reduce((sum, r) => sum + (parseInt(r[inventoryKey]) || 0), 0);
+  const storeInv = currentStore ? allRelated.filter(r => r['Sucursal'] === currentStore).reduce((sum, r) => sum + (parseInt(r[inventoryKey]) || 0), 0) : totalInv;
   if (storeCards.length) {
     storeHTML = `
       <div class="stores-section">
@@ -3148,7 +3149,7 @@ function displayProduct(rows, scannedCode) {
   }
 
   // Show "última pieza" toast if only 1 unit in total
-  if (typeof totalInv !== 'undefined' && totalInv === 1) {
+  if (typeof storeInv !== 'undefined' && storeInv === 1) {
     setTimeout(() => showUltimaPiezaToast(), 600);
   }
 
@@ -4916,11 +4917,34 @@ function renderTallaSheet(selectedTalla, storeInv) {
       + '</div>';
   });
 
-  document.getElementById('bsBody').innerHTML = html;
+  var searchBar = '<input type="text" id="bsStoreSearch" placeholder="Buscar tienda..." oninput="filterBsStores()" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:10px;background:#f5f5f5;outline:none;box-sizing:border-box">';
+  document.getElementById('bsBody').innerHTML = searchBar + '<div id="bsStoreList">' + html + '</div>';
 
   // Open
   document.getElementById('bsOverlay').classList.add('active');
   document.getElementById('bottomSheet').classList.add('active');
+}
+
+function filterBsStores() {
+  var query = document.getElementById('bsStoreSearch').value.trim().toUpperCase();
+  var cards = document.querySelectorAll('#bsStoreList .bs-store-card');
+  var headers = document.querySelectorAll('#bsStoreList > div[style*="text-transform"]');
+  cards.forEach(function(card) {
+    var name = card.querySelector('.bs-store-name');
+    if (!name) return;
+    var text = name.textContent.toUpperCase();
+    card.style.display = (!query || text.indexOf(query) >= 0) ? '' : 'none';
+  });
+  // Hide estado headers if no visible cards below them
+  headers.forEach(function(h) {
+    var next = h.nextElementSibling;
+    var hasVisible = false;
+    while (next && !next.style.textTransform && next.classList.contains('bs-store-card')) {
+      if (next.style.display !== 'none') hasVisible = true;
+      next = next.nextElementSibling;
+    }
+    h.style.display = hasVisible ? '' : 'none';
+  });
 }
 
 function closeBottomSheet() {
