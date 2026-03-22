@@ -1123,16 +1123,13 @@ button, .store-select-btn, .size-btn {
 }
 .bottom-sheet {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   max-width: 430px;
   margin: 0 auto;
   background: var(--white);
-  border-radius: 20px 20px 0 0;
   z-index: 1001;
   transform: translateY(100%);
   transition: transform 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
-  max-height: 70vh;
-  max-height: 70dvh;
   display: flex;
   flex-direction: column;
 }
@@ -1140,15 +1137,31 @@ button, .store-select-btn, .size-btn {
   transform: translateY(0);
 }
 .bottom-sheet-handle {
-  width: 40px;
-  height: 4px;
-  background: #ccc;
-  border-radius: 2px;
-  margin: 10px auto 6px;
+  display: none;
 }
 .bottom-sheet-header {
-  padding: 4px 20px 12px;
+  padding: 12px 20px;
   border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.bottom-sheet-header .bs-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.bottom-sheet-header-text {
+  flex: 1;
 }
 .bottom-sheet-title {
   font-size: 16px;
@@ -1161,8 +1174,9 @@ button, .store-select-btn, .size-btn {
   margin-top: 2px;
 }
 .bottom-sheet-search {
-  padding: 8px 20px 0;
+  padding: 8px 20px;
   flex-shrink: 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 .bottom-sheet-search input {
   width: 100%;
@@ -2162,10 +2176,12 @@ button, .store-select-btn, .size-btn {
 <!-- Bottom Sheet: Talla inventory all stores -->
 <div class="bottom-sheet-overlay" id="bsOverlay" onclick="closeBottomSheet()"></div>
 <div class="bottom-sheet" id="bottomSheet">
-  <div class="bottom-sheet-handle"></div>
   <div class="bottom-sheet-header">
-    <div class="bottom-sheet-title" id="bsTitle">Talla 25</div>
-    <div class="bottom-sheet-subtitle" id="bsSubtitle">Inventario en todas las sucursales</div>
+    <button class="bs-close-btn" onclick="closeBottomSheet()">&larr;</button>
+    <div class="bottom-sheet-header-text">
+      <div class="bottom-sheet-title" id="bsTitle">Talla 25</div>
+      <div class="bottom-sheet-subtitle" id="bsSubtitle">Inventario en todas las sucursales</div>
+    </div>
   </div>
   <div class="bottom-sheet-search">
     <input type="text" id="bsStoreSearch" placeholder="Buscar tienda..." oninput="filterBsStores()">
@@ -4973,11 +4989,8 @@ function filterBsStores() {
 function closeBottomSheet() {
   var search = document.getElementById('bsStoreSearch');
   if (search) search.blur();
-  var sheet = document.getElementById('bottomSheet');
-  sheet.style.bottom = '';
-  sheet.style.maxHeight = '';
   document.getElementById('bsOverlay').classList.remove('active');
-  sheet.classList.remove('active');
+  document.getElementById('bottomSheet').classList.remove('active');
 }
 
 // Swipe down to close bottom sheet
@@ -5011,24 +5024,6 @@ function closeBottomSheet() {
   });
 })();
 
-// Adjust bottom sheet when keyboard opens/closes on mobile
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', function() {
-    var sheet = document.getElementById('bottomSheet');
-    if (!sheet.classList.contains('active')) return;
-    var keyboardHeight = window.innerHeight - window.visualViewport.height;
-    if (keyboardHeight > 100) {
-      // Keyboard open: expand sheet to use all available space above keyboard
-      sheet.style.bottom = keyboardHeight + 'px';
-      sheet.style.maxHeight = (window.visualViewport.height - 20) + 'px';
-      sheet.style.borderRadius = '20px 20px 0 0';
-    } else {
-      // Keyboard closed: restore normal size
-      sheet.style.bottom = '';
-      sheet.style.maxHeight = '';
-    }
-  });
-}
 
 // ============ SCREEN NAVIGATION ============
 function goToScreen(target) {
