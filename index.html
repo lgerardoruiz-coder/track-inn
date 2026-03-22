@@ -4862,6 +4862,13 @@ function goToScreen(target) {
   const currentEl = document.getElementById('screen' + currentScreen);
   const targetEl = document.getElementById('screen' + target);
 
+  // Hide heavy lists during transition for smooth animation
+  var heavyLists = ['cpList', 'puList', 'batchList'];
+  heavyLists.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.visibility = 'hidden';
+  });
+
   targetEl.classList.remove('left', 'right', 'active');
   targetEl.classList.add(goingForward ? 'right' : 'left');
   targetEl.offsetHeight; // force reflow
@@ -4870,6 +4877,14 @@ function goToScreen(target) {
   currentEl.classList.add(goingForward ? 'left' : 'right');
   targetEl.classList.remove('left', 'right');
   targetEl.classList.add('active');
+
+  // Show lists after transition completes
+  setTimeout(function() {
+    heavyLists.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.visibility = '';
+    });
+  }, 280);
 
 
   // Bottom CTAs
