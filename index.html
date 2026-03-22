@@ -4971,8 +4971,13 @@ function filterBsStores() {
 }
 
 function closeBottomSheet() {
+  var search = document.getElementById('bsStoreSearch');
+  if (search) search.blur();
+  var sheet = document.getElementById('bottomSheet');
+  sheet.style.bottom = '';
+  sheet.style.maxHeight = '';
   document.getElementById('bsOverlay').classList.remove('active');
-  document.getElementById('bottomSheet').classList.remove('active');
+  sheet.classList.remove('active');
 }
 
 // Swipe down to close bottom sheet
@@ -5013,9 +5018,12 @@ if (window.visualViewport) {
     if (!sheet.classList.contains('active')) return;
     var keyboardHeight = window.innerHeight - window.visualViewport.height;
     if (keyboardHeight > 100) {
+      // Keyboard open: expand sheet to use all available space above keyboard
       sheet.style.bottom = keyboardHeight + 'px';
-      sheet.style.maxHeight = (window.visualViewport.height * 0.7) + 'px';
+      sheet.style.maxHeight = (window.visualViewport.height - 20) + 'px';
+      sheet.style.borderRadius = '20px 20px 0 0';
     } else {
+      // Keyboard closed: restore normal size
       sheet.style.bottom = '';
       sheet.style.maxHeight = '';
     }
@@ -5025,6 +5033,7 @@ if (window.visualViewport) {
 // ============ SCREEN NAVIGATION ============
 function goToScreen(target) {
   if (target === currentScreen) return;
+  closeBottomSheet();
   const goingForward = target > currentScreen;
   const currentEl = document.getElementById('screen' + currentScreen);
   const targetEl = document.getElementById('screen' + target);
