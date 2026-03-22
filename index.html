@@ -4167,19 +4167,23 @@ function updateCpPrintBtn() {
   document.getElementById('cpSelectAll').classList.toggle('active', allSel);
 }
 
+var _cpSearchTimer = null;
 function cpSearchFilter() {
-  var query = document.getElementById('cpSearchInput').value.trim().toUpperCase();
-  if (!query) { applyCpFilters(); return; }
-  var marca = document.getElementById('cpFilterMarca').value;
-  var gen = document.getElementById('cpFilterGenero').value;
-  var div = document.getElementById('cpFilterDiv').value;
-  cpFiltered = cpAllData.filter(function(p) {
-    if (marca && p.marca !== marca) return false;
-    if (gen && p.gen !== gen) return false;
-    if (div && p.div !== div) return false;
-    return p.estilo.toUpperCase().indexOf(query) >= 0 || p.desc.toUpperCase().indexOf(query) >= 0;
-  });
-  renderCpList();
+  if (_cpSearchTimer) clearTimeout(_cpSearchTimer);
+  _cpSearchTimer = setTimeout(function() {
+    var query = document.getElementById('cpSearchInput').value.trim().toUpperCase();
+    if (!query) { applyCpFilters(); return; }
+    var marca = document.getElementById('cpFilterMarca').value;
+    var gen = document.getElementById('cpFilterGenero').value;
+    var div = document.getElementById('cpFilterDiv').value;
+    cpFiltered = cpAllData.filter(function(p) {
+      if (marca && p.marca !== marca) return false;
+      if (gen && p.gen !== gen) return false;
+      if (div && p.div !== div) return false;
+      return p.estilo.toUpperCase().indexOf(query) >= 0 || p.desc.toUpperCase().indexOf(query) >= 0;
+    });
+    renderCpList();
+  }, 200);
 }
 
 function resetCambiosPrecio() {
