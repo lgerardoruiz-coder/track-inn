@@ -1207,8 +1207,8 @@ button, .store-select-btn, .size-btn {
   gap: 16px;
 }
 .label-frame {
-  /* 40mm x 30mm at ~3.78px/mm ≈ 151x113, scaled up for preview */
-  width: 240px;
+  /* 50mm x 30mm at ~6px/mm = 300x180, scaled for preview */
+  width: 300px;
   height: 180px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -3209,14 +3209,14 @@ function generateLabelPreview() {
   if (isFullPrice) {
     pricesHTML = '<div class="label-price-main" style="font-size:24px;margin-top:2px">' + formatP(d.n1) + '</div>';
   } else if (isCPPromo) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:9px">De: ' + formatP(d.n1) + '</div>'
-      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">CP: ' + formatP(d.n2) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:9px">De: ' + formatP(d.n1) + '</div>'
+      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">CP: ' + formatP(d.n2) + '</div>'
       + '<div class="label-price-main" style="font-size:22px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
   } else if (isPromoOnly) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">De: ' + formatP(d.n1) + '</div>'
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
   } else {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;font-size:11px">De: ' + formatP(d.n1) + '</div>'
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">De: ' + formatP(d.n1) + '</div>'
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n2) + '</div>';
   }
 
@@ -3226,9 +3226,10 @@ function generateLabelPreview() {
     + '<div>' + pricesHTML + '</div>'
     + '<div style="text-align:right;flex-shrink:0;max-width:45%">'
     + '<div style="font-size:9px;font-weight:700;color:#000">' + d.estilo + '</div>'
-    + '<div style="font-size:8px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">' + d.description + '</div>'
     + '</div></div>'
-    + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;align-items:center;justify-content:center"><svg id="labelBarcode"></svg></div>'
+    + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><svg id="labelBarcode"></svg>'
+    + '<div style="font-size:7px;color:#333;text-align:center;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">' + d.description + '</div>'
+    + '</div>'
     + '</div></div>';
 
   // Quantity selector
@@ -3247,7 +3248,7 @@ function generateLabelPreview() {
     + '<button class="btn-connect-printer' + (printerConnected ? ' connected' : '') + '" onclick="togglePrinter()" id="btnConnectPrinter">'
     + (printerConnected ? '&#9679; Phomemo M120 conectada — Desconectar' : '&#9678; Conectar impresora Phomemo M120')
     + '</button>'
-    + '<div class="printer-status" id="printerStatus">' + (printerConnected ? 'Impresora lista' : 'Vista previa 40mm x 30mm') + '</div>'
+    + '<div class="printer-status" id="printerStatus">' + (printerConnected ? 'Impresora lista' : 'Vista previa 50mm x 30mm') + '</div>'
     + '</div>';
 
   container.innerHTML = html;
@@ -3601,7 +3602,7 @@ function renderLabelToCanvas() {
     var t1 = 'De: ' + formatP(d.n1);
     ctx.fillText(t1, pad, 18);
     var tw1 = ctx.measureText(t1).width;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
     ctx.beginPath(); ctx.moveTo(pad, 14); ctx.lineTo(pad + tw1, 14); ctx.stroke();
 
     ctx.font = '14px Arial';
@@ -3618,7 +3619,7 @@ function renderLabelToCanvas() {
     var t3 = 'De: ' + formatP(d.n1);
     ctx.fillText(t3, pad, 22);
     var tw3 = ctx.measureText(t3).width;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
     ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw3, 18); ctx.stroke();
 
     ctx.font = 'bold 36px Arial';
@@ -3630,7 +3631,7 @@ function renderLabelToCanvas() {
     var t4 = 'De: ' + formatP(d.n1);
     ctx.fillText(t4, pad, 22);
     var tw4 = ctx.measureText(t4).width;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
     ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw4, 18); ctx.stroke();
 
     ctx.font = 'bold 36px Arial';
@@ -3895,7 +3896,7 @@ function populatePuFilters() {
     if (item.division) divisiones[item.division] = true;
   });
 
-  var priorityBrands = ['NIKE', 'ADIDAS', 'PUMA', 'UNDER ARMOUR', 'ON', 'NEW BALANCE', 'HOKA', 'ASICS', 'BIRKENSTOCK'];
+  var priorityBrands = ['NIKE', 'ADIDAS', 'PUMA', 'UNDER ARMOUR', 'ON', 'NEW BALANCE', 'NEW ERA', 'ASICS', 'HOKA', 'BIRKENSTOCK'];
   var allMarcas = Object.keys(marcas);
   var sortedMarcas = [];
   priorityBrands.forEach(function(pb) {
@@ -3916,7 +3917,7 @@ function fillPuSelect(id, label, options, preserveOrder) {
   var sel = document.getElementById(id);
   if (!sel) return;
   var current = sel.value;
-  sel.innerHTML = '<option value="">' + label + ' (' + options.length + ')</option>';
+  sel.innerHTML = '<option value="">' + label + '</option>';
   options.forEach(function(opt) {
     sel.innerHTML += '<option value="' + opt + '"' + (opt === current ? ' selected' : '') + '>' + opt + '</option>';
   });
@@ -4121,7 +4122,12 @@ function initCambiosPrecio() {
   gSel.innerHTML = '<option value="">Gen</option>';
   if (cSel) cSel.innerHTML = '<option value="">Cat</option>';
   dSel.innerHTML = '<option value="">Div</option>';
-  Object.keys(marcas).sort().forEach(function(m) { mSel.innerHTML += '<option>' + m + '</option>'; });
+  var cpPriorityBrands = ['NIKE', 'ADIDAS', 'PUMA', 'UNDER ARMOUR', 'ON', 'NEW BALANCE', 'NEW ERA', 'ASICS', 'HOKA', 'BIRKENSTOCK'];
+  var cpAllMarcas = Object.keys(marcas);
+  var cpSortedMarcas = [];
+  cpPriorityBrands.forEach(function(pb) { var f = cpAllMarcas.find(function(m) { return m.toUpperCase() === pb || m.toUpperCase().startsWith(pb); }); if (f) cpSortedMarcas.push(f); });
+  cpAllMarcas.sort().forEach(function(m) { if (cpSortedMarcas.indexOf(m) < 0) cpSortedMarcas.push(m); });
+  cpSortedMarcas.forEach(function(m) { mSel.innerHTML += '<option>' + m + '</option>'; });
   Object.keys(generos).sort().forEach(function(g) { gSel.innerHTML += '<option>' + g + '</option>'; });
   if (cSel) Object.keys(cats).sort().forEach(function(c) { cSel.innerHTML += '<option>' + c + '</option>'; });
   Object.keys(divs).sort().forEach(function(d) { dSel.innerHTML += '<option>' + d + '</option>'; });
@@ -5230,10 +5236,11 @@ document.addEventListener('DOMContentLoaded', () => {
             switchTab('producto'); return;
           }
         }
-        var backMap = { 1: 0, 2: 1, 3: 2, 4: 3 };
+        var backMap = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 1, 6: 1, 7: 1 };
         var backTo = backMap[currentScreen];
         if (backTo !== undefined) {
-          goToScreen(backTo);
+          if (currentScreen === 5) leaveBatchScreen();
+          else goToScreen(backTo);
         }
       } else {
         // Swipe left — go forward on results screen tabs
