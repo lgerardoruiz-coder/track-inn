@@ -2813,6 +2813,7 @@ function findRelatedByEstilo(estilo) {
 
 // ============ PRODUCT DISPLAY ============
 function displayProduct(rows, scannedCode) {
+  closeBottomSheet();
   const container = document.getElementById('productContent');
   const first = rows[0]; // Use first row for base product info
 
@@ -5400,6 +5401,7 @@ document.addEventListener('DOMContentLoaded', () => {
   var swipeTracking = false;
 
   document.addEventListener('touchstart', function(e) {
+    if (document.getElementById('bottomSheet').classList.contains('active')) return;
     var t = e.touches[0];
     swipeStartX = t.clientX;
     swipeStartY = t.clientY;
