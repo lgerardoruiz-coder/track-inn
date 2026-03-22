@@ -2012,16 +2012,16 @@ button, .store-select-btn, .size-btn {
         <!-- Filters -->
         <div class="pu-filters">
           <select class="pu-filter" id="puFilterMarca" onchange="applyPuFilters()">
-            <option value="">Mar</option>
+            <option value="">Marca</option>
           </select>
           <select class="pu-filter" id="puFilterGenero" onchange="applyPuFilters()">
             <option value="">Gen</option>
           </select>
+          <select class="pu-filter" id="puFilterCat" onchange="applyPuFilters()">
+            <option value="">Cat</option>
+          </select>
           <select class="pu-filter" id="puFilterDivision" onchange="applyPuFilters()">
             <option value="">Div</option>
-          </select>
-          <select class="pu-filter" id="puFilterVigencia" onchange="applyPuFilters()">
-            <option value="">Vig</option>
           </select>
         </div>
         <div class="pu-controls">
@@ -2036,6 +2036,13 @@ button, .store-select-btn, .size-btn {
             <option value="pzas-desc">Mas pzas</option>
           </select>
           <button class="pu-clear-btn" onclick="clearPuFilters()">Limpiar filtros</button>
+        </div>
+        <!-- Search -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
+          <div style="flex:1;position:relative">
+            <input type="text" id="puSearchInput" placeholder="Buscar estilo..." oninput="puSearchFilter()" style="width:100%;padding:9px 12px 9px 32px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:12px;font-family:'Poppins',sans-serif;outline:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
         </div>
         <!-- Results list -->
         <div id="puList" class="pu-list"></div>
@@ -2059,6 +2066,7 @@ button, .store-select-btn, .size-btn {
           <div class="pu-filters" style="margin-bottom:0;flex:1">
             <select class="pu-filter" id="cpFilterMarca" onchange="applyCpFilters()"><option value="">Marca</option></select>
             <select class="pu-filter" id="cpFilterGenero" onchange="applyCpFilters()"><option value="">Gen</option></select>
+            <select class="pu-filter" id="cpFilterCat" onchange="applyCpFilters()"><option value="">Cat</option></select>
             <select class="pu-filter" id="cpFilterDiv" onchange="applyCpFilters()"><option value="">Div</option></select>
           </div>
         </div>
@@ -3861,8 +3869,8 @@ function initPiezasUnicas() {
       description: String(getField(first, 'Descripcion') || getField(first, 'Descripción') || '').trim(),
       brand: String(getField(first, 'Marca') || getField(first, 'Grupos de Marca') || '').trim(),
       genero: String(getField(first, 'Genero') || '').trim(),
+      deporte: String(getField(first, 'Deporte') || '').trim(),
       division: String(getField(first, 'Division') || '').trim(),
-      vigencia: String(getField(first, 'Vigencia') || '').trim(),
       tallas: tallasStr,
       tallasCount: tallasWithInv.length,
       n1: n1,
@@ -3879,16 +3887,15 @@ function initPiezasUnicas() {
 }
 
 function populatePuFilters() {
-  var marcas = {}, generos = {}, divisiones = {}, vigencias = {};
+  var marcas = {}, generos = {}, categorias = {}, divisiones = {};
   puAllData.forEach(function(item) {
     if (item.brand) marcas[item.brand] = true;
     if (item.genero) generos[item.genero] = true;
+    if (item.deporte) categorias[item.deporte] = true;
     if (item.division) divisiones[item.division] = true;
-    if (item.vigencia) vigencias[item.vigencia] = true;
   });
 
-  // Sort marcas: priority brands first, then alphabetical
-  var priorityBrands = ['NIKE', 'ADIDAS', 'PUMA', 'UNDER ARMOUR', 'ON', 'NEW BALANCE'];
+  var priorityBrands = ['NIKE', 'ADIDAS', 'PUMA', 'UNDER ARMOUR', 'ON', 'NEW BALANCE', 'HOKA', 'ASICS', 'BIRKENSTOCK'];
   var allMarcas = Object.keys(marcas);
   var sortedMarcas = [];
   priorityBrands.forEach(function(pb) {
@@ -3899,10 +3906,10 @@ function populatePuFilters() {
     if (sortedMarcas.indexOf(m) < 0) sortedMarcas.push(m);
   });
 
-  fillPuSelect('puFilterMarca', 'Mar', sortedMarcas, true);
+  fillPuSelect('puFilterMarca', 'Marca', sortedMarcas, true);
   fillPuSelect('puFilterGenero', 'Gen', Object.keys(generos).sort());
+  fillPuSelect('puFilterCat', 'Cat', Object.keys(categorias).sort());
   fillPuSelect('puFilterDivision', 'Div', Object.keys(divisiones).sort());
-  fillPuSelect('puFilterVigencia', 'Vig', Object.keys(vigencias).sort());
 }
 
 function fillPuSelect(id, label, options, preserveOrder) {
@@ -3918,8 +3925,10 @@ function fillPuSelect(id, label, options, preserveOrder) {
 function clearPuFilters() {
   document.getElementById('puFilterMarca').value = '';
   document.getElementById('puFilterGenero').value = '';
+  document.getElementById('puFilterCat').value = '';
   document.getElementById('puFilterDivision').value = '';
-  document.getElementById('puFilterVigencia').value = '';
+  var searchInput = document.getElementById('puSearchInput');
+  if (searchInput) searchInput.value = '';
   document.getElementById('puSort').value = 'price-desc';
   setPuMaxPzas(1);
 }
@@ -3936,16 +3945,19 @@ function setPuMaxPzas(n) {
 function applyPuFilters() {
   var marca = document.getElementById('puFilterMarca').value;
   var genero = document.getElementById('puFilterGenero').value;
+  var cat = document.getElementById('puFilterCat') ? document.getElementById('puFilterCat').value : '';
   var division = document.getElementById('puFilterDivision').value;
-  var vigencia = document.getElementById('puFilterVigencia').value;
   var sort = document.getElementById('puSort').value;
+  var searchInput = document.getElementById('puSearchInput');
+  var query = searchInput ? searchInput.value.trim().toUpperCase() : '';
 
   puData = puAllData.filter(function(item) {
     if (item.totalInv > puMaxPzas) return false;
     if (marca && item.brand !== marca) return false;
     if (genero && item.genero !== genero) return false;
+    if (cat && item.deporte !== cat) return false;
     if (division && item.division !== division) return false;
-    if (vigencia && item.vigencia !== vigencia) return false;
+    if (query && item.estilo.toUpperCase().indexOf(query) < 0 && item.description.toUpperCase().indexOf(query) < 0) return false;
     return true;
   });
 
@@ -3959,6 +3971,12 @@ function applyPuFilters() {
   });
 
   renderPuList();
+}
+
+var _puSearchTimer = null;
+function puSearchFilter() {
+  if (_puSearchTimer) clearTimeout(_puSearchTimer);
+  _puSearchTimer = setTimeout(function() { applyPuFilters(); }, 200);
 }
 
 function renderPuList() {
@@ -4079,6 +4097,7 @@ function initCambiosPrecio() {
       desc: String(getField(r, 'Descripción') || getField(r, 'Descripcion') || '').trim(),
       marca: String(getField(r, 'Marca') || getField(r, 'Grupos de Marca') || '').trim(),
       gen: String(getField(r, 'Genero') || '').trim(),
+      cat: String(getField(r, 'Deporte') || '').trim(),
       div: String(getField(r, 'Division') || '').trim(),
       oldPrice: oldPrice,
       newPrice: finalPrice,
@@ -4092,16 +4111,19 @@ function initCambiosPrecio() {
   cpAllData.sort(function(a, b) { return (b.oldPrice - b.newPrice) - (a.oldPrice - a.newPrice); });
 
   // Populate filters
-  var marcas = {}, generos = {}, divs = {};
-  cpAllData.forEach(function(p) { marcas[p.marca]=1; generos[p.gen]=1; divs[p.div]=1; });
+  var marcas = {}, generos = {}, cats = {}, divs = {};
+  cpAllData.forEach(function(p) { marcas[p.marca]=1; generos[p.gen]=1; if(p.cat)cats[p.cat]=1; divs[p.div]=1; });
   var mSel = document.getElementById('cpFilterMarca');
   var gSel = document.getElementById('cpFilterGenero');
+  var cSel = document.getElementById('cpFilterCat');
   var dSel = document.getElementById('cpFilterDiv');
   mSel.innerHTML = '<option value="">Marca</option>';
   gSel.innerHTML = '<option value="">Gen</option>';
+  if (cSel) cSel.innerHTML = '<option value="">Cat</option>';
   dSel.innerHTML = '<option value="">Div</option>';
   Object.keys(marcas).sort().forEach(function(m) { mSel.innerHTML += '<option>' + m + '</option>'; });
   Object.keys(generos).sort().forEach(function(g) { gSel.innerHTML += '<option>' + g + '</option>'; });
+  if (cSel) Object.keys(cats).sort().forEach(function(c) { cSel.innerHTML += '<option>' + c + '</option>'; });
   Object.keys(divs).sort().forEach(function(d) { dSel.innerHTML += '<option>' + d + '</option>'; });
 
   cpInitialized = true;
@@ -4111,10 +4133,13 @@ function initCambiosPrecio() {
 function applyCpFilters() {
   var marca = document.getElementById('cpFilterMarca').value;
   var gen = document.getElementById('cpFilterGenero').value;
+  var catEl = document.getElementById('cpFilterCat');
+  var cat = catEl ? catEl.value : '';
   var div = document.getElementById('cpFilterDiv').value;
   cpFiltered = cpAllData.filter(function(p) {
     if (marca && p.marca !== marca) return false;
     if (gen && p.gen !== gen) return false;
+    if (cat && p.cat !== cat) return false;
     if (div && p.div !== div) return false;
     return true;
   });
@@ -4187,10 +4212,13 @@ function cpSearchFilter() {
     if (!query) { applyCpFilters(); return; }
     var marca = document.getElementById('cpFilterMarca').value;
     var gen = document.getElementById('cpFilterGenero').value;
+    var cpCatEl2 = document.getElementById('cpFilterCat');
+    var cat = cpCatEl2 ? cpCatEl2.value : '';
     var div = document.getElementById('cpFilterDiv').value;
     cpFiltered = cpAllData.filter(function(p) {
       if (marca && p.marca !== marca) return false;
       if (gen && p.gen !== gen) return false;
+      if (cat && p.cat !== cat) return false;
       if (div && p.div !== div) return false;
       return p.estilo.toUpperCase().indexOf(query) >= 0 || p.desc.toUpperCase().indexOf(query) >= 0;
     });
@@ -4203,6 +4231,8 @@ function resetCambiosPrecio() {
   cpAllData.forEach(function(p) { cpQty[p.estilo] = 1; });
   document.getElementById('cpFilterMarca').value = '';
   document.getElementById('cpFilterGenero').value = '';
+  var cpCatEl = document.getElementById('cpFilterCat');
+  if (cpCatEl) cpCatEl.value = '';
   document.getElementById('cpFilterDiv').value = '';
   document.getElementById('cpSearchInput').value = '';
   applyCpFilters();
