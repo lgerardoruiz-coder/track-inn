@@ -2612,16 +2612,17 @@ function lookupBarcode(code) {
     }
   }
 
-  // 3. Exact match on Estilo
-  const estiloRows = productData.filter(r => String(r['Estilo'] || '').trim() === normalizedCode);
+  // 3. Exact match on Estilo (case-insensitive)
+  const codeUpper = normalizedCode.toUpperCase();
+  const estiloRows = productData.filter(r => String(r['Estilo'] || '').trim().toUpperCase() === codeUpper);
   if (estiloRows.length > 0) return estiloRows;
 
-  // 4. Partial match on Estilo (only if estilo is long enough to be meaningful)
+  // 4. Partial match on Estilo (case-insensitive, only if estilo is long enough to be meaningful)
   const partialEstilo = productData.filter(r => {
-    const est = String(r['Estilo'] || '').trim();
-    if (!est || est.length < 5) return false; // Skip short estilos like "10" to avoid false matches
-    if (normalizedCode.length >= 5 && est.includes(normalizedCode)) return true;
-    if (normalizedCode.length >= 5 && normalizedCode.length <= est.length + 4 && normalizedCode.includes(est)) return true;
+    const est = String(r['Estilo'] || '').trim().toUpperCase();
+    if (!est || est.length < 5) return false;
+    if (codeUpper.length >= 5 && est.includes(codeUpper)) return true;
+    if (codeUpper.length >= 5 && codeUpper.length <= est.length + 4 && codeUpper.includes(est)) return true;
     return false;
   });
   if (partialEstilo.length > 0) return partialEstilo;
