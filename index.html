@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -508,7 +508,7 @@ button, .store-select-btn, .size-btn {
 /* SCREEN 3 - PRODUCT RESULT */
 .screen-product { background: var(--white); }
 
-.product-body { padding: 8px 20px 140px; }
+.product-body { padding: 8px 20px 160px; }
 
 .product-image-area {
   width: 100%;
@@ -907,7 +907,7 @@ button, .store-select-btn, .size-btn {
   transform: translateX(-50%);
   width: 100%;
   max-width: 430px;
-  padding: 16px 20px 28px;
+  padding: 16px 20px calc(40px + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(to top, var(--white) 80%, transparent);
   display: none;
   flex-direction: column;
@@ -1807,6 +1807,18 @@ button, .store-select-btn, .size-btn {
     <!-- SCREEN 0: STORE SELECT -->
     <div class="screen active" id="screen0">
       <div class="screen-store-select">
+        <div class="logo-icon" style="margin-bottom:8px">
+          <svg viewBox="0 0 80 80" fill="none">
+            <rect x="10" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+            <rect x="18" y="18" width="3" height="44" rx="1.5" fill="white" opacity="0.8"/>
+            <rect x="24" y="22" width="5" height="36" rx="2" fill="white"/>
+            <rect x="33" y="18" width="3" height="44" rx="1.5" fill="#E63946"/>
+            <rect x="40" y="22" width="6" height="36" rx="2" fill="white"/>
+            <rect x="50" y="18" width="3" height="44" rx="1.5" fill="#E63946" opacity="0.8"/>
+            <rect x="57" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+            <rect x="65" y="26" width="5" height="28" rx="2" fill="white" opacity="0.4"/>
+          </svg>
+        </div>
         <div class="logo-text" style="font-size:36px;letter-spacing:3px;margin-bottom:8px">TRACK <span>INN</span></div>
         <div class="store-select-title">Selecciona tu tienda</div>
         <button class="store-select-btn" onclick="selectStore('innovasport')">
