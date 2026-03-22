@@ -2409,8 +2409,13 @@ const ALGOLIA_APP_ID = 'WIE52UGB1T';
 const ALGOLIA_API_KEY = 'e34ff2be6f2ea02814fc690cc78a5d5f';
 function getAlgoliaIndex() {
   if (selectedBusiness === 'innvictus') return 'innvictus_prd_slave_mxn_es';
-  if (selectedBusiness === 'overtime') return 'innvictus_prd_slave_mxn_es';
   return 'innovasport_prd_slave_mxn_es';
+}
+
+// For Overtime, search in BOTH indices
+function getAlgoliaIndices() {
+  if (selectedBusiness === 'overtime') return ['innovasport_prd_slave_mxn_es', 'innvictus_prd_slave_mxn_es'];
+  return [getAlgoliaIndex()];
 }
 const imageCache = {}; // estilo → image URL
 
@@ -2441,10 +2446,12 @@ async function fetchProductImage(description, brand, estilo) {
   if (brand && description) queries.push(brand + ' ' + description);
   if (description) queries.push(description);
 
+  const indices = getAlgoliaIndices();
+  for (const algoliaIdx of indices) {
   for (const query of queries) {
     try {
       const response = await fetch(
-        `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${getAlgoliaIndex()}/query`,
+        `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${algoliaIdx}/query`,
         {
           method: 'POST',
           headers: {
@@ -2482,6 +2489,7 @@ async function fetchProductImage(description, brand, estilo) {
     } catch(err) {
       console.warn('Algolia search error for "' + query + '":', err);
     }
+  }
   }
   return null;
 }
