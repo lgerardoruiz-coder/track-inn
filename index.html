@@ -2024,25 +2024,35 @@ button, .store-select-btn, .size-btn {
             <option value="">Div</option>
           </select>
         </div>
-        <div class="pu-controls">
+        <div class="cp-actions">
           <div class="pu-toggle" id="puPzaToggle">
             <button class="pu-toggle-btn active" onclick="setPuMaxPzas(1)">1 pza</button>
             <button class="pu-toggle-btn" onclick="setPuMaxPzas(3)">Hasta 3</button>
           </div>
-          <select class="pu-sort" id="puSort" onchange="applyPuFilters()">
+          <select class="pu-sort" id="puSort" onchange="applyPuFilters()" style="flex:1">
             <option value="price-desc">Precio ↓</option>
             <option value="price-asc">Precio ↑</option>
             <option value="pzas-asc">Menos pzas</option>
             <option value="pzas-desc">Mas pzas</option>
           </select>
-          <button class="pu-clear-btn" onclick="clearPuFilters()">Limpiar filtros</button>
+          <button class="cp-select-all" id="puSelectAll" onclick="togglePuSelectAll()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+            Sel. todo
+          </button>
+          <button class="cp-print-btn" id="puPrintBtn" onclick="puPrintSelected()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            (0)
+          </button>
         </div>
-        <!-- Search -->
+        <!-- Search + Reset -->
         <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center">
           <div style="flex:1;position:relative">
             <input type="text" id="puSearchInput" placeholder="Buscar estilo..." oninput="puSearchFilter()" style="width:100%;padding:9px 12px 9px 32px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:12px;font-family:'Poppins',sans-serif;outline:none">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           </div>
+          <button onclick="clearPuFilters()" style="width:36px;height:36px;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" title="Limpiar filtros">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gray)" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+          </button>
         </div>
         <!-- Results list -->
         <div id="puList" class="pu-list"></div>
@@ -3887,6 +3897,9 @@ function initPiezasUnicas() {
   });
 
   // Populate filter dropdowns
+  puSelected = {};
+  puQty = {};
+  puAllData.forEach(function(p) { puQty[p.estilo] = 1; });
   populatePuFilters();
   applyPuFilters();
 }
@@ -3928,9 +3941,13 @@ function fillPuSelect(id, label, options, preserveOrder) {
 }
 
 function clearPuFilters() {
+  puSelected = {};
+  puQty = {};
+  puAllData.forEach(function(p) { puQty[p.estilo] = 1; });
   document.getElementById('puFilterMarca').value = '';
   document.getElementById('puFilterGenero').value = '';
-  document.getElementById('puFilterCat').value = '';
+  var puCatEl = document.getElementById('puFilterCat');
+  if (puCatEl) puCatEl.value = '';
   document.getElementById('puFilterDivision').value = '';
   var searchInput = document.getElementById('puSearchInput');
   if (searchInput) searchInput.value = '';
@@ -4006,7 +4023,6 @@ function renderPuList() {
     return '$' + r;
   };
 
-  // Render max 100 at a time for performance
   var showing = puData.slice(0, 100);
   var html = '';
   showing.forEach(function(item, idx) {
@@ -4015,36 +4031,111 @@ function renderPuList() {
       : '';
 
     var tallasLabel = item.tallasCount === 1 ? 'T: ' + item.tallas : 'T: ' + item.tallas + ' (' + item.tallasCount + ')';
+    var sel = puSelected[item.estilo] ? ' selected' : '';
+    var check = puSelected[item.estilo] ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>' : '';
+    var qty = puQty[item.estilo] || 1;
+    var est = item.estilo.replace(/'/g, "\\'");
 
-    html += '<div class="pu-card" onclick="puGoToProduct(\'' + item.upc.replace(/'/g, "\\'") + '\')">'
-      + '<div class="pu-card-top">'
-      + '<div><span class="pu-card-brand">' + item.brand + '</span></div>'
-      + '<div class="pu-card-price">' + formatP(item.finalPrice) + '</div>'
+    html += '<div class="cp-item' + sel + '" style="border-left:4px solid #F39C12">'
+      + '<div class="cp-check" onclick="event.stopPropagation();togglePuItem(\'' + est + '\')">' + check + '</div>'
+      + '<div class="cp-info" onclick="puGoToProduct(\'' + item.upc.replace(/'/g, "\\'") + '\')">'
+      + '<div class="cp-brand" style="color:#F39C12">' + item.brand + '</div>'
+      + '<div class="cp-name">' + item.description + '</div>'
+      + '<div class="cp-style">' + item.estilo + ' <span class="pu-card-talla" style="font-size:9px">' + tallasLabel + '</span> <span class="pu-card-pzas" style="font-size:9px;color:#F39C12">' + item.totalInv + ' pza</span></div>'
       + '</div>'
-      + '<div class="pu-card-desc">' + item.description + '</div>'
-      + '<div class="pu-card-meta">'
-      + '<span>' + item.estilo + '</span>'
-      + '<span class="pu-card-talla">' + tallasLabel + '</span>'
-      + '<span>' + discountHTML + '</span>'
-      + '<span class="pu-card-pzas">' + item.totalInv + ' pza</span>'
+      + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">'
+      + '<div class="cp-prices">'
+      + (item.pctDiscount > 0 ? '<div class="cp-old">' + formatP(item.n1) + '</div>' : '')
+      + '<div class="cp-new" style="color:#F39C12">' + formatP(item.finalPrice) + '</div>'
+      + (item.pctDiscount > 0 ? '<div style="font-size:9px;color:var(--red);font-weight:700">-' + item.pctDiscount + '%</div>' : '')
       + '</div>'
-      + '</div>';
+      + '<div class="cp-qty">'
+      + '<button class="cp-qty-btn" onclick="event.stopPropagation();changePuQty(\'' + est + '\',-1)">−</button>'
+      + '<input class="cp-qty-val" type="number" value="' + qty + '" min="1" max="99" onchange="event.stopPropagation();var q=parseInt(this.value)||1;if(q<1)q=1;if(q>99)q=99;puQty[\'' + est + '\']=q;updatePuPrintBtn()" onclick="event.stopPropagation()">'
+      + '<button class="cp-qty-btn" onclick="event.stopPropagation();changePuQty(\'' + est + '\',1)">+</button>'
+      + '</div></div></div>';
   });
 
   if (puData.length > 100) {
     html += '<div style="text-align:center;color:var(--gray);padding:16px;font-size:12px">Mostrando 100 de ' + puData.length + ' — usa los filtros para refinar</div>';
   }
 
+  updatePuPrintBtn();
+
   list.innerHTML = html;
 }
 
 function puGoToProduct(upc) {
-  // Simulate scanning this UPC — go to product detail
   var rows = lookupBarcode(upc);
   if (rows && rows.length > 0) {
     displayProduct(rows, upc);
     goToScreen(3);
   }
+}
+
+var puSelected = {};
+var puQty = {};
+
+function togglePuItem(estilo) {
+  if (puSelected[estilo]) delete puSelected[estilo]; else puSelected[estilo] = true;
+  renderPuList();
+}
+
+function togglePuSelectAll() {
+  var allSelected = puData.length > 0 && puData.every(function(p) { return puSelected[p.estilo]; });
+  if (allSelected) { puData.forEach(function(p) { delete puSelected[p.estilo]; }); }
+  else { puData.forEach(function(p) { puSelected[p.estilo] = true; }); }
+  renderPuList();
+}
+
+function updatePuPrintBtn() {
+  var items = 0, labels = 0;
+  Object.keys(puSelected).forEach(function(est) { items++; labels += (puQty[est] || 1); });
+  var btn = document.getElementById('puPrintBtn');
+  if (btn) {
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> (' + items + ')';
+    btn.disabled = items === 0;
+  }
+  var selBtn = document.getElementById('puSelectAll');
+  if (selBtn) {
+    var allSel = puData.length > 0 && puData.every(function(p) { return puSelected[p.estilo]; });
+    selBtn.classList.toggle('active', allSel);
+  }
+}
+
+function changePuQty(estilo, delta) {
+  var q = (puQty[estilo] || 1) + delta;
+  if (q < 1) q = 1; if (q > 99) q = 99;
+  puQty[estilo] = q;
+  renderPuList();
+}
+
+async function puPrintSelected() {
+  var selected = puAllData.filter(function(p) { return puSelected[p.estilo]; });
+  if (selected.length === 0) return;
+  if (!window._phomemo || !window._phomemo.isConnected()) { showToast('Conecta la impresora primero'); return; }
+  var totalLabels = 0;
+  selected.forEach(function(p) { totalLabels += (puQty[p.estilo] || 1); });
+  var printed = 0;
+  for (var i = 0; i < selected.length; i++) {
+    var p = selected[i];
+    var qty = puQty[p.estilo] || 1;
+    window._labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
+      n1: p.n1, n2: 0, n3: p.finalPrice !== p.n1 ? p.finalPrice : 0,
+      tag: p.tag, impulso: '', upc: p.upc };
+    var canvas = renderLabelToCanvas();
+    if (!canvas) continue;
+    await new Promise(function(r){setTimeout(r,400)});
+    canvas = renderLabelToCanvas();
+    await new Promise(function(r){setTimeout(r,400)});
+    for (var q = 0; q < qty; q++) {
+      printed++;
+      showToast('Imprimiendo ' + printed + '/' + totalLabels);
+      try { await window._phomemo.print(canvas); } catch(e) { showToast('Error: '+e.message); return; }
+      if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,500)});
+    }
+  }
+  showToast(printed + ' etiquetas impresas');
 }
 
 // ============ CAMBIOS DE PRECIO MODULE ============
