@@ -2407,7 +2407,11 @@ detectStore();
 // ============ ALGOLIA IMAGE SEARCH ============
 const ALGOLIA_APP_ID = 'WIE52UGB1T';
 const ALGOLIA_API_KEY = 'e34ff2be6f2ea02814fc690cc78a5d5f';
-const ALGOLIA_INDEX = 'innovasport_prd_slave_mxn_es';
+function getAlgoliaIndex() {
+  if (selectedBusiness === 'innvictus') return 'innvictus_prd_slave_mxn_es';
+  if (selectedBusiness === 'overtime') return 'innvictus_prd_slave_mxn_es';
+  return 'innovasport_prd_slave_mxn_es';
+}
 const imageCache = {}; // estilo → image URL
 
 async function fetchProductImage(description, brand, estilo) {
@@ -2440,7 +2444,7 @@ async function fetchProductImage(description, brand, estilo) {
   for (const query of queries) {
     try {
       const response = await fetch(
-        `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${ALGOLIA_INDEX}/query`,
+        `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/${getAlgoliaIndex()}/query`,
         {
           method: 'POST',
           headers: {
