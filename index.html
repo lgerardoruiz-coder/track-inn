@@ -2632,18 +2632,7 @@ function showUltimaPiezaToast() {
 
 // ============ SERVICE WORKER ============
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(function(reg) {
-    // Check for updates periodically
-    setInterval(function() { reg.update(); }, 60000);
-    reg.addEventListener('updatefound', function() {
-      var newWorker = reg.installing;
-      newWorker.addEventListener('statechange', function() {
-        if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-          showToast('Nueva versión disponible. Recarga para actualizar.');
-        }
-      });
-    });
-  }).catch(function() { /* silently ignore */ });
+  navigator.serviceWorker.register('sw.js').catch(function() { /* silently ignore */ });
 }
 
 // ============ EXCEL HANDLING ============
@@ -3181,10 +3170,10 @@ function displayProduct(rows, scannedCode) {
 
   container.innerHTML = `
     <div class="product-body">
-      <div class="product-image-area">
+      ${_previousScreen !== 6 && _previousScreen !== 7 ? `<div class="product-image-area">
         ${displayBrand ? `<div class="product-badge-overlay">${escapeHTML(displayBrand)}</div>` : ''}
         ${imageHTML}
-      </div>
+      </div>` : ''}
       <div class="product-info">
         <div class="product-name">${escapeHTML(displayName)}</div>
         <div class="product-talla-estilo">
@@ -3219,8 +3208,8 @@ function displayProduct(rows, scannedCode) {
     priceSlot.innerHTML = priceHTML;
   }
 
-  // Async: fetch image from Algolia if no image yet
-  if (!imageUrl || !String(imageUrl).trim()) {
+  // Async: fetch image from Algolia if no image yet (skip from piezas unicas/cambios de precio)
+  if (_previousScreen !== 6 && _previousScreen !== 7 && (!imageUrl || !String(imageUrl).trim())) {
     fetchProductImage(description, brand, estilo).then(url => {
       if (url) {
         const imgArea = container.querySelector('.product-image-area');
