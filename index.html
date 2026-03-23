@@ -4125,6 +4125,7 @@ function renderPuList() {
 function puGoToProduct(upc) {
   var rows = lookupBarcode(upc);
   if (rows && rows.length > 0) {
+    _previousScreen = currentScreen;
     displayProduct(rows, upc);
     goToScreen(3);
   }
