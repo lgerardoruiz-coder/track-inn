@@ -23,9 +23,9 @@ if ('serviceWorker' in navigator) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" integrity="sha384-c9d8RFSL+u3exBOJ4Yp3HUJXS4znl9f+z66d1y54ig+ea249SpqR+w1wyvXz/lk+" crossorigin="anonymous"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
 <style>
 *, *::before, *::after {
   box-sizing: border-box;
@@ -2200,6 +2200,26 @@ let currentStore = null; // Detected store via GPS
 let userLat = null;
 let userLng = null;
 let selectedBusiness = null; // 'innovasport' or 'innvictus'
+let _currentEstilo = '';
+let _labelData = null;
+let _cameraTrack = null;
+
+// ============ SECURITY UTILITIES ============
+function escapeHTML(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ============ PRICE UTILITIES ============
+function formatPrice(n) {
+  var num = Math.round(Number(n));
+  if (isNaN(num) || num === 0) return '$0';
+  return '$' + num.toLocaleString('en-US');
+}
+
+function cleanPrice(v) {
+  return Number(String(v).replace(/[$,\s]/g, '')) || 0;
+}
 
 // ============ TRACK INN CORE API ============
 const API_BASE = 'http://localhost:4000';
@@ -2223,7 +2243,7 @@ async function apiLogin() {
     localStorage.setItem('trackinn_api_refresh', data.refreshToken);
     return true;
   } catch (e) {
-    console.warn('API no disponible:', e.message);
+    // silently ignore
     return false;
   }
 }
@@ -2265,7 +2285,7 @@ async function apiFetch(path) {
     if (!res.ok) return null;
     return await res.json();
   } catch (e) {
-    console.warn('API fetch error:', e.message);
+    // silently ignore
     return null;
   }
 }
@@ -2292,7 +2312,6 @@ function apiAutoConnect() {
     apiFetch('/api/auth/me').then(data => {
       if (data) {
         apiUser = data.user;
-        console.log('API conectada:', apiUser.username);
         updateApiUI(true);
       } else {
         apiRefreshToken().then(ok => { if (ok) updateApiUI(true); });
@@ -2412,7 +2431,6 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
 
 function detectStore() {
   if (!navigator.geolocation) {
-    console.warn('Geolocation not available');
     return;
   }
 
@@ -2442,7 +2460,6 @@ function detectStore() {
       }
     },
     (err) => {
-      console.warn('Geo error:', err.message);
       updateLocationBadge(null, null, 'GPS no disponible');
     },
     { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
@@ -2552,7 +2569,7 @@ async function fetchProductImage(description, brand, estilo) {
         }
       }
     } catch(err) {
-      console.warn('Algolia search error for "' + query + '":', err);
+      // silently ignore
     }
   }
   }
@@ -2654,14 +2671,14 @@ function handleFileUpload(event) {
         localStorage.setItem('trackinn_file' + suffix, file.name);
         localStorage.setItem('trackinn_date' + suffix, new Date().toLocaleDateString('es-MX'));
         localStorage.setItem('trackinn_count' + suffix, productData.length);
-      } catch(err) { console.warn('Cache error:', err); }
+      } catch(err) { /* silently ignore */ }
 
       updateDataStatus();
       showToast(productData.length + ' productos cargados');
     } catch(err) {
       showToast('Error: ' + err.message);
       statusEl.textContent = 'Error: ' + err.message;
-      console.error('Excel parse error:', err);
+      // silently ignore
     }
   };
   reader.readAsArrayBuffer(file);
@@ -2837,7 +2854,7 @@ function displayProduct(rows, scannedCode) {
   const brand = getField('Marca') || getField('Grupos de Marca') || '';
   const description = getField('Descripcion') || getField('Descripción') || getField('DESCRIPCION') || '';
   const estilo = getField('Estilo') || '';
-  window._currentEstilo = estilo;
+  _currentEstilo = estilo;
   const generico = getField('Generico') || '';
   const division = getField('Division') || '';
   const deporte = getField('Deporte') || '';
@@ -2849,19 +2866,6 @@ function displayProduct(rows, scannedCode) {
 
   // Build price HTML - 3 level pricing system
   let priceHTML = '';
-  const formatPrice = (n) => {
-    const num = Math.round(Number(n));
-    if (isNaN(num) || num === 0) return '\u00240';
-    const str = String(num);
-    let result = '';
-    for (let i = 0; i < str.length; i++) {
-      if (i > 0 && (str.length - i) % 3 === 0) result += ',';
-      result += str[i];
-    }
-    return '\u0024' + result;
-  };
-
-  const cleanPrice = (v) => Number(String(v).replace(/[$,\s]/g, '')) || 0;
 
   // 3-level pricing
   const n1 = cleanPrice(getField('Precio Nivel 1'));
@@ -2883,7 +2887,7 @@ function displayProduct(rows, scannedCode) {
   const impulsoLabel = (impulso && impulso !== 'SIN PROMO') ? impulso : '';
 
   // Save data for label preview
-  window._labelData = {
+  _labelData = {
     description: description || estilo || 'Producto',
     estilo: estilo,
     brand: brand,
@@ -2894,7 +2898,7 @@ function displayProduct(rows, scannedCode) {
   };
 
   // Tappable badge helper
-  var _badgeId = 0;
+  let _badgeId = 0;
   function tapBadge(label, pct, bgColor, explanation) {
     var id = 'priceBadge' + (++_badgeId);
     var tipId = id + 'Tip';
@@ -2916,9 +2920,9 @@ function displayProduct(rows, scannedCode) {
       priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
         + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
         + tapBadge('CP', pctCP, '#E63946', 'Cambio de Precio: ' + formatPrice(n1) + ' → ' + formatPrice(n2))
-        + tapBadge('PROMO', pctPromo, '#F39C12', impulsoLabel || 'Promoción activa')
+        + tapBadge('PROMO', pctPromo, '#F39C12', escapeHTML(impulsoLabel) || 'Promoción activa')
         + '</div>'
-        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + impulsoLabel + '</div>' : '')
+        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + escapeHTML(impulsoLabel) + '</div>' : '')
         + '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">'
         + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n1) + '</span>'
         + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(n2) + '</span>'
@@ -2944,9 +2948,9 @@ function displayProduct(rows, scannedCode) {
       var promoPct = promoFrom > 0 && n3 > 0 && n3 < promoFrom ? Math.round((1 - n3 / promoFrom) * 100) : 0;
       priceHTML = '<div style="background:#FFF3F3;border:1px solid #FFD6D6;border-radius:16px;padding:16px 18px;margin:12px 0">'
         + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
-        + tapBadge('PROMO', promoPct, '#F39C12', impulsoLabel || 'Promoción activa')
+        + tapBadge('PROMO', promoPct, '#F39C12', escapeHTML(impulsoLabel) || 'Promoción activa')
         + '</div>'
-        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + impulsoLabel + '</div>' : '')
+        + (impulsoLabel ? '<div style="color:#2980B9;font-size:13px;font-weight:700;margin-bottom:8px">' + escapeHTML(impulsoLabel) + '</div>' : '')
         + '<div style="display:flex;align-items:baseline;gap:10px">'
         + '<span style="font-size:15px;color:#999;text-decoration:line-through;font-weight:500">' + formatPrice(promoFrom) + '</span>'
         + '<span style="font-size:29px;font-weight:800;color:#E63946">' + formatPrice(n3) + '</span>'
@@ -3028,12 +3032,12 @@ function displayProduct(rows, scannedCode) {
       <div class="store-card${isCurrent ? ' current-store' : ''}">
         <div class="store-status-dot ${stockColor}"></div>
         <div class="store-info">
-          <div class="store-name">${sucursal} ${isCurrent ? '<span class="current-store-tag">Estas aqui</span>' : ''}</div>
+          <div class="store-name">${escapeHTML(sucursal)} ${isCurrent ? '<span class="current-store-tag">Estas aqui</span>' : ''}</div>
           <div class="store-stock ${stockColor}">${stockText}</div>
-          ${direccion ? `<div style="font-size:11px;color:#999;margin-top:2px">${direccion}${estado ? ', ' + estado : ''}</div>` : ''}
+          ${direccion ? `<div style="font-size:11px;color:#999;margin-top:2px">${escapeHTML(direccion)}${estado ? ', ' + escapeHTML(estado) : ''}</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-          <div style="font-size:20px;font-weight:800;color:${inv <= 0 ? '#ccc' : 'var(--black)'}" data-sucursal="${sucursal}" class="store-inv-num">${inv}</div>
+          <div style="font-size:20px;font-weight:800;color:${inv <= 0 ? '#ccc' : 'var(--black)'}" data-sucursal="${escapeHTML(sucursal)}" class="store-inv-num">${inv}</div>
           ${distLabel ? `<div style="font-size:11px;color:var(--gray)">${distLabel}</div>` : ''}
         </div>
       </div>`);
@@ -3111,30 +3115,30 @@ function displayProduct(rows, scannedCode) {
       <span>Buscando imagen...</span>
     </div>`;
   const imageHTML = (imageUrl && String(imageUrl).trim())
-    ? `<img src="${imageUrl}" alt="${displayName}" onerror="this.outerHTML=document.getElementById('noImgTemplate').innerHTML">`
+    ? `<img src="${imageUrl}" alt="${escapeHTML(displayName)}" onerror="this.outerHTML=document.getElementById('noImgTemplate').innerHTML">`
     : noImageHTML;
 
   container.innerHTML = `
     <div class="product-body">
       <div class="product-image-area">
-        ${displayBrand ? `<div class="product-badge-overlay">${displayBrand}</div>` : ''}
+        ${displayBrand ? `<div class="product-badge-overlay">${escapeHTML(displayBrand)}</div>` : ''}
         ${imageHTML}
       </div>
       <div class="product-info">
-        <div class="product-name">${displayName}</div>
+        <div class="product-name">${escapeHTML(displayName)}</div>
         <div class="product-talla-estilo">
-          ${talla && talla !== '(Sin valor)' ? `<span class="product-sku">Talla: ${talla}</span>` : ''}
-          ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${estilo}</span>` : ''}
+          ${talla && talla !== '(Sin valor)' ? `<span class="product-sku">Talla: ${escapeHTML(talla)}</span>` : ''}
+          ${estilo && estilo !== '(Sin valor)' ? `<span class="product-sku">Estilo: ${escapeHTML(estilo)}</span>` : ''}
         </div>
         <div id="priceSlot"></div>
       </div>
       ${storeHTML}
       ${sizesHTML}
       ${detailsHTML}
-      ${categoryLabel ? `<span class="category-badge" style="display:inline-block;margin-top:12px">${categoryLabel}</span>` : ''}
+      ${categoryLabel ? `<span class="category-badge" style="display:inline-block;margin-top:12px">${escapeHTML(categoryLabel)}</span>` : ''}
       <div class="product-details-grid" style="margin-top:8px">
-        ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="detail-label">Material</div><div class="detail-value">${getField('Genérico Talla') || getField('Generico Talla')}</div>` : ''}
-        <div class="detail-label">UPC</div><div class="detail-value">${String(first['UPC'] || scannedCode).trim()}</div>
+        ${getField('Genérico Talla') || getField('Generico Talla') ? `<div class="detail-label">Material</div><div class="detail-value">${escapeHTML(getField('Genérico Talla') || getField('Generico Talla'))}</div>` : ''}
+        <div class="detail-label">UPC</div><div class="detail-value">${escapeHTML(String(first['UPC'] || scannedCode).trim())}</div>
       </div>
     </div>
     <template id="noImgTemplate">
@@ -3218,25 +3222,12 @@ function switchTab(tab) {
 }
 
 
-// Global price formatter
-function formatPriceGlobal(n) {
-  var num = Math.round(Number(n));
-  if (isNaN(num) || num === 0) return '$0';
-  var str = String(num);
-  var result = '';
-  for (var i = 0; i < str.length; i++) {
-    if (i > 0 && (str.length - i) % 3 === 0) result += ',';
-    result += str[i];
-  }
-  return '$' + result;
-}
-
 // ============ SIZE SELECTION ============
 // ============ LABEL PREVIEW ============
 function generateLabelPreview() {
   var container = document.getElementById('etiquetaContent');
-  if (!container || !window._labelData) return;
-  var d = window._labelData;
+  if (!container || !_labelData) return;
+  var d = _labelData;
 
   var tag = d.tag;
   var isFullPrice = (tag === 'FULL PRICE' || tag === '');
@@ -3246,18 +3237,6 @@ function generateLabelPreview() {
   var isCPPromo = hasCP && hasPromo;
   var isPromoOnly = hasPromo && !hasCP;
 
-  var formatP = function(n) {
-    var num = Math.round(Number(n));
-    if (isNaN(num) || num === 0) return '$0.00';
-    var str = String(num);
-    var r = '';
-    for (var i = 0; i < str.length; i++) {
-      if (i > 0 && (str.length - i) % 3 === 0) r += ',';
-      r += str[i];
-    }
-    return '$' + r + '.00';
-  };
-
   var today = new Date();
   var dateStr = ('0' + today.getDate()).slice(-2) + '/' + ('0' + (today.getMonth() + 1)).slice(-2) + '/' + today.getFullYear();
 
@@ -3266,17 +3245,17 @@ function generateLabelPreview() {
   // New unified layout: prices left, estilo+desc top-right, big barcode bottom
   var pricesHTML = '';
   if (isFullPrice) {
-    pricesHTML = '<div class="label-price-main" style="font-size:24px;margin-top:2px">' + formatP(d.n1) + '</div>';
+    pricesHTML = '<div class="label-price-main" style="font-size:24px;margin-top:2px">' + formatPrice(d.n1) + '</div>';
   } else if (isCPPromo) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:9px">De: ' + formatP(d.n1) + '</div>'
-      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">CP: ' + formatP(d.n2) + '</div>'
-      + '<div class="label-price-main" style="font-size:22px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:9px">De: ' + formatPrice(d.n1) + '</div>'
+      + '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">CP: ' + formatPrice(d.n2) + '</div>'
+      + '<div class="label-price-main" style="font-size:22px;margin-top:1px">A: ' + formatPrice(d.n3) + '</div>';
   } else if (isPromoOnly) {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">De: ' + formatP(d.n1) + '</div>'
-      + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n3) + '</div>';
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">De: ' + formatPrice(d.n1) + '</div>'
+      + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatPrice(d.n3) + '</div>';
   } else {
-    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">De: ' + formatP(d.n1) + '</div>'
-      + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatP(d.n2) + '</div>';
+    pricesHTML = '<div class="label-price-from" style="color:#000;text-decoration:line-through;text-decoration-thickness:0.8px;font-size:11px">De: ' + formatPrice(d.n1) + '</div>'
+      + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatPrice(d.n2) + '</div>';
   }
 
   html += '<div class="label-frame">'
@@ -3284,10 +3263,10 @@ function generateLabelPreview() {
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     + '<div>' + pricesHTML + '</div>'
     + '<div style="text-align:right;flex-shrink:0;max-width:45%">'
-    + '<div style="font-size:9px;font-weight:700;color:#000">' + d.estilo + '</div>'
+    + '<div style="font-size:9px;font-weight:700;color:#000">' + escapeHTML(d.estilo) + '</div>'
     + '</div></div>'
     + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><svg id="labelBarcode"></svg>'
-    + '<div style="font-size:7px;color:#333;text-align:center;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">' + d.description + '</div>'
+    + '<div style="font-size:7px;color:#333;text-align:center;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">' + escapeHTML(d.description) + '</div>'
     + '</div>'
     + '</div></div>';
 
@@ -3569,7 +3548,7 @@ window._phomemo = (function() {
   };
 })();
 
-var _printerSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
+const _printerSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
 
 function updatePrinterUI(state, customMsg) {
   var btn = document.getElementById('btnPrintLabel');
@@ -3608,7 +3587,7 @@ function updatePrinterUI(state, customMsg) {
 }
 
 function renderLabelToCanvas() {
-  var d = window._labelData;
+  var d = _labelData;
   if (!d) return null;
 
   // M120: 40mm x 30mm label at 203 DPI = 320x240 px (8 px/mm)
@@ -3623,18 +3602,6 @@ function renderLabelToCanvas() {
   var hasPromo = tag.indexOf('PROMO') >= 0;
   var isCPPromo = hasCP && hasPromo;
   var isPromoOnly = hasPromo && !hasCP;
-
-  var formatP = function(n) {
-    var num = Math.round(Number(n));
-    if (isNaN(num) || num === 0) return '$0';
-    var str = String(num);
-    var r = '';
-    for (var i = 0; i < str.length; i++) {
-      if (i > 0 && (str.length - i) % 3 === 0) r += ',';
-      r += str[i];
-    }
-    return '$' + r + '.00';
-  };
 
   // White background
   ctx.fillStyle = '#FFFFFF';
@@ -3657,47 +3624,47 @@ function renderLabelToCanvas() {
   if (isFullPrice) {
     ctx.fillStyle = '#000';
     ctx.font = 'bold 36px Arial';
-    ctx.fillText(formatP(d.n1), pad, 50);
+    ctx.fillText(formatPrice(d.n1), pad, 50);
   } else if (isCPPromo) {
     ctx.fillStyle = '#000';
     ctx.font = '12px Arial';
-    var t1 = 'De: ' + formatP(d.n1);
+    var t1 = 'De: ' + formatPrice(d.n1);
     ctx.fillText(t1, pad, 18);
     var tw1 = ctx.measureText(t1).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
     ctx.beginPath(); ctx.moveTo(pad, 14); ctx.lineTo(pad + tw1, 14); ctx.stroke();
 
     ctx.font = '14px Arial';
-    var t2 = 'CP: ' + formatP(d.n2);
+    var t2 = 'CP: ' + formatPrice(d.n2);
     ctx.fillText(t2, pad, 36);
     var tw2 = ctx.measureText(t2).width;
     ctx.beginPath(); ctx.moveTo(pad, 32); ctx.lineTo(pad + tw2, 32); ctx.stroke();
 
     ctx.font = 'bold 34px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 72);
+    ctx.fillText('A: ' + formatPrice(d.n3), pad, 72);
   } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
     ctx.font = '14px Arial';
-    var t3 = 'De: ' + formatP(d.n1);
+    var t3 = 'De: ' + formatPrice(d.n1);
     ctx.fillText(t3, pad, 22);
     var tw3 = ctx.measureText(t3).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
     ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw3, 18); ctx.stroke();
 
     ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatP(d.n3), pad, 62);
+    ctx.fillText('A: ' + formatPrice(d.n3), pad, 62);
   } else {
     // REBAJA / CP
     ctx.fillStyle = '#000';
     ctx.font = '14px Arial';
-    var t4 = 'De: ' + formatP(d.n1);
+    var t4 = 'De: ' + formatPrice(d.n1);
     ctx.fillText(t4, pad, 22);
     var tw4 = ctx.measureText(t4).width;
     ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
     ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw4, 18); ctx.stroke();
 
     ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatP(d.n2), pad, 62);
+    ctx.fillText('A: ' + formatPrice(d.n2), pad, 62);
   }
 
   // === BOTTOM SECTION: Big barcode ===
@@ -3760,7 +3727,7 @@ function validateLabelQty() {
 }
 
 async function printLabel() {
-  if (!window._labelData) return;
+  if (!_labelData) return;
 
   var qtyInput = document.getElementById('labelQtyInput');
   var qty = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
@@ -3832,9 +3799,9 @@ function togglePrinter() {
 }
 
 // ============ PIEZAS UNICAS MODULE ============
-var puMaxPzas = 1;
-var puData = []; // filtered/processed data
-var puAllData = []; // all unique pieces from store
+let puMaxPzas = 1;
+let puData = []; // filtered/processed data
+let puAllData = []; // all unique pieces from store
 
 function initPiezasUnicas() {
   if (productData.length === 0) {
@@ -3873,7 +3840,7 @@ function initPiezasUnicas() {
     return '';
   };
 
-  var cleanPrice = function(v) { return Number(String(v).replace(/[$,\s]/g, '')) || 0; };
+
 
   // Step 1: Collect all rows from current store with inventory > 0
   var storeRows = [];
@@ -3984,7 +3951,7 @@ function fillPuSelect(id, label, options, preserveOrder) {
   var current = sel.value;
   sel.innerHTML = '<option value="">' + label + '</option>';
   options.forEach(function(opt) {
-    sel.innerHTML += '<option value="' + opt + '"' + (opt === current ? ' selected' : '') + '>' + opt + '</option>';
+    sel.innerHTML += '<option value="' + escapeHTML(opt) + '"' + (opt === current ? ' selected' : '') + '>' + escapeHTML(opt) + '</option>';
   });
 }
 
@@ -4043,7 +4010,7 @@ function applyPuFilters() {
   renderPuList();
 }
 
-var _puSearchTimer = null;
+let _puSearchTimer = null;
 function puSearchFilter() {
   if (_puSearchTimer) clearTimeout(_puSearchTimer);
   _puSearchTimer = setTimeout(function() { applyPuFilters(); }, 200);
@@ -4059,23 +4026,11 @@ function renderPuList() {
     return;
   }
 
-  var formatP = function(n) {
-    var num = Math.round(Number(n));
-    if (isNaN(num) || num === 0) return '$0';
-    var str = String(num);
-    var r = '';
-    for (var i = 0; i < str.length; i++) {
-      if (i > 0 && (str.length - i) % 3 === 0) r += ',';
-      r += str[i];
-    }
-    return '$' + r;
-  };
-
   var showing = puData.slice(0, 100);
   var html = '';
   showing.forEach(function(item, idx) {
     var discountHTML = item.pctDiscount > 0
-      ? '<span class="pu-card-original">' + formatP(item.n1) + '</span> <span class="pu-card-discount">-' + item.pctDiscount + '%</span>'
+      ? '<span class="pu-card-original">' + formatPrice(item.n1) + '</span> <span class="pu-card-discount">-' + item.pctDiscount + '%</span>'
       : '';
 
     var tallasLabel = item.tallasCount === 1 ? 'T: ' + item.tallas : 'T: ' + item.tallas + ' (' + item.tallasCount + ')';
@@ -4087,14 +4042,14 @@ function renderPuList() {
     html += '<div class="cp-item' + sel + '" style="border-left:4px solid #F39C12">'
       + '<div class="cp-check" onclick="event.stopPropagation();togglePuItem(\'' + est + '\')">' + check + '</div>'
       + '<div class="cp-info" onclick="puGoToProduct(\'' + item.upc.replace(/'/g, "\\'") + '\')">'
-      + '<div class="cp-brand" style="color:#F39C12">' + item.brand + '</div>'
-      + '<div class="cp-name">' + item.description + '</div>'
-      + '<div class="cp-style">' + item.estilo + ' <span class="pu-card-talla" style="font-size:9px">' + tallasLabel + '</span> <span class="pu-card-pzas" style="font-size:9px;color:#F39C12">' + item.totalInv + ' pza</span></div>'
+      + '<div class="cp-brand" style="color:#F39C12">' + escapeHTML(item.brand) + '</div>'
+      + '<div class="cp-name">' + escapeHTML(item.description) + '</div>'
+      + '<div class="cp-style">' + escapeHTML(item.estilo) + ' <span class="pu-card-talla" style="font-size:9px">' + escapeHTML(tallasLabel) + '</span> <span class="pu-card-pzas" style="font-size:9px;color:#F39C12">' + item.totalInv + ' pza</span></div>'
       + '</div>'
       + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">'
       + '<div class="cp-prices">'
-      + (item.pctDiscount > 0 ? '<div class="cp-old">' + formatP(item.n1) + '</div>' : '')
-      + '<div class="cp-new" style="color:#F39C12">' + formatP(item.finalPrice) + '</div>'
+      + (item.pctDiscount > 0 ? '<div class="cp-old">' + formatPrice(item.n1) + '</div>' : '')
+      + '<div class="cp-new" style="color:#F39C12">' + formatPrice(item.finalPrice) + '</div>'
       + (item.pctDiscount > 0 ? '<div style="font-size:9px;color:var(--red);font-weight:700">-' + item.pctDiscount + '%</div>' : '')
       + '</div>'
       + '<div class="cp-qty">'
@@ -4121,8 +4076,8 @@ function puGoToProduct(upc) {
   }
 }
 
-var puSelected = {};
-var puQty = {};
+let puSelected = {};
+let puQty = {};
 
 function togglePuItem(estilo) {
   if (puSelected[estilo]) delete puSelected[estilo]; else puSelected[estilo] = true;
@@ -4168,7 +4123,7 @@ async function puPrintSelected() {
   for (var i = 0; i < selected.length; i++) {
     var p = selected[i];
     var qty = puQty[p.estilo] || 1;
-    window._labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
+    _labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
       n1: p.n1, n2: 0, n3: p.finalPrice !== p.n1 ? p.finalPrice : 0,
       tag: p.tag, impulso: '', upc: p.upc };
     var canvas = renderLabelToCanvas();
@@ -4187,11 +4142,11 @@ async function puPrintSelected() {
 }
 
 // ============ CAMBIOS DE PRECIO MODULE ============
-var cpSelected = {};
-var cpQty = {};
-var cpFiltered = [];
-var cpAllData = [];
-var cpInitialized = false;
+let cpSelected = {};
+let cpQty = {};
+let cpFiltered = [];
+let cpAllData = [];
+let cpInitialized = false;
 
 function initCambiosPrecio() {
   if (productData.length === 0) {
@@ -4213,7 +4168,7 @@ function initCambiosPrecio() {
     if (match !== undefined && row[match] !== '' && row[match] !== null) return row[match];
     return '';
   };
-  var cleanPrice = function(v) { return Number(String(v).replace(/[$,\s]/g, '')) || 0; };
+
 
   // Find products with price changes (CP or REBAJA tag, or N1 != N2)
   var estiloGroups = {};
@@ -4270,10 +4225,10 @@ function initCambiosPrecio() {
   var cpSortedMarcas = [];
   cpPriorityBrands.forEach(function(pb) { var f = cpAllMarcas.find(function(m) { return m.toUpperCase() === pb || m.toUpperCase().startsWith(pb); }); if (f) cpSortedMarcas.push(f); });
   cpAllMarcas.sort().forEach(function(m) { if (cpSortedMarcas.indexOf(m) < 0) cpSortedMarcas.push(m); });
-  cpSortedMarcas.forEach(function(m) { mSel.innerHTML += '<option>' + m + '</option>'; });
-  Object.keys(generos).sort().forEach(function(g) { gSel.innerHTML += '<option>' + g + '</option>'; });
-  if (cSel) Object.keys(cats).sort().forEach(function(c) { cSel.innerHTML += '<option>' + c + '</option>'; });
-  Object.keys(divs).sort().forEach(function(d) { dSel.innerHTML += '<option>' + d + '</option>'; });
+  cpSortedMarcas.forEach(function(m) { mSel.innerHTML += '<option>' + escapeHTML(m) + '</option>'; });
+  Object.keys(generos).sort().forEach(function(g) { gSel.innerHTML += '<option>' + escapeHTML(g) + '</option>'; });
+  if (cSel) Object.keys(cats).sort().forEach(function(c) { cSel.innerHTML += '<option>' + escapeHTML(c) + '</option>'; });
+  Object.keys(divs).sort().forEach(function(d) { dSel.innerHTML += '<option>' + escapeHTML(d) + '</option>'; });
 
   cpInitialized = true;
   applyCpFilters();
@@ -4296,7 +4251,6 @@ function applyCpFilters() {
 }
 
 function renderCpList() {
-  var formatP = function(n) { var num=Math.round(Number(n)); if(isNaN(num)||num===0) return '$0'; var s=String(num),r=''; for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)r+=',';r+=s[i];} return '$'+r; };
   var html = '';
   cpFiltered.forEach(function(p) {
     var sel = cpSelected[p.estilo] ? ' selected' : '';
@@ -4306,14 +4260,14 @@ function renderCpList() {
     html += '<div class="cp-item' + sel + '">'
       + '<div class="cp-check" onclick="toggleCpItem(\'' + p.estilo.replace(/'/g,"\\'") + '\')">' + check + '</div>'
       + '<div class="cp-info" onclick="toggleCpItem(\'' + p.estilo.replace(/'/g,"\\'") + '\')">'
-      + '<div class="cp-brand">' + p.marca + '</div>'
-      + '<div class="cp-name">' + p.desc + '</div>'
-      + '<div class="cp-style">' + p.estilo + ' <span class="cp-tag">' + p.tag + '</span></div>'
+      + '<div class="cp-brand">' + escapeHTML(p.marca) + '</div>'
+      + '<div class="cp-name">' + escapeHTML(p.desc) + '</div>'
+      + '<div class="cp-style">' + escapeHTML(p.estilo) + ' <span class="cp-tag">' + escapeHTML(p.tag) + '</span></div>'
       + '</div>'
       + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">'
       + '<div class="cp-prices">'
-      + '<div class="cp-old">' + formatP(p.oldPrice) + '</div>'
-      + '<div class="cp-new">' + formatP(p.newPrice) + '</div>'
+      + '<div class="cp-old">' + formatPrice(p.oldPrice) + '</div>'
+      + '<div class="cp-new">' + formatPrice(p.newPrice) + '</div>'
       + '<div style="font-size:9px;color:var(--red);font-weight:700">-' + discount + '%</div>'
       + '</div>'
       + '<div class="cp-qty">'
@@ -4353,7 +4307,7 @@ function updateCpPrintBtn() {
   document.getElementById('cpSelectAll').classList.toggle('active', allSel);
 }
 
-var _cpSearchTimer = null;
+let _cpSearchTimer = null;
 function cpSearchFilter() {
   if (_cpSearchTimer) clearTimeout(_cpSearchTimer);
   _cpSearchTimer = setTimeout(function() {
@@ -4400,7 +4354,7 @@ async function cpPrintSelected() {
     var qty = cpQty[p.estilo] || 1;
     var hasCP = p.tag.indexOf('CP')>=0 || p.tag==='REBAJA';
     var hasPromo = p.tag.indexOf('PROMO')>=0;
-    window._labelData = { description: p.desc, estilo: p.estilo, brand: p.marca,
+    _labelData = { description: p.desc, estilo: p.estilo, brand: p.marca,
       n1: p.oldPrice, n2: hasCP ? p.newPrice : 0, n3: hasPromo ? p.newPrice : 0,
       tag: hasCP && hasPromo ? 'CP+PROMO' : hasCP ? 'REBAJA' : 'PROMO', impulso: '', upc: p.upc };
     var canvas = renderLabelToCanvas();
@@ -4419,10 +4373,10 @@ async function cpPrintSelected() {
 }
 
 // ============ BATCH PRINT MODULE ============
-var batchItems = [];
-var batchRowCounter = 0;
-var batchScannerInstance = null;
-var batchScanTargetId = null;
+let batchItems = [];
+let batchRowCounter = 0;
+let batchScannerInstance = null;
+let batchScanTargetId = null;
 
 function buildLabelData(rows, scannedCode) {
   var first = rows[0];
@@ -4440,7 +4394,7 @@ function buildLabelData(rows, scannedCode) {
   var brand = getField('Marca') || getField('Grupos de Marca') || '';
   var description = getField('Descripcion') || getField('Descripción') || getField('DESCRIPCION') || '';
   var estilo = getField('Estilo') || '';
-  var cleanPrice = function(v) { return Number(String(v).replace(/[$,\s]/g, '')) || 0; };
+
   var n1 = cleanPrice(getField('Precio Nivel 1'));
   var n2 = cleanPrice(getField('Precio Nivel 2'));
   var n3 = cleanPrice(getField('Precio Final a público - Nivel 3') || getField('Precio Final a publico - Nivel 3'));
@@ -4608,7 +4562,7 @@ function openBatchScanner(rowId) {
     },
     function() {} // ignore errors
   ).catch(function(e) {
-    console.log('Batch scanner error:', e);
+    // silently ignore
   });
 }
 
@@ -4670,11 +4624,11 @@ async function batchPrintAll() {
       var item = toPrint[p];
 
       // Set label data and render canvas
-      window._labelData = item.labelData;
+      _labelData = item.labelData;
       var canvas = renderLabelToCanvas();
       if (!canvas) continue;
       await new Promise(function(r) { setTimeout(r, 400); });
-      window._labelData = item.labelData;
+      _labelData = item.labelData;
       canvas = renderLabelToCanvas();
       await new Promise(function(r) { setTimeout(r, 400); });
 
@@ -4713,12 +4667,12 @@ function selectSize(btn) {
   if (productData.length > 0) {
     inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
   }
-  if (!inventoryKey || !window._currentEstilo) return;
+  if (!inventoryKey || !_currentEstilo) return;
 
   // Find all rows for this estilo + selected talla, grouped by sucursal
   var tallaInv = {};
   productData.forEach(function(r) {
-    if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
+    if (String(r['Estilo'] || '').trim() !== _currentEstilo) return;
     if (String(r['Talla'] || '').trim() !== selectedTalla) return;
     var suc = r['Sucursal'] || '';
     if (!tallaInv[suc]) tallaInv[suc] = 0;
@@ -4735,8 +4689,8 @@ function selectSize(btn) {
 }
 
 // ============ LONG PRESS → BOTTOM SHEET ============
-var _longPressTimer = null;
-var _longPressTriggered = false;
+let _longPressTimer = null;
+let _longPressTriggered = false;
 
 function startLongPress(btn) {
   _longPressTriggered = false;
@@ -4756,7 +4710,7 @@ function cancelLongPress() {
 
 function openTallaSheet(selectedTalla) {
   // Si hay API conectada, intentar cargar inventario real
-  if (apiToken && window._currentEstilo) {
+  if (apiToken && _currentEstilo) {
     openTallaSheetFromAPI(selectedTalla);
     return;
   }
@@ -4764,7 +4718,7 @@ function openTallaSheet(selectedTalla) {
 }
 
 async function openTallaSheetFromAPI(selectedTalla) {
-  var estilo = window._currentEstilo;
+  var estilo = _currentEstilo;
   var apiInv = await apiGetInventoryByEstilo(estilo);
   if (!apiInv || apiInv.length === 0) {
     // Fallback a datos locales
@@ -4791,12 +4745,12 @@ function openTallaSheetLocal(selectedTalla) {
   if (productData.length > 0) {
     inventoryKey = Object.keys(productData[0]).find(function(k) { return k.trim().toLowerCase().startsWith('inventario'); }) || 'Inventario';
   }
-  if (!inventoryKey || !window._currentEstilo) return;
+  if (!inventoryKey || !_currentEstilo) return;
 
   // Gather inventory for this talla across ALL stores
   var storeInv = {};
   productData.forEach(function(r) {
-    if (String(r['Estilo'] || '').trim() !== window._currentEstilo) return;
+    if (String(r['Estilo'] || '').trim() !== _currentEstilo) return;
     if (String(r['Talla'] || '').trim() !== selectedTalla) return;
     var suc = r['Sucursal'] || '';
     var inv = parseInt(r[inventoryKey]) || 0;
@@ -4938,7 +4892,7 @@ function renderTallaSheet(selectedTalla, storeInv) {
   stores.forEach(function(s) {
     if (s.estado && s.estado !== lastEstado) {
       lastEstado = s.estado;
-      html += '<div style="font-size:11px;font-weight:700;color:var(--gray);padding:8px 0 4px;border-bottom:1px solid #eee;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px">' + s.estado + '</div>';
+      html += '<div style="font-size:11px;font-weight:700;color:var(--gray);padding:8px 0 4px;border-bottom:1px solid #eee;margin-top:4px;text-transform:uppercase;letter-spacing:0.5px">' + escapeHTML(s.estado) + '</div>';
     }
     var dotColor = s.inv <= 0 ? 'red' : (s.inv <= 3 ? 'orange' : 'green');
     var distLabel = '';
@@ -4949,7 +4903,7 @@ function renderTallaSheet(selectedTalla, storeInv) {
     html += '<div class="bs-store-card">'
       + '<div class="bs-store-dot ' + dotColor + '"></div>'
       + '<div style="flex:1">'
-      + '<div class="bs-store-name">' + s.name + (isCurrent ? ' <span style="font-size:10px;background:var(--green);color:#fff;padding:1px 6px;border-radius:4px;font-weight:600">Aquí</span>' : '') + '</div>'
+      + '<div class="bs-store-name">' + escapeHTML(s.name) + (isCurrent ? ' <span style="font-size:10px;background:var(--green);color:#fff;padding:1px 6px;border-radius:4px;font-weight:600">Aquí</span>' : '') + '</div>'
       + (distLabel ? '<div class="bs-store-dist">' + distLabel + '</div>' : '')
       + '</div>'
       + '<div class="bs-store-inv" style="color:' + (s.inv <= 0 ? '#ccc' : '#1D1D1D') + '">' + s.inv + '</div>'
@@ -5180,7 +5134,7 @@ function startScanner() {
         }
         // Torch support - save track for later
         if (capabilities.torch) {
-          window._cameraTrack = track;
+          _cameraTrack = track;
           var torchBtn = document.getElementById('torchBtn');
           if (torchBtn) torchBtn.style.display = 'flex';
         }
@@ -5188,9 +5142,8 @@ function startScanner() {
           track.applyConstraints({ advanced: [advanced] });
         }
       }
-    } catch(e) { console.warn('Camera settings:', e); }
+    } catch(e) { /* silently ignore */ }
   }).catch(err => {
-    console.warn('Camera error:', err);
     readerEl.innerHTML = '<div style="color:#666;text-align:center;padding:60px 20px;font-size:14px;">' +
       'No se pudo acceder a la camara.<br>Usa la entrada manual abajo.</div>';
   });
@@ -5260,7 +5213,7 @@ function alignOverlayToQrbox() {
   }
 }
 
-var _stopPromise = null;
+let _stopPromise = null;
 function stopScanner() {
   scannerRunning = false;
   stopHDScanning();
@@ -5279,9 +5232,9 @@ function stopScanner() {
 
 let torchOn = false;
 function toggleTorch() {
-  if (!window._cameraTrack) return;
+  if (!_cameraTrack) return;
   torchOn = !torchOn;
-  window._cameraTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+  _cameraTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
   var btn = document.getElementById('torchBtn');
   if (btn) {
     btn.style.background = torchOn ? 'rgba(255,200,0,0.4)' : 'rgba(255,255,255,0.15)';
@@ -5308,7 +5261,7 @@ function onScanSuccess(decodedText, decodedResult) {
     // FOUND — show product
     scanCooldown = true;
     if (navigator.vibrate) navigator.vibrate(100);
-    lastScanInfo.innerHTML = 'Encontrado: <strong>' + decodedText + '</strong> (' + fmt + ')';
+    lastScanInfo.innerHTML = 'Encontrado: <strong>' + escapeHTML(decodedText) + '</strong> (' + escapeHTML(fmt) + ')';
     displayProduct(rows, decodedText);
     goToScreen(3);
     setTimeout(() => { scanCooldown = false; }, 2000);
@@ -5316,7 +5269,7 @@ function onScanSuccess(decodedText, decodedResult) {
     // Not found — show immediately
     scanCooldown = true;
     if (navigator.vibrate) navigator.vibrate(100);
-    lastScanInfo.innerHTML = 'No encontrado: <strong>' + decodedText + '</strong> (' + fmt + ')';
+    lastScanInfo.innerHTML = 'No encontrado: <strong>' + escapeHTML(decodedText) + '</strong> (' + escapeHTML(fmt) + ')';
     document.getElementById('notFoundCode').textContent = decodedText + ' (' + fmt + ', ' + decodedText.length + ' dig.)';
     goToScreen(4);
     setTimeout(() => { scanCooldown = false; }, 2000);
