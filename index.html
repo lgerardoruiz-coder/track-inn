@@ -4254,7 +4254,7 @@ function initCambiosPrecio() {
     var n2 = cleanPrice(getField(r, 'Precio Nivel 2') || getField(r, 'Precio Actual - Nivel 2') || getField(r, 'Precio Actual'));
     var n3 = cleanPrice(getField(r, 'Precio Final a público - Nivel 3') || getField(r, 'Precio Final a publico - Nivel 3'));
 
-    var hasCP = tag === 'CP' || tag === 'CP PROMO' || tag === 'CP+PROMO';
+    var hasCP = tag.indexOf('CP') >= 0;
     if (!hasCP) return;
     var hasPromo = tag.indexOf('PROMO') >= 0;
 
