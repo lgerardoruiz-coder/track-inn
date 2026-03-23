@@ -4146,7 +4146,23 @@ let puQty = {};
 
 function togglePuItem(estilo) {
   if (puSelected[estilo]) delete puSelected[estilo]; else puSelected[estilo] = true;
-  renderPuList();
+  // Fast toggle — update only the clicked item
+  var items = document.querySelectorAll('#puList .cp-item');
+  items.forEach(function(el) {
+    var check = el.querySelector('.cp-check');
+    if (!check) return;
+    var onclick = check.getAttribute('onclick') || '';
+    if (onclick.indexOf(estilo.replace(/'/g, "\\'")) >= 0) {
+      if (puSelected[estilo]) {
+        el.classList.add('selected');
+        check.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>';
+      } else {
+        el.classList.remove('selected');
+        check.innerHTML = '';
+      }
+    }
+  });
+  updatePuPrintBtn();
 }
 
 function togglePuSelectAll() {
@@ -4175,7 +4191,8 @@ function changePuQty(estilo, delta) {
   var q = (puQty[estilo] || 1) + delta;
   if (q < 1) q = 1; if (q > 99) q = 99;
   puQty[estilo] = q;
-  renderPuList();
+  var inp = document.querySelector('#puList input[onchange*="' + CSS.escape(estilo) + '"]'); if(inp) inp.value=q;
+  updatePuPrintBtn();
 }
 
 async function puPrintSelected() {
@@ -4347,12 +4364,28 @@ function renderCpList() {
   updateCpPrintBtn();
 }
 
-function changeCpQty(estilo, delta) { var q = (cpQty[estilo]||1)+delta; if(q<1)q=1; if(q>99)q=99; cpQty[estilo]=q; renderCpList(); }
-function setCpQty(estilo, val) { var q=parseInt(val)||1; if(q<1)q=1; if(q>99)q=99; cpQty[estilo]=q; renderCpList(); }
+function changeCpQty(estilo, delta) { var q = (cpQty[estilo]||1)+delta; if(q<1)q=1; if(q>99)q=99; cpQty[estilo]=q; var inp = document.querySelector('#cpList input[onchange*="' + CSS.escape(estilo) + '"]'); if(inp) inp.value=q; updateCpPrintBtn(); }
+function setCpQty(estilo, val) { var q=parseInt(val)||1; if(q<1)q=1; if(q>99)q=99; cpQty[estilo]=q; updateCpPrintBtn(); }
 
 function toggleCpItem(estilo) {
   if (cpSelected[estilo]) delete cpSelected[estilo]; else cpSelected[estilo] = true;
-  renderCpList();
+  // Fast toggle — update only the clicked item, don't re-render entire list
+  var items = document.querySelectorAll('#cpList .cp-item');
+  items.forEach(function(el) {
+    var check = el.querySelector('.cp-check');
+    if (!check) return;
+    var onclick = check.getAttribute('onclick') || el.querySelector('.cp-info').getAttribute('onclick') || '';
+    if (onclick.indexOf(estilo.replace(/'/g, "\\'")) >= 0) {
+      if (cpSelected[estilo]) {
+        el.classList.add('selected');
+        check.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>';
+      } else {
+        el.classList.remove('selected');
+        check.innerHTML = '';
+      }
+    }
+  });
+  updateCpPrintBtn();
 }
 
 function toggleCpSelectAll() {
@@ -5118,12 +5151,21 @@ function goToScreen(target) {
 
   // Initialize piezas unicas when entering
   if (target === 6) {
-    setTimeout(function() { initPiezasUnicas(); }, 300);
+    if (currentScreen === 3) {
+      // Returning from product detail — just re-render, keep selections
+      setTimeout(function() { applyPuFilters(); updatePuPrintBtn(); }, 100);
+    } else {
+      setTimeout(function() { initPiezasUnicas(); }, 300);
+    }
   }
 
   // Initialize cambios precio when entering
   if (target === 7) {
-    setTimeout(function() { initCambiosPrecio(); }, 300);
+    if (currentScreen === 3) {
+      setTimeout(function() { applyCpFilters(); updateCpPrintBtn(); }, 100);
+    } else {
+      setTimeout(function() { initCambiosPrecio(); }, 300);
+    }
   }
 
   // Close batch scanner when leaving screen 5
