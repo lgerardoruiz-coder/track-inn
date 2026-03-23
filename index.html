@@ -1669,7 +1669,7 @@ button, .store-select-btn, .size-btn {
 .cp-list { display:flex;flex-direction:column;gap:6px;padding-bottom:20px; }
 .cp-item { display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 12px;transition:all 0.2s; }
 .cp-item.selected { background:rgba(91,184,255,0.08);border-color:rgba(91,184,255,0.3); }
-.cp-check { width:22px;height:22px;min-width:44px;min-height:44px;border-radius:6px;border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s; }
+.cp-check { width:22px;height:22px;min-width:22px;border-radius:6px;border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;padding:11px;box-sizing:content-box; }
 .cp-item.selected .cp-check { background:#5bb8ff;border-color:#5bb8ff; }
 .cp-info { flex:1;min-width:0; }
 .cp-brand { font-size:10px;color:#5bb8ff;font-weight:600;text-transform:uppercase;letter-spacing:0.5px; }
@@ -4245,9 +4245,9 @@ function initCambiosPrecio() {
     var n2 = cleanPrice(getField(r, 'Precio Nivel 2') || getField(r, 'Precio Actual - Nivel 2') || getField(r, 'Precio Actual'));
     var n3 = cleanPrice(getField(r, 'Precio Final a público - Nivel 3') || getField(r, 'Precio Final a publico - Nivel 3'));
 
-    var hasCP = tag.indexOf('CP') >= 0 || tag === 'REBAJA';
+    var hasCP = tag === 'CP' || tag === 'CP PROMO' || tag === 'CP+PROMO';
+    if (!hasCP) return;
     var hasPromo = tag.indexOf('PROMO') >= 0;
-    if (!hasCP && !hasPromo && !(n1 > 0 && n2 > 0 && n2 < n1)) return;
 
     var finalPrice = hasPromo && n3 > 0 ? n3 : n2 > 0 ? n2 : n1;
     var oldPrice = n1;
