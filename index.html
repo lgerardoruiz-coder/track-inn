@@ -3170,10 +3170,10 @@ function displayProduct(rows, scannedCode) {
 
   container.innerHTML = `
     <div class="product-body">
-      ${_previousScreen !== 6 && _previousScreen !== 7 ? `<div class="product-image-area">
+      <div class="product-image-area">
         ${displayBrand ? `<div class="product-badge-overlay">${escapeHTML(displayBrand)}</div>` : ''}
         ${imageHTML}
-      </div>` : ''}
+      </div>
       <div class="product-info">
         <div class="product-name">${escapeHTML(displayName)}</div>
         <div class="product-talla-estilo">
@@ -3208,8 +3208,8 @@ function displayProduct(rows, scannedCode) {
     priceSlot.innerHTML = priceHTML;
   }
 
-  // Async: fetch image from Algolia if no image yet (skip from piezas unicas/cambios de precio)
-  if (_previousScreen !== 6 && _previousScreen !== 7 && (!imageUrl || !String(imageUrl).trim())) {
+  // Async: fetch image from Algolia if no image yet
+  if (!imageUrl || !String(imageUrl).trim()) {
     fetchProductImage(description, brand, estilo).then(url => {
       if (url) {
         const imgArea = container.querySelector('.product-image-area');
@@ -3242,7 +3242,7 @@ function displayProduct(rows, scannedCode) {
   }
 
   // Show "última pieza" toast if only 1 unit in total
-  if (typeof storeInv !== 'undefined' && storeInv === 1) {
+  if (typeof storeInv !== 'undefined' && storeInv === 1 && _previousScreen !== 6 && _previousScreen !== 7) {
     setTimeout(() => showUltimaPiezaToast(), 600);
   }
 
