@@ -1,12 +1,17 @@
 {
-  "name": "Track Inn - Escaner de Precios",
+  "name": "Track Inn - Escáner de Precios",
   "short_name": "Track Inn",
-  "description": "Escanea productos y consulta precios e inventario",
+  "description": "Escanea productos y consulta precios, inventario y disponibilidad en todas las tiendas. Genera etiquetas e identifica piezas únicas.",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1D1D1D",
   "theme_color": "#E63946",
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "es-MX",
+  "dir": "ltr",
+  "scope": "./",
+  "id": "track-inn-pwa",
   "icons": [
     {
       "src": "icon.svg",

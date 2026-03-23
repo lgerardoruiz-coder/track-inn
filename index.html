@@ -6,6 +6,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.sheetjs.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://site-product.innovasport.com https://*.algolia.net https://*.algolianet.com https://www.innovasport.com https://www.innvictus.com; connect-src 'self' https://*.algolia.net https://*.algolianet.com https://*.algolia.io http://localhost:4000;">
+<meta name="description" content="Track Inn - Escáner de precios para retail. Consulta precios, inventario y genera etiquetas.">
 <title>Track Inn - Escaner de Precios</title>
 <script>
 // Force SW update on every page load
@@ -1926,9 +1931,9 @@ button, .store-select-btn, .size-btn {
     </div>
 
     <!-- SCREEN 2: SCANNER -->
-    <div class="screen right" id="screen2">
+    <div class="screen right" id="screen2" aria-label="Escáner de códigos">
       <div class="screen-header header-dark">
-        <button class="back-btn" onclick="stopScannerAndGoBack()">
+        <button class="back-btn" aria-label="Volver" onclick="stopScannerAndGoBack()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -1952,8 +1957,8 @@ button, .store-select-btn, .size-btn {
         <div class="manual-input-section">
           <div class="manual-label">o ingresa el codigo manualmente</div>
           <div class="manual-input-row">
-            <input type="text" id="manualBarcode" placeholder="UPC, Estilo o Material..." inputmode="text">
-            <button onclick="manualSearch()">Buscar</button>
+            <input type="text" id="manualBarcode" placeholder="UPC, Estilo o Material..." inputmode="text" aria-label="Código de barras manual">
+            <button onclick="manualSearch()" aria-label="Buscar producto">Buscar</button>
           </div>
         </div>
         <div id="locationBadge" class="location-badge nearby">
@@ -1965,9 +1970,9 @@ button, .store-select-btn, .size-btn {
     </div>
 
     <!-- SCREEN 3: PRODUCT RESULT -->
-    <div class="screen screen-product right" id="screen3">
+    <div class="screen screen-product right" id="screen3" role="main">
       <div class="screen-header header-light">
-        <button class="back-btn" onclick="goToScreen(2)">
+        <button class="back-btn" aria-label="Volver al escáner" onclick="goToScreen(2)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -1994,7 +1999,7 @@ button, .store-select-btn, .size-btn {
     <!-- SCREEN 4: NOT FOUND -->
     <div class="screen right" id="screen4">
       <div class="screen-header header-light">
-        <button class="back-btn" onclick="goToScreen(2)">
+        <button class="back-btn" aria-label="Volver al escáner" onclick="goToScreen(2)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -2016,7 +2021,7 @@ button, .store-select-btn, .size-btn {
     <!-- SCREEN 5: BATCH PRINT -->
     <div class="screen right" id="screen5">
       <div class="screen-header header-dark">
-        <button class="back-btn" onclick="leaveBatchScreen()">
+        <button class="back-btn" aria-label="Volver al inicio" onclick="leaveBatchScreen()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -2045,7 +2050,7 @@ button, .store-select-btn, .size-btn {
     <!-- SCREEN 6: PIEZAS UNICAS -->
     <div class="screen right" id="screen6">
       <div class="screen-header header-dark">
-        <button class="back-btn" onclick="goToScreen(1)">
+        <button class="back-btn" aria-label="Volver al inicio" onclick="goToScreen(1)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -2104,7 +2109,7 @@ button, .store-select-btn, .size-btn {
     <!-- SCREEN 7: CAMBIOS DE PRECIO -->
     <div class="screen right" id="screen7">
       <div class="screen-header header-dark">
-        <button class="back-btn" onclick="goToScreen(1)">
+        <button class="back-btn" aria-label="Volver al inicio" onclick="goToScreen(1)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -2154,7 +2159,7 @@ button, .store-select-btn, .size-btn {
     <div class="batch-scanner-modal">
       <div class="batch-scanner-header">
         <span>Escanear codigo</span>
-        <button class="batch-scanner-close" onclick="closeBatchScanner()">&times;</button>
+        <button class="batch-scanner-close" aria-label="Cerrar escáner" onclick="closeBatchScanner()">&times;</button>
       </div>
       <div class="batch-scanner-video" id="batchScannerReader"></div>
       <div class="batch-manual-row">
@@ -2175,16 +2180,16 @@ button, .store-select-btn, .size-btn {
 
 <!-- Bottom Sheet: Talla inventory all stores -->
 <div class="bottom-sheet-overlay" id="bsOverlay" onclick="closeBottomSheet()"></div>
-<div class="bottom-sheet" id="bottomSheet">
+<div class="bottom-sheet" id="bottomSheet" role="dialog" aria-label="Detalle de inventario por talla">
   <div class="bottom-sheet-header">
-    <button class="bs-close-btn" onclick="closeBottomSheet()">&larr;</button>
+    <button class="bs-close-btn" aria-label="Cerrar panel" onclick="closeBottomSheet()">&larr;</button>
     <div class="bottom-sheet-header-text">
       <div class="bottom-sheet-title" id="bsTitle">Talla 25</div>
       <div class="bottom-sheet-subtitle" id="bsSubtitle">Inventario en todas las sucursales</div>
     </div>
   </div>
   <div class="bottom-sheet-search">
-    <input type="text" id="bsStoreSearch" placeholder="Buscar tienda..." oninput="filterBsStores()">
+    <input type="text" id="bsStoreSearch" placeholder="Buscar tienda..." aria-label="Buscar tienda" oninput="filterBsStores()">
   </div>
   <div class="bottom-sheet-body" id="bsBody"></div>
 </div>
@@ -2662,6 +2667,23 @@ function handleFileUpload(event) {
         productData = jsonData;
       }
 
+      // Validate required columns
+      (function() {
+        var requiredCols = ['UPC', 'Estilo', 'Talla', 'Sucursal', 'Precio Nivel 1'];
+        var colNames = Object.keys(productData[0] || {});
+        var missing = [];
+        requiredCols.forEach(function(req) {
+          var found = colNames.some(function(c) { return c.trim() === req; });
+          if (!found) missing.push(req);
+        });
+        // Check for Inventario (starts with)
+        var hasInventario = colNames.some(function(c) { return c.trim().toLowerCase().startsWith('inventario'); });
+        if (!hasInventario) missing.push('Inventario');
+        if (missing.length > 0) {
+          showToast('Columnas faltantes: ' + missing.join(', ') + '. Verifica el formato.');
+        }
+      })();
+
       statusEl.textContent = 'Guardando en cache...';
 
       // Cache in IndexedDB
@@ -2671,14 +2693,13 @@ function handleFileUpload(event) {
         localStorage.setItem('trackinn_file' + suffix, file.name);
         localStorage.setItem('trackinn_date' + suffix, new Date().toLocaleDateString('es-MX'));
         localStorage.setItem('trackinn_count' + suffix, productData.length);
-      } catch(err) { /* silently ignore */ }
+      } catch(err) { showToast('No se pudo guardar en caché local'); }
 
       updateDataStatus();
       showToast(productData.length + ' productos cargados');
     } catch(err) {
-      showToast('Error: ' + err.message);
-      statusEl.textContent = 'Error: ' + err.message;
-      // silently ignore
+      showToast('Error al procesar el archivo: ' + err.message);
+      statusEl.textContent = 'Error al procesar archivo';
     }
   };
   reader.readAsArrayBuffer(file);
@@ -3305,7 +3326,9 @@ function generateLabelPreview() {
         background: 'transparent'
       });
     }
-  } catch(e) {}
+  } catch(e) {
+    showToast('No se pudo generar el código de barras');
+  }
 }
 
 // ============ PHOMEMO M120 BLE PRINTER ============
@@ -3782,7 +3805,7 @@ function handleBleError(e) {
     updatePrinterUI(false, 'Conexión cancelada');
   } else {
     updatePrinterUI(false, 'Error: ' + msg);
-    alert('Error de conexión: ' + msg);
+    alert('Error de conexión con la impresora: ' + msg);
   }
 }
 
@@ -4134,7 +4157,7 @@ async function puPrintSelected() {
     for (var q = 0; q < qty; q++) {
       printed++;
       showToast('Imprimiendo ' + printed + '/' + totalLabels);
-      try { await window._phomemo.print(canvas); } catch(e) { showToast('Error: '+e.message); return; }
+      try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
       if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,500)});
     }
   }
@@ -4365,7 +4388,7 @@ async function cpPrintSelected() {
     for (var q = 0; q < qty; q++) {
       printed++;
       showToast('Imprimiendo ' + printed + '/' + totalLabels);
-      try { await window._phomemo.print(canvas); } catch(e) { showToast('Error: '+e.message); return; }
+      try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
       if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,500)});
     }
   }
@@ -4562,7 +4585,7 @@ function openBatchScanner(rowId) {
     },
     function() {} // ignore errors
   ).catch(function(e) {
-    // silently ignore
+    showToast('No se pudo iniciar la cámara');
   });
 }
 
