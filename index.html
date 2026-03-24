@@ -3742,22 +3742,25 @@ function renderLabelToCanvas() {
     ctx.fillText('A: ' + formatPrice(d.n2), pad, 62);
   }
 
-  // === BOTTOM SECTION: Big barcode ===
-  // JsBarcode SVG: bars=120px + text=18px = 138px tall, width varies by UPC length
-  // For CODE128 13-digit UPC at width:3 ≈ 500px wide
-  // Scale factor = min(barcodeW/500, maxH/138) ≈ 0.57-0.67 (width constrained)
-  // Actual rendered height ≈ 138 * scale ≈ 80-92px
-  // UPC text ends at barcodeY + actualHeight
+  // === BOTTOM SECTION: Barcode (bars only) + UPC text + Description ===
+  // Barcode renders BARS ONLY (no displayValue) so height is consistent
+  // Then UPC and description are drawn at fixed positions below
   var barcodeY = 78;
-  var barcodeMaxH = 150;
+  var barsH = 120;
   var barcodeW = contentW - 16;
-  renderBarcodeToCanvas(ctx, d.upc, 8, barcodeY, barcodeW, barcodeMaxH);
+  renderBarcodeToCanvas(ctx, d.upc, 8, barcodeY, barcodeW, barsH);
 
-  // Description — 1mm (8px) below where UPC numbers actually end
-  // Estimated actual barcode height: ~92px (width-constrained scaling)
-  // UPC text ends at approximately barcodeY + 95 = 173
-  // Description at 173 + 8 = 181
-  var descY = 197;
+  // UPC text — fixed position below bars area
+  // Bars max height = 120px starting at y=78, bars end at max y=198
+  // But bars scale down by width, so actual end varies. Fixed UPC position = 205
+  var upcY = 205;
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.font = '13px Arial';
+  ctx.fillText(String(d.upc || '').trim(), contentW / 2, upcY);
+
+  // Description — 1mm (8px) below UPC text
+  var descY = upcY + 14;
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = 'bold 10px Arial';
@@ -3775,7 +3778,7 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
     document.body.appendChild(tmpSvg);
     JsBarcode(tmpSvg, upc.trim(), {
       format: 'CODE128', width: 3, height: 120,
-      displayValue: true, fontSize: 18, margin: 0,
+      displayValue: false, margin: 0,
       background: 'transparent', lineColor: '#000'
     });
     var svgData = new XMLSerializer().serializeToString(tmpSvg);
