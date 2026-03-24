@@ -3311,9 +3311,9 @@ function generateLabelPreview() {
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatPrice(d.n2) + '</div>';
   }
 
-  var liqBar = hasCP ? '<div style="position:absolute;top:0;right:0;bottom:0;width:18px;background:#000;display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:8px;font-weight:800;letter-spacing:1.5px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)">LIQUIDACI\u00D3N</span></div>' : '';
+  var liqBar = hasCP ? '<div style="position:absolute;top:0;right:0;bottom:0;width:22px;background:#000;display:flex;align-items:center;justify-content:center"><span style="color:transparent;font-size:10px;font-weight:800;letter-spacing:2px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);-webkit-text-stroke:1px #fff">LIQUIDACI\u00D3N</span></div>' : '';
   var estiloAlign = hasCP ? 'text-align:center;flex:1' : 'text-align:right;flex-shrink:0;max-width:45%';
-  var contentPadRight = hasCP ? 'padding:5px 24px 5px 8px' : 'padding:5px 8px';
+  var contentPadRight = hasCP ? 'padding:5px 28px 5px 8px' : 'padding:5px 8px';
 
   html += '<div class="label-frame" style="position:relative;overflow:hidden">'
     + liqBar
@@ -3322,7 +3322,7 @@ function generateLabelPreview() {
     + '<div>' + pricesHTML + '</div>'
     + '<div style="' + estiloAlign + '">'
     + '<div style="font-size:9px;font-weight:700;color:#000">' + escapeHTML(d.estilo) + '</div>'
-    + '<div style="font-size:7px;font-weight:600;color:#555;margin-top:1px">' + (d.vigencia || 'NUEVO') + '</div>'
+    + '<div style="font-size:8px;font-weight:800;color:#000;margin-top:1px">' + (d.vigencia || 'NUEVO') + '</div>'
     + '</div></div>'
     + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><svg id="labelBarcode"></svg>'
     + '<div style="font-size:7px;color:#333;text-align:center;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px">' + escapeHTML(d.description) + '</div>'
@@ -3668,19 +3668,19 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
 
-  // Liquidación bar for CP products
-  var barW = hasCP ? 18 : 0;
+  // Liquidación bar for CP products — thick bar, outline text
+  var barW = hasCP ? 28 : 0;
   if (hasCP) {
     ctx.fillStyle = '#000';
     ctx.fillRect(W - barW, 0, barW, H);
     ctx.save();
-    ctx.translate(W - 4, H - 20);
+    ctx.translate(W - 6, H - 16);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillStyle = '#FFF';
-    ctx.font = 'bold 8px Arial';
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 1.2;
+    ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'left';
-    ctx.letterSpacing = '1.5px';
-    ctx.fillText('LIQUIDACI\u00D3N', 0, 0);
+    ctx.strokeText('LIQUIDACI\u00D3N', 0, 0);
     ctx.restore();
   }
 
@@ -3692,21 +3692,27 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#000';
   if (hasCP) {
     ctx.textAlign = 'center';
-    ctx.font = 'bold 11px Arial';
+    ctx.font = 'bold 12px Arial';
     ctx.fillText(d.estilo, (pad + contentW) / 2 + 40, 14);
-    ctx.font = '9px Arial';
-    ctx.fillStyle = '#555';
-    ctx.fillText(d.vigencia || 'NUEVO', (pad + contentW) / 2 + 40, 26);
+    ctx.font = 'bold 10px Arial';
+    ctx.fillStyle = '#000';
+    ctx.fillText(d.vigencia || 'NUEVO', (pad + contentW) / 2 + 40, 27);
   } else {
     ctx.textAlign = 'right';
-    ctx.font = 'bold 11px Arial';
+    ctx.font = 'bold 12px Arial';
     ctx.fillText(d.estilo, contentW - pad, 14);
-    ctx.font = '9px Arial';
-    ctx.fillStyle = '#555';
-    ctx.fillText(d.vigencia || 'NUEVO', contentW - pad, 26);
+    ctx.font = 'bold 10px Arial';
+    ctx.fillStyle = '#000';
+    ctx.fillText(d.vigencia || 'NUEVO', contentW - pad, 27);
   }
   // Prices — top left
   ctx.textAlign = 'left';
+
+  // Strikethrough helper — visible thin line
+  function strikeThrough(x, y, width) {
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + width, y); ctx.stroke();
+  }
 
   if (isFullPrice) {
     ctx.fillStyle = '#000';
@@ -3717,15 +3723,12 @@ function renderLabelToCanvas() {
     ctx.font = '12px Arial';
     var t1 = 'De: ' + formatPrice(d.n1);
     ctx.fillText(t1, pad, 18);
-    var tw1 = ctx.measureText(t1).width;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
-    ctx.beginPath(); ctx.moveTo(pad, 14); ctx.lineTo(pad + tw1, 14); ctx.stroke();
+    strikeThrough(pad, 14, ctx.measureText(t1).width);
 
     ctx.font = '14px Arial';
     var t2 = 'CP: ' + formatPrice(d.n2);
     ctx.fillText(t2, pad, 36);
-    var tw2 = ctx.measureText(t2).width;
-    ctx.beginPath(); ctx.moveTo(pad, 32); ctx.lineTo(pad + tw2, 32); ctx.stroke();
+    strikeThrough(pad, 32, ctx.measureText(t2).width);
 
     ctx.font = 'bold 34px Arial';
     ctx.fillText('A: ' + formatPrice(d.n3), pad, 72);
@@ -3734,9 +3737,7 @@ function renderLabelToCanvas() {
     ctx.font = '14px Arial';
     var t3 = 'De: ' + formatPrice(d.n1);
     ctx.fillText(t3, pad, 22);
-    var tw3 = ctx.measureText(t3).width;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
-    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw3, 18); ctx.stroke();
+    strikeThrough(pad, 18, ctx.measureText(t3).width);
 
     ctx.font = 'bold 36px Arial';
     ctx.fillText('A: ' + formatPrice(d.n3), pad, 62);
@@ -3746,9 +3747,7 @@ function renderLabelToCanvas() {
     ctx.font = '14px Arial';
     var t4 = 'De: ' + formatPrice(d.n1);
     ctx.fillText(t4, pad, 22);
-    var tw4 = ctx.measureText(t4).width;
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 0.65;
-    ctx.beginPath(); ctx.moveTo(pad, 18); ctx.lineTo(pad + tw4, 18); ctx.stroke();
+    strikeThrough(pad, 18, ctx.measureText(t4).width);
 
     ctx.font = 'bold 36px Arial';
     ctx.fillText('A: ' + formatPrice(d.n2), pad, 62);
@@ -3756,14 +3755,14 @@ function renderLabelToCanvas() {
 
   // === BOTTOM SECTION: Big barcode ===
   var barcodeW = contentW - 16;
-  renderBarcodeToCanvas(ctx, d.upc, 8, 78, barcodeW, 148);
+  renderBarcodeToCanvas(ctx, d.upc, 8, 78, barcodeW, 136);
 
-  // Description below barcode
-  ctx.fillStyle = '#333';
+  // Description below barcode — 1.5mm (~12px) gap from UPC numbers
+  ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
-  ctx.font = '9px Arial';
-  var descText = d.description.length > 40 ? d.description.substring(0, 40) + '...' : d.description;
-  ctx.fillText(descText, contentW / 2, H - 4);
+  ctx.font = 'bold 10px Arial';
+  var descText = d.description.length > 38 ? d.description.substring(0, 38) + '...' : d.description;
+  ctx.fillText(descText, contentW / 2, H - 6);
 
   return canvas;
 }
