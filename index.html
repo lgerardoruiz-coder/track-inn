@@ -2944,7 +2944,8 @@ function displayProduct(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
-    upc: String(first['UPC'] || scannedCode).trim()
+    upc: String(first['UPC'] || scannedCode).trim(),
+    vigencia: 'NUEVO'
   };
 
   // Tappable badge helper
@@ -3316,6 +3317,7 @@ function generateLabelPreview() {
     + '<div>' + pricesHTML + '</div>'
     + '<div style="text-align:right;flex-shrink:0;max-width:45%">'
     + '<div style="font-size:9px;font-weight:700;color:#000">' + escapeHTML(d.estilo) + '</div>'
+    + '<div style="font-size:7px;font-weight:600;color:#555;margin-top:1px">' + (d.vigencia || 'NUEVO') + '</div>'
     + '</div></div>'
     + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><svg id="labelBarcode"></svg>'
     + '<div style="font-size:7px;color:#333;text-align:center;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">' + escapeHTML(d.description) + '</div>'
@@ -3664,11 +3666,14 @@ function renderLabelToCanvas() {
   // === TOP SECTION: Prices left, Estilo+Desc right ===
   var pad = 8;
 
-  // Estilo + Description — top right, small
+  // Estilo + Vigencia — top right, small
   ctx.fillStyle = '#000';
   ctx.textAlign = 'right';
   ctx.font = 'bold 11px Arial';
   ctx.fillText(d.estilo, W - pad, 14);
+  ctx.font = '9px Arial';
+  ctx.fillStyle = '#555';
+  ctx.fillText(d.vigencia || 'NUEVO', W - pad, 26);
   // Prices — top left
   ctx.textAlign = 'left';
 
@@ -4203,7 +4208,7 @@ async function puPrintSelected() {
     var qty = puQty[p.estilo] || 1;
     _labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
       n1: p.n1, n2: p.n2, n3: p.n3,
-      tag: p.tag, impulso: '', upc: p.upc };
+      tag: p.tag, impulso: '', upc: p.upc, vigencia: 'NUEVO' };
     var canvas = renderLabelToCanvas();
     if (!canvas) continue;
     await new Promise(function(r){setTimeout(r,400)});
@@ -4452,7 +4457,7 @@ async function cpPrintSelected() {
     var hasPromo = p.tag.indexOf('PROMO')>=0;
     _labelData = { description: p.desc, estilo: p.estilo, brand: p.marca,
       n1: p.oldPrice, n2: p.n2, n3: p.n3,
-      tag: p.tag, impulso: '', upc: p.upc };
+      tag: p.tag, impulso: '', upc: p.upc, vigencia: 'NUEVO' };
     var canvas = renderLabelToCanvas();
     if (!canvas) continue;
     await new Promise(function(r){setTimeout(r,400)});
@@ -4504,7 +4509,8 @@ function buildLabelData(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
-    upc: String(first['UPC'] || scannedCode).trim()
+    upc: String(first['UPC'] || scannedCode).trim(),
+    vigencia: 'NUEVO'
   };
 }
 
