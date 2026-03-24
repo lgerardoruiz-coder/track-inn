@@ -3311,7 +3311,7 @@ function generateLabelPreview() {
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatPrice(d.n2) + '</div>';
   }
 
-  var liqBar = hasCP ? '<div style="position:absolute;top:0;right:2px;bottom:0;width:16px;display:flex;align-items:center;justify-content:center"><span style="color:#000;font-size:9px;font-weight:800;letter-spacing:1px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)">LIQUIDACI\u00D3N</span></div>' : '';
+  var liqBar = hasCP ? '<div style="position:absolute;top:0;right:0;bottom:0;width:20px;display:flex;align-items:center;justify-content:center"><span style="color:#000;font-size:14px;font-weight:800;letter-spacing:1.5px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)">LIQUIDACI\u00D3N</span></div>' : '';
   var estiloAlign = 'text-align:right;flex-shrink:0;max-width:45%';
   var contentPadRight = hasCP ? 'padding:5px 22px 5px 8px' : 'padding:5px 8px';
 
@@ -3668,14 +3668,17 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
 
-  // LIQUIDACIÓN text for CP products — no bar, just rotated text on right
+  // LIQUIDACIÓN text for CP products — centered at barcode height, large
+  // Barcode area: y=78 to ~y=170 (actual rendered). Center ≈ y=124
+  // Font ~24px (just below "A:" which is 34px). Text width ~160px when horizontal
+  // Rotated 90°: spans ~80px above and below center
   if (hasCP) {
     ctx.save();
-    ctx.translate(W - 5, H - 10);
+    ctx.translate(W - 6, 204);
     ctx.rotate(-Math.PI / 2);
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 11px Arial';
-    ctx.textAlign = 'left';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
     ctx.fillText('LIQUIDACI\u00D3N', 0, 0);
     ctx.restore();
   }
@@ -3740,13 +3743,21 @@ function renderLabelToCanvas() {
   }
 
   // === BOTTOM SECTION: Big barcode ===
+  // JsBarcode SVG: bars=120px + text=18px = 138px tall, width varies by UPC length
+  // For CODE128 13-digit UPC at width:3 ≈ 500px wide
+  // Scale factor = min(barcodeW/500, maxH/138) ≈ 0.57-0.67 (width constrained)
+  // Actual rendered height ≈ 138 * scale ≈ 80-92px
+  // UPC text ends at barcodeY + actualHeight
   var barcodeY = 78;
-  var barcodeH = 128;
+  var barcodeMaxH = 150;
   var barcodeW = contentW - 16;
-  renderBarcodeToCanvas(ctx, d.upc, 8, barcodeY, barcodeW, barcodeH);
+  renderBarcodeToCanvas(ctx, d.upc, 8, barcodeY, barcodeW, barcodeMaxH);
 
-  // Description — 1mm (8px) below barcode area end
-  var descY = barcodeY + barcodeH + 8;
+  // Description — 1mm (8px) below where UPC numbers actually end
+  // Estimated actual barcode height: ~92px (width-constrained scaling)
+  // UPC text ends at approximately barcodeY + 95 = 173
+  // Description at 173 + 8 = 181
+  var descY = 181;
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = 'bold 10px Arial';
