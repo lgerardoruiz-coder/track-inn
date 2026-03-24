@@ -3311,9 +3311,9 @@ function generateLabelPreview() {
       + '<div class="label-price-main" style="font-size:24px;margin-top:1px">A: ' + formatPrice(d.n2) + '</div>';
   }
 
-  var liqBar = hasCP ? '<div style="position:absolute;top:0;right:0;bottom:0;width:22px;background:#000;display:flex;align-items:center;justify-content:center"><span style="color:transparent;font-size:10px;font-weight:800;letter-spacing:2px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);-webkit-text-stroke:1px #fff">LIQUIDACI\u00D3N</span></div>' : '';
-  var estiloAlign = hasCP ? 'text-align:center;flex:1' : 'text-align:right;flex-shrink:0;max-width:45%';
-  var contentPadRight = hasCP ? 'padding:5px 28px 5px 8px' : 'padding:5px 8px';
+  var liqBar = hasCP ? '<div style="position:absolute;top:0;right:2px;bottom:0;width:16px;display:flex;align-items:center;justify-content:center"><span style="color:#000;font-size:9px;font-weight:800;letter-spacing:1px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)">LIQUIDACI\u00D3N</span></div>' : '';
+  var estiloAlign = 'text-align:right;flex-shrink:0;max-width:45%';
+  var contentPadRight = hasCP ? 'padding:5px 22px 5px 8px' : 'padding:5px 8px';
 
   html += '<div class="label-frame" style="position:relative;overflow:hidden">'
     + liqBar
@@ -3668,49 +3668,35 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
 
-  // Liquidación bar for CP products — thick bar, outline text
-  var barW = hasCP ? 28 : 0;
+  // LIQUIDACIÓN text for CP products — no bar, just rotated text on right
   if (hasCP) {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(W - barW, 0, barW, H);
     ctx.save();
-    ctx.translate(W - 6, H - 16);
+    ctx.translate(W - 5, H - 10);
     ctx.rotate(-Math.PI / 2);
-    ctx.strokeStyle = '#FFF';
-    ctx.lineWidth = 1.2;
-    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 11px Arial';
     ctx.textAlign = 'left';
-    ctx.strokeText('LIQUIDACI\u00D3N', 0, 0);
+    ctx.fillText('LIQUIDACI\u00D3N', 0, 0);
     ctx.restore();
   }
 
   // === TOP SECTION: Prices left, Estilo+Vigencia ===
   var pad = 8;
-  var contentW = W - barW;
+  var contentW = W - 18;
 
   // Estilo + Vigencia
   ctx.fillStyle = '#000';
-  if (hasCP) {
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 12px Arial';
-    ctx.fillText(d.estilo, (pad + contentW) / 2 + 40, 14);
-    ctx.font = 'bold 10px Arial';
-    ctx.fillStyle = '#000';
-    ctx.fillText(d.vigencia || 'NUEVO', (pad + contentW) / 2 + 40, 27);
-  } else {
-    ctx.textAlign = 'right';
-    ctx.font = 'bold 12px Arial';
-    ctx.fillText(d.estilo, contentW - pad, 14);
-    ctx.font = 'bold 10px Arial';
-    ctx.fillStyle = '#000';
-    ctx.fillText(d.vigencia || 'NUEVO', contentW - pad, 27);
-  }
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 12px Arial';
+  ctx.fillText(d.estilo, contentW - pad, 14);
+  ctx.font = 'bold 10px Arial';
+  ctx.fillText(d.vigencia || 'NUEVO', contentW - pad, 27);
   // Prices — top left
   ctx.textAlign = 'left';
 
   // Strikethrough helper — visible thin line
   function strikeThrough(x, y, width) {
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + width, y); ctx.stroke();
   }
 
@@ -3754,15 +3740,18 @@ function renderLabelToCanvas() {
   }
 
   // === BOTTOM SECTION: Big barcode ===
+  var barcodeY = 78;
+  var barcodeH = 128;
   var barcodeW = contentW - 16;
-  renderBarcodeToCanvas(ctx, d.upc, 8, 78, barcodeW, 136);
+  renderBarcodeToCanvas(ctx, d.upc, 8, barcodeY, barcodeW, barcodeH);
 
-  // Description below barcode — 1.5mm (~12px) gap from UPC numbers
+  // Description — 1mm (8px) below barcode area end
+  var descY = barcodeY + barcodeH + 8;
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = 'bold 10px Arial';
   var descText = d.description.length > 38 ? d.description.substring(0, 38) + '...' : d.description;
-  ctx.fillText(descText, contentW / 2, H - 6);
+  ctx.fillText(descText, contentW / 2, descY);
 
   return canvas;
 }
