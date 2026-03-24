@@ -3674,7 +3674,7 @@ function renderLabelToCanvas() {
   // Rotated 90°: spans ~80px above and below center
   if (hasCP) {
     ctx.save();
-    ctx.translate(W - 6, 204);
+    ctx.translate(W - 6, 124);
     ctx.rotate(-Math.PI / 2);
     ctx.fillStyle = '#000';
     ctx.font = 'bold 24px Arial';
@@ -3757,7 +3757,7 @@ function renderLabelToCanvas() {
   // Estimated actual barcode height: ~92px (width-constrained scaling)
   // UPC text ends at approximately barcodeY + 95 = 173
   // Description at 173 + 8 = 181
-  var descY = 181;
+  var descY = 197;
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = 'bold 10px Arial';
