@@ -3669,9 +3669,6 @@ function renderLabelToCanvas() {
   ctx.textAlign = 'right';
   ctx.font = 'bold 11px Arial';
   ctx.fillText(d.estilo, W - pad, 14);
-  ctx.font = '10px Arial';
-  ctx.fillText(d.description, W - pad, 28);
-
   // Prices — top left
   ctx.textAlign = 'left';
 
@@ -3723,7 +3720,14 @@ function renderLabelToCanvas() {
 
   // === BOTTOM SECTION: Big barcode ===
   // Barcode takes up from y=80 to y=240 (160px tall), full width
-  renderBarcodeToCanvas(ctx, d.upc, 8, 78, W - 16, 158);
+  renderBarcodeToCanvas(ctx, d.upc, 8, 78, W - 16, 148);
+
+  // Description below barcode
+  ctx.fillStyle = '#333';
+  ctx.textAlign = 'center';
+  ctx.font = '9px Arial';
+  var descText = d.description.length > 45 ? d.description.substring(0, 45) + '...' : d.description;
+  ctx.fillText(descText, W / 2, H - 4);
 
   return canvas;
 }
@@ -3958,6 +3962,8 @@ function initPiezasUnicas() {
       tallas: tallasStr,
       tallasCount: tallasWithInv.length,
       n1: n1,
+      n2: n2,
+      n3: n3,
       finalPrice: finalPrice,
       pctDiscount: pctDiscount,
       tag: tag,
@@ -4196,7 +4202,7 @@ async function puPrintSelected() {
     var p = selected[i];
     var qty = puQty[p.estilo] || 1;
     _labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
-      n1: p.n1, n2: 0, n3: p.finalPrice !== p.n1 ? p.finalPrice : 0,
+      n1: p.n1, n2: p.n2, n3: p.n3,
       tag: p.tag, impulso: '', upc: p.upc };
     var canvas = renderLabelToCanvas();
     if (!canvas) continue;
@@ -4272,6 +4278,8 @@ function initCambiosPrecio() {
       div: String(getField(r, 'Division') || '').trim(),
       oldPrice: oldPrice,
       newPrice: finalPrice,
+      n2: n2,
+      n3: n3,
       tag: tag,
       upc: upc
     };
@@ -4443,8 +4451,8 @@ async function cpPrintSelected() {
     var hasCP = p.tag.indexOf('CP')>=0 || p.tag==='REBAJA';
     var hasPromo = p.tag.indexOf('PROMO')>=0;
     _labelData = { description: p.desc, estilo: p.estilo, brand: p.marca,
-      n1: p.oldPrice, n2: hasCP ? p.newPrice : 0, n3: hasPromo ? p.newPrice : 0,
-      tag: hasCP && hasPromo ? 'CP+PROMO' : hasCP ? 'REBAJA' : 'PROMO', impulso: '', upc: p.upc };
+      n1: p.oldPrice, n2: p.n2, n3: p.n3,
+      tag: p.tag, impulso: '', upc: p.upc };
     var canvas = renderLabelToCanvas();
     if (!canvas) continue;
     await new Promise(function(r){setTimeout(r,400)});
