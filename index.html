@@ -2584,12 +2584,17 @@ async function handleLogin() {
     syncOfflineLogs();
 
   } catch (e) {
-    // Backend not available — allow offline mode
-    errorEl.textContent = '';
-    localStorage.setItem('trackinn_logged_user', username);
-    apiUser = { username: username };
-    document.getElementById('loginOverlay').style.display = 'none';
-    document.getElementById('loggedUserName').textContent = username + ' (offline)';
+    // Backend not available — only allow offline if user previously logged in successfully
+    var previousUser = localStorage.getItem('trackinn_logged_user');
+    var previousToken = localStorage.getItem('trackinn_api_token');
+    if (previousUser === username && previousToken) {
+      apiUser = { username: username };
+      apiToken = previousToken;
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('loggedUserName').textContent = username + ' (offline)';
+    } else {
+      errorEl.textContent = 'Sin conexion al servidor. Verifica tu internet.';
+    }
     btn.disabled = false;
     btn.textContent = 'ENTRAR';
   }
