@@ -9,7 +9,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.sheetjs.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://site-product.innovasport.com https://*.algolia.net https://*.algolianet.com https://www.innovasport.com https://www.innvictus.com; connect-src 'self' https://*.algolia.net https://*.algolianet.com https://*.algolia.io http://localhost:4000;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.sheetjs.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://site-product.innovasport.com https://*.algolia.net https://*.algolianet.com https://www.innovasport.com https://www.innvictus.com; connect-src 'self' https://*.algolia.net https://*.algolianet.com https://*.algolia.io http://localhost:4000 https://*.trycloudflare.com;">
 <meta name="description" content="Track Inn - Escáner de precios para retail. Consulta precios, inventario y genera etiquetas.">
 <title>Track Inn - Escaner de Precios</title>
 <script>
@@ -1837,6 +1837,93 @@ button, .store-select-btn, .size-btn {
   font-weight: 600;
 }
 
+/* LOGIN SCREEN */
+.login-body {
+  background: var(--black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  height: 100%;
+  gap: 20px;
+}
+.login-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.login-select {
+  width: 100%;
+  max-width: 280px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: var(--dark-gray);
+  color: var(--white);
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2395A5A6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+.login-pin-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.login-pin-digit {
+  width: 52px;
+  height: 60px;
+  border-radius: 12px;
+  border: 2px solid #333;
+  background: var(--dark-gray);
+  color: var(--white);
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  caret-color: var(--red);
+  transition: border-color 0.2s;
+}
+.login-pin-digit:focus {
+  border-color: var(--red);
+  outline: none;
+}
+.login-btn {
+  width: 100%;
+  max-width: 280px;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: var(--red);
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: opacity 0.2s;
+}
+.login-btn:active { opacity: 0.8; }
+.login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.login-error {
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 500;
+  min-height: 20px;
+}
+.login-user-badge {
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 500;
+  display: none;
+}
+
 /* Offline Banner */
 .offline-banner {
   position: fixed;
@@ -1864,6 +1951,46 @@ button, .store-select-btn, .size-btn {
 <div class="phone-frame">
 
   <div class="screens-viewport">
+    <!-- LOGIN OVERLAY -->
+    <div id="loginOverlay" style="position:absolute;inset:0;z-index:100;display:flex">
+      <div class="login-body" style="width:100%">
+        <div class="logo-icon" style="margin-bottom:0">
+          <svg viewBox="0 0 80 80" fill="none" width="60" height="60">
+            <rect x="10" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+            <rect x="18" y="18" width="3" height="44" rx="1.5" fill="white" opacity="0.8"/>
+            <rect x="24" y="22" width="5" height="36" rx="2" fill="white"/>
+            <rect x="33" y="18" width="3" height="44" rx="1.5" fill="#E63946"/>
+            <rect x="40" y="22" width="6" height="36" rx="2" fill="white"/>
+            <rect x="50" y="18" width="3" height="44" rx="1.5" fill="#E63946" opacity="0.8"/>
+            <rect x="57" y="22" width="4" height="36" rx="2" fill="white" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="logo-text" style="font-size:28px;letter-spacing:3px">TRACK <span>INN</span></div>
+        <div class="login-title">Iniciar sesion</div>
+        <select id="loginUser" class="login-select">
+          <option value="">Selecciona tu usuario</option>
+          <option value="Gerardo">Gerardo</option>
+          <option value="Usuario2">Usuario 2</option>
+          <option value="Usuario3">Usuario 3</option>
+          <option value="Usuario4">Usuario 4</option>
+          <option value="Usuario5">Usuario 5</option>
+          <option value="Usuario6">Usuario 6</option>
+          <option value="Usuario7">Usuario 7</option>
+          <option value="Usuario8">Usuario 8</option>
+          <option value="Usuario9">Usuario 9</option>
+          <option value="Usuario10">Usuario 10</option>
+        </select>
+        <div class="login-pin-row">
+          <input type="tel" class="login-pin-digit" id="pin1" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="tel" class="login-pin-digit" id="pin2" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="tel" class="login-pin-digit" id="pin3" maxlength="1" inputmode="numeric" autocomplete="off">
+          <input type="tel" class="login-pin-digit" id="pin4" maxlength="1" inputmode="numeric" autocomplete="off">
+        </div>
+        <div class="login-error" id="loginError"></div>
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">ENTRAR</button>
+      </div>
+    </div>
+
     <!-- SCREEN 0: STORE SELECT -->
     <div class="screen active" id="screen0">
       <div class="screen-store-select">
@@ -1932,20 +2059,10 @@ button, .store-select-btn, .size-btn {
           </button>
           <input type="file" id="excelInput" class="file-input-hidden" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" onchange="handleFileUpload(event)">
           <div id="dataStatus" class="data-status">Sin datos cargados</div>
-          <div id="apiConnectSection" style="margin-top:12px">
-            <div id="apiStatus" style="font-size:12px;color:var(--gray);margin-bottom:6px">
-              <span id="apiDot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#666;margin-right:4px;vertical-align:middle"></span>
-              <span id="apiStatusText">API desconectada</span>
-            </div>
-            <div id="apiLoginForm" style="display:none">
-              <input type="text" id="apiUsername" placeholder="Usuario" style="width:140px;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#fff;font-size:13px;margin-right:4px;font-family:'Poppins',sans-serif">
-              <input type="password" id="apiPassword" placeholder="Contraseña" style="width:140px;padding:8px 10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#fff;font-size:13px;font-family:'Poppins',sans-serif">
-              <div style="margin-top:6px">
-                <button onclick="connectAPI()" style="background:#E63946;border:none;color:#fff;padding:8px 20px;border-radius:8px;font-size:12px;font-family:'Poppins',sans-serif;cursor:pointer">Conectar</button>
-                <button onclick="document.getElementById('apiLoginForm').style.display='none'" style="background:none;border:none;color:var(--gray);font-size:12px;font-family:'Poppins',sans-serif;cursor:pointer;margin-left:8px">Cancelar</button>
-              </div>
-            </div>
-            <button id="btnApiConnect" onclick="toggleApiLogin()" style="background:none;border:1px solid #333;color:var(--light);font-size:12px;font-family:'Poppins',sans-serif;cursor:pointer;padding:6px 16px;border-radius:8px">Conectar API</button>
+          <div id="loggedUserBadge" style="margin-top:12px;font-size:12px;color:var(--green);font-weight:500">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;vertical-align:middle"></span>
+            <span id="loggedUserName"></span>
+            <button onclick="handleLogout()" style="background:none;border:none;color:var(--gray);font-size:11px;font-family:'Poppins',sans-serif;cursor:pointer;margin-left:8px;text-decoration:underline">Cerrar sesion</button>
           </div>
           <button onclick="goToScreen(0)" style="background:none;border:none;color:var(--gray);font-size:13px;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:8px;padding:8px 16px">&#8592; Cambiar tienda</button>
         </div>
@@ -2397,6 +2514,226 @@ function disconnectAPI() {
   updateApiUI(false);
   showToast('API desconectada');
 }
+
+// ============ LOGIN SYSTEM ============
+function setupPinInputs() {
+  var pins = [document.getElementById('pin1'), document.getElementById('pin2'), document.getElementById('pin3'), document.getElementById('pin4')];
+  pins.forEach(function(input, i) {
+    input.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value.length === 1 && i < 3) pins[i + 1].focus();
+      if (pins.every(function(p) { return p.value.length === 1; })) {
+        document.getElementById('loginBtn').focus();
+      }
+    });
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace' && this.value === '' && i > 0) {
+        pins[i - 1].focus();
+        pins[i - 1].value = '';
+      }
+      if (e.key === 'Enter') handleLogin();
+    });
+  });
+}
+
+async function handleLogin() {
+  var username = document.getElementById('loginUser').value;
+  var pin = document.getElementById('pin1').value + document.getElementById('pin2').value + document.getElementById('pin3').value + document.getElementById('pin4').value;
+  var errorEl = document.getElementById('loginError');
+  var btn = document.getElementById('loginBtn');
+
+  if (!username) { errorEl.textContent = 'Selecciona un usuario'; return; }
+  if (pin.length < 4) { errorEl.textContent = 'Ingresa tu PIN de 4 digitos'; return; }
+
+  errorEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'VERIFICANDO...';
+
+  try {
+    var res = await fetch(API_BASE + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, password: pin }),
+    });
+
+    if (!res.ok) {
+      errorEl.textContent = 'PIN incorrecto';
+      btn.disabled = false;
+      btn.textContent = 'ENTRAR';
+      return;
+    }
+
+    var data = await res.json();
+    apiToken = data.token;
+    apiUser = data.user;
+    localStorage.setItem('trackinn_api_token', apiToken);
+    localStorage.setItem('trackinn_api_refresh', data.refreshToken);
+    localStorage.setItem('trackinn_api_creds', JSON.stringify({ username: username, password: pin }));
+    localStorage.setItem('trackinn_logged_user', username);
+
+    // Hide login, show app
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('loggedUserName').textContent = username;
+
+    // Clear PIN inputs
+    ['pin1','pin2','pin3','pin4'].forEach(function(id) { document.getElementById(id).value = ''; });
+    btn.disabled = false;
+    btn.textContent = 'ENTRAR';
+
+    // Sync any offline logs
+    syncOfflineLogs();
+
+  } catch (e) {
+    // Backend not available — allow offline mode
+    errorEl.textContent = '';
+    localStorage.setItem('trackinn_logged_user', username);
+    apiUser = { username: username };
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('loggedUserName').textContent = username + ' (offline)';
+    btn.disabled = false;
+    btn.textContent = 'ENTRAR';
+  }
+}
+
+function handleLogout() {
+  apiToken = null;
+  apiUser = null;
+  localStorage.removeItem('trackinn_api_token');
+  localStorage.removeItem('trackinn_api_refresh');
+  localStorage.removeItem('trackinn_api_creds');
+  localStorage.removeItem('trackinn_logged_user');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginError').textContent = '';
+  document.getElementById('loginUser').value = '';
+  ['pin1','pin2','pin3','pin4'].forEach(function(id) { document.getElementById(id).value = ''; });
+}
+
+function checkSavedLogin() {
+  var savedUser = localStorage.getItem('trackinn_logged_user');
+  var savedToken = localStorage.getItem('trackinn_api_token');
+  if (savedUser && savedToken) {
+    apiToken = savedToken;
+    apiUser = { username: savedUser };
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('loggedUserName').textContent = savedUser;
+    // Verify token is still valid
+    apiFetch('/api/auth/me').then(function(data) {
+      if (data && data.user) {
+        apiUser = data.user;
+      } else {
+        // Token expired, try refresh
+        apiRefreshToken().then(function(ok) {
+          if (!ok) {
+            // Refresh also failed — keep offline mode
+            document.getElementById('loggedUserName').textContent = savedUser + ' (offline)';
+          }
+        });
+      }
+    });
+    syncOfflineLogs();
+  }
+}
+
+// ============ LOG TRACKING ============
+function sendScanLog(upc, estilo, descripcion, found) {
+  var logData = {
+    upc: upc || null,
+    estilo: estilo || null,
+    descripcion: descripcion || null,
+    found: !!found,
+    store_name: currentStore || null,
+  };
+
+  if (apiToken) {
+    fetch(API_BASE + '/api/logs/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+      body: JSON.stringify(logData),
+    }).catch(function() {
+      // Failed — save to offline queue
+      logData.scanned_at = new Date().toISOString();
+      saveOfflineLog('scan', logData);
+    });
+  } else {
+    logData.scanned_at = new Date().toISOString();
+    saveOfflineLog('scan', logData);
+  }
+}
+
+function sendPrintLog(upc, estilo, descripcion, qty, printType) {
+  var logData = {
+    upc: upc || null,
+    estilo: estilo || null,
+    descripcion: descripcion || null,
+    qty: qty || 1,
+    print_type: printType || 'single',
+    store_name: currentStore || null,
+  };
+
+  if (apiToken) {
+    fetch(API_BASE + '/api/logs/print', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+      body: JSON.stringify(logData),
+    }).catch(function() {
+      logData.printed_at = new Date().toISOString();
+      saveOfflineLog('print', logData);
+    });
+  } else {
+    logData.printed_at = new Date().toISOString();
+    saveOfflineLog('print', logData);
+  }
+}
+
+// ============ OFFLINE LOG QUEUE ============
+function getOfflineLogs() {
+  try { return JSON.parse(localStorage.getItem('trackinn_offline_logs') || '{"scan":[],"print":[]}'); }
+  catch(e) { return { scan: [], print: [] }; }
+}
+
+function saveOfflineLog(type, data) {
+  var logs = getOfflineLogs();
+  logs[type].push(data);
+  localStorage.setItem('trackinn_offline_logs', JSON.stringify(logs));
+}
+
+async function syncOfflineLogs() {
+  if (!apiToken) return;
+  var logs = getOfflineLogs();
+  var hadLogs = false;
+
+  if (logs.scan.length > 0) {
+    hadLogs = true;
+    try {
+      var res = await fetch(API_BASE + '/api/logs/scan/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+        body: JSON.stringify({ logs: logs.scan }),
+      });
+      if (res.ok) logs.scan = [];
+    } catch(e) { /* retry next time */ }
+  }
+
+  if (logs.print.length > 0) {
+    hadLogs = true;
+    try {
+      var res = await fetch(API_BASE + '/api/logs/print/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+        body: JSON.stringify({ logs: logs.print }),
+      });
+      if (res.ok) logs.print = [];
+    } catch(e) { /* retry next time */ }
+  }
+
+  localStorage.setItem('trackinn_offline_logs', JSON.stringify(logs));
+  if (hadLogs && logs.scan.length === 0 && logs.print.length === 0) {
+    showToast('Logs offline sincronizados');
+  }
+}
+
+// Sync offline logs every 5 minutes
+setInterval(function() { if (apiToken) syncOfflineLogs(); }, 5 * 60 * 1000);
 
 // Enriquecer inventario con datos del backend
 async function enrichWithAPI(estilo, upc) {
@@ -3859,6 +4196,9 @@ async function printLabel() {
     updatePrinterUI(true, '¡' + qty + (qty === 1 ? ' etiqueta impresa!' : ' etiquetas impresas!'));
     setTimeout(function() { updatePrinterUI(true); }, 3000);
 
+    // Log print
+    if (_labelData) sendPrintLog(_labelData.upc, _labelData.estilo, _labelData.description, qty, 'single');
+
   } catch(e) {
     handleBleError(e);
   }
@@ -4253,6 +4593,7 @@ async function puPrintSelected() {
       try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
       if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,500)});
     }
+    sendPrintLog(p.upc, p.estilo, p.description, qty, 'batch_pu');
   }
   showToast(printed + ' etiquetas impresas');
 }
@@ -4502,6 +4843,7 @@ async function cpPrintSelected() {
       try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
       if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,500)});
     }
+    sendPrintLog(p.upc, p.estilo, p.desc, qty, 'batch_cp');
   }
   showToast(printed + ' etiquetas impresas');
 }
@@ -4775,6 +5117,7 @@ async function batchPrintAll() {
           await new Promise(function(r) { setTimeout(r, 500); });
         }
       }
+      sendPrintLog(item.labelData.upc, item.labelData.estilo, item.labelData.description, item.qty, 'batch');
     }
 
     if (statusEl) statusEl.textContent = '¡' + totalLabels + ' etiquetas impresas!';
@@ -5425,6 +5768,9 @@ function onScanSuccess(decodedText, decodedResult) {
     displayProduct(rows, decodedText);
     goToScreen(3);
     setTimeout(() => { scanCooldown = false; }, 2000);
+    // Log scan
+    var r0 = rows[0];
+    sendScanLog(decodedText, r0['Estilo'] || r0['estilo'] || '', r0['Descripción'] || r0['Descripcion'] || r0['descripcion'] || '', true);
   } else {
     // Not found — show immediately
     scanCooldown = true;
@@ -5433,6 +5779,8 @@ function onScanSuccess(decodedText, decodedResult) {
     document.getElementById('notFoundCode').textContent = decodedText + ' (' + fmt + ', ' + decodedText.length + ' dig.)';
     goToScreen(4);
     setTimeout(() => { scanCooldown = false; }, 2000);
+    // Log scan (not found)
+    sendScanLog(decodedText, '', '', false);
   }
 }
 
@@ -5458,9 +5806,12 @@ function processBarcode(code) {
   if (rows && rows.length > 0) {
     displayProduct(rows, code);
     goToScreen(3);
+    var r0 = rows[0];
+    sendScanLog(code, r0['Estilo'] || r0['estilo'] || '', r0['Descripción'] || r0['Descripcion'] || r0['descripcion'] || '', true);
   } else {
     document.getElementById('notFoundCode').textContent = code + ' (' + code.length + ' dígitos)';
     goToScreen(4);
+    sendScanLog(code, '', '', false);
   }
 }
 
@@ -5480,8 +5831,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Enable :active states on iOS Safari
   document.body.addEventListener('touchstart', function(){}, { passive: true });
 
-  // Auto-connect to Track INN Core API
-  apiAutoConnect();
+  // Setup login PIN inputs and check saved session
+  setupPinInputs();
+  checkSavedLogin();
 
   // Prevent accidental browser back button from leaving the app
   history.pushState(null, '', location.href);
