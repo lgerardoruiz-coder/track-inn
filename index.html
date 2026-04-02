@@ -5574,12 +5574,8 @@ function startScanner() {
     }
   };
 
-  // Request high resolution — critical for small UPC barcodes
-  const cameraConfig = {
-    facingMode: 'environment',
-    width: { ideal: 1920 },
-    height: { ideal: 1080 }
-  };
+  // html5-qrcode only accepts 1 key in camera config object
+  const cameraConfig = { facingMode: 'environment' };
 
   html5QrCode.start(
     cameraConfig,

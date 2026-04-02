@@ -1,5 +1,5 @@
-// v53 — Show real camera error for debugging
-const CACHE_VERSION = 'v53';
+// v54 — Fix camera: cameraConfig must have exactly 1 key for html5-qrcode
+const CACHE_VERSION = 'v54';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
