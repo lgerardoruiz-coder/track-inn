@@ -5616,6 +5616,10 @@ function startScanner() {
         if (Object.keys(advanced).length > 0) {
           track.applyConstraints({ advanced: [advanced] });
         }
+        // Apply high resolution after camera is running (can't pass in cameraConfig)
+        track.applyConstraints({ width: { ideal: 1920 }, height: { ideal: 1080 } }).then(function() {
+          setTimeout(alignOverlayToQrbox, 300);
+        }).catch(function() {});
       }
     } catch(e) { /* silently ignore */ }
   }).catch(err => {
