@@ -1,5 +1,5 @@
-// v55 — Apply high resolution after camera start, fix shaded region
-const CACHE_VERSION = 'v55';
+// v56 — Get high-res camera via getUserMedia then pass deviceId to html5-qrcode
+const CACHE_VERSION = 'v56';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

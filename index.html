@@ -5574,15 +5574,34 @@ function startScanner() {
     }
   };
 
-  // html5-qrcode only accepts 1 key in camera config object
-  const cameraConfig = { facingMode: 'environment' };
+  // html5-qrcode only accepts 1 key — get camera with high resolution first,
+  // then pass the exact deviceId to the library
+  var cameraStartPromise;
+  try {
+    cameraStartPromise = navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    }).then(function(stream) {
+      var track = stream.getVideoTracks()[0];
+      var deviceId = track.getSettings().deviceId;
+      // Stop this temporary stream — html5-qrcode will open its own
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      return html5QrCode.start(
+        { deviceId: { exact: deviceId } },
+        config,
+        onScanSuccess,
+        function() {}
+      );
+    });
+  } catch(e) {
+    cameraStartPromise = html5QrCode.start(
+      { facingMode: 'environment' },
+      config,
+      onScanSuccess,
+      function() {}
+    );
+  }
 
-  html5QrCode.start(
-    cameraConfig,
-    config,
-    onScanSuccess,
-    () => {} // ignore scan failures
-  ).then(() => {
+  cameraStartPromise.then(() => {
     scannerRunning = true;
     // Align red overlay to actual qrbox — 500ms for render, retry at 1000ms
     setTimeout(alignOverlayToQrbox, 500);
