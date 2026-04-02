@@ -1,5 +1,5 @@
-// v50 — Force cache clear after login system + logging update
-const CACHE_VERSION = 'v50';
+// v51 — Fix camera: login overlay removed from DOM after login
+const CACHE_VERSION = 'v51';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

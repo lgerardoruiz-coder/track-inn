@@ -1950,9 +1950,8 @@ button, .store-select-btn, .size-btn {
 
 <div class="phone-frame">
 
-  <div class="screens-viewport">
-    <!-- LOGIN OVERLAY -->
-    <div id="loginOverlay" style="position:absolute;inset:0;z-index:100;display:flex">
+  <!-- LOGIN OVERLAY (outside viewport to avoid camera conflicts) -->
+  <div id="loginOverlay" style="position:absolute;inset:0;z-index:200;display:flex">
       <div class="login-body" style="width:100%">
         <div class="logo-icon" style="margin-bottom:0">
           <svg viewBox="0 0 80 80" fill="none" width="60" height="60">
@@ -1989,8 +1988,9 @@ button, .store-select-btn, .size-btn {
         <div class="login-error" id="loginError"></div>
         <button class="login-btn" id="loginBtn" onclick="handleLogin()">ENTRAR</button>
       </div>
-    </div>
+  </div>
 
+  <div class="screens-viewport">
     <!-- SCREEN 0: STORE SELECT -->
     <div class="screen active" id="screen0">
       <div class="screen-store-select">
@@ -2572,7 +2572,7 @@ async function handleLogin() {
     localStorage.setItem('trackinn_logged_user', username);
 
     // Hide login, show app
-    document.getElementById('loginOverlay').style.display = 'none';
+    var _lo = document.getElementById('loginOverlay'); if (_lo) _lo.remove();
     document.getElementById('loggedUserName').textContent = username;
 
     // Clear PIN inputs
@@ -2590,7 +2590,7 @@ async function handleLogin() {
     if (previousUser === username && previousToken) {
       apiUser = { username: username };
       apiToken = previousToken;
-      document.getElementById('loginOverlay').style.display = 'none';
+      var _lo = document.getElementById('loginOverlay'); if (_lo) _lo.remove();
       document.getElementById('loggedUserName').textContent = username + ' (offline)';
     } else {
       errorEl.textContent = 'Sin conexion al servidor. Verifica tu internet.';
@@ -2607,10 +2607,7 @@ function handleLogout() {
   localStorage.removeItem('trackinn_api_refresh');
   localStorage.removeItem('trackinn_api_creds');
   localStorage.removeItem('trackinn_logged_user');
-  document.getElementById('loginOverlay').style.display = 'flex';
-  document.getElementById('loginError').textContent = '';
-  document.getElementById('loginUser').value = '';
-  ['pin1','pin2','pin3','pin4'].forEach(function(id) { document.getElementById(id).value = ''; });
+  window.location.reload();
 }
 
 function checkSavedLogin() {
@@ -2619,7 +2616,7 @@ function checkSavedLogin() {
   if (savedUser && savedToken) {
     apiToken = savedToken;
     apiUser = { username: savedUser };
-    document.getElementById('loginOverlay').style.display = 'none';
+    var _lo = document.getElementById('loginOverlay'); if (_lo) _lo.remove();
     document.getElementById('loggedUserName').textContent = savedUser;
     // Verify token is still valid
     apiFetch('/api/auth/me').then(function(data) {
