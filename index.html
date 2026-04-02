@@ -1987,6 +1987,7 @@ button, .store-select-btn, .size-btn {
         </div>
         <div class="login-error" id="loginError"></div>
         <button class="login-btn" id="loginBtn" onclick="handleLogin()">ENTRAR</button>
+        <button onclick="enterOffline()" style="background:none;border:none;color:var(--gray);font-size:13px;font-family:'Poppins',sans-serif;cursor:pointer;padding:8px 16px;text-decoration:underline">Entrar sin conexion</button>
       </div>
   </div>
 
@@ -2368,7 +2369,7 @@ function cleanPrice(v) {
 }
 
 // ============ TRACK INN CORE API ============
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://periodic-plenty-barrier-judgment.trycloudflare.com';
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:4000' : (localStorage.getItem('trackinn_api_url') || 'https://periodic-plenty-barrier-judgment.trycloudflare.com');
 let apiToken = null;
 let apiUser = null;
 
@@ -2466,54 +2467,7 @@ function apiAutoConnect() {
   }
 }
 
-function updateApiUI(connected) {
-  var dot = document.getElementById('apiDot');
-  var text = document.getElementById('apiStatusText');
-  var btn = document.getElementById('btnApiConnect');
-  if (connected) {
-    dot.style.background = '#2ecc71';
-    text.textContent = 'API conectada' + (apiUser ? ' — ' + apiUser.username : '');
-    btn.textContent = 'Desconectar';
-    btn.onclick = disconnectAPI;
-    document.getElementById('apiLoginForm').style.display = 'none';
-  } else {
-    dot.style.background = '#666';
-    text.textContent = 'API desconectada';
-    btn.textContent = 'Conectar API';
-    btn.onclick = toggleApiLogin;
-  }
-}
-
-function toggleApiLogin() {
-  var form = document.getElementById('apiLoginForm');
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-async function connectAPI() {
-  var username = document.getElementById('apiUsername').value.trim();
-  var password = document.getElementById('apiPassword').value;
-  if (!username || !password) { showToast('Ingresa usuario y contraseña'); return; }
-  localStorage.setItem('trackinn_api_creds', JSON.stringify({ username, password }));
-  var ok = await apiLogin();
-  if (ok) {
-    updateApiUI(true);
-    showToast('API conectada');
-    document.getElementById('apiPassword').value = '';
-  } else {
-    showToast('Error: credenciales inválidas o API no disponible');
-    localStorage.removeItem('trackinn_api_creds');
-  }
-}
-
-function disconnectAPI() {
-  apiToken = null;
-  apiUser = null;
-  localStorage.removeItem('trackinn_api_token');
-  localStorage.removeItem('trackinn_api_refresh');
-  localStorage.removeItem('trackinn_api_creds');
-  updateApiUI(false);
-  showToast('API desconectada');
-}
+// (API UI functions removed — login system handles auth now)
 
 // ============ LOGIN SYSTEM ============
 function setupPinInputs() {
@@ -2571,14 +2525,13 @@ async function handleLogin() {
     localStorage.setItem('trackinn_api_creds', JSON.stringify({ username: username, password: pin }));
     localStorage.setItem('trackinn_logged_user', username);
 
-    // Hide login, show app
-    var _lo = document.getElementById('loginOverlay'); if (_lo) _lo.remove();
-    document.getElementById('loggedUserName').textContent = username;
-
-    // Clear PIN inputs
-    ['pin1','pin2','pin3','pin4'].forEach(function(id) { document.getElementById(id).value = ''; });
+    // Clear PIN inputs BEFORE removing overlay
+    ['pin1','pin2','pin3','pin4'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
     btn.disabled = false;
     btn.textContent = 'ENTRAR';
+
+    // Hide login, show app
+    dismissLogin(username);
 
     // Sync any offline logs
     syncOfflineLogs();
@@ -2590,14 +2543,31 @@ async function handleLogin() {
     if (previousUser === username && previousToken) {
       apiUser = { username: username };
       apiToken = previousToken;
-      var _lo = document.getElementById('loginOverlay'); if (_lo) _lo.remove();
-      document.getElementById('loggedUserName').textContent = username + ' (offline)';
+      dismissLogin(username + ' (offline)');
     } else {
       errorEl.textContent = 'Sin conexion al servidor. Verifica tu internet.';
     }
     btn.disabled = false;
     btn.textContent = 'ENTRAR';
   }
+}
+
+function dismissLogin(displayName) {
+  var _lo = document.getElementById('loginOverlay');
+  if (_lo) _lo.remove();
+  var nameEl = document.getElementById('loggedUserName');
+  if (nameEl) nameEl.textContent = displayName || '';
+}
+
+function enterOffline() {
+  var username = document.getElementById('loginUser').value;
+  if (!username) {
+    document.getElementById('loginError').textContent = 'Selecciona un usuario';
+    return;
+  }
+  localStorage.setItem('trackinn_logged_user', username);
+  apiUser = { username: username };
+  dismissLogin(username + ' (sin conexion)');
 }
 
 function handleLogout() {
@@ -2612,27 +2582,31 @@ function handleLogout() {
 
 function checkSavedLogin() {
   var savedUser = localStorage.getItem('trackinn_logged_user');
+  if (!savedUser) return;
+
   var savedToken = localStorage.getItem('trackinn_api_token');
-  if (savedUser && savedToken) {
+  apiUser = { username: savedUser };
+
+  if (savedToken) {
     apiToken = savedToken;
-    apiUser = { username: savedUser };
-    var _lo = document.getElementById('loginOverlay'); if (_lo) _lo.remove();
-    document.getElementById('loggedUserName').textContent = savedUser;
-    // Verify token is still valid
+    dismissLogin(savedUser);
+    // Verify token is still valid in background
     apiFetch('/api/auth/me').then(function(data) {
       if (data && data.user) {
         apiUser = data.user;
       } else {
-        // Token expired, try refresh
         apiRefreshToken().then(function(ok) {
           if (!ok) {
-            // Refresh also failed — keep offline mode
-            document.getElementById('loggedUserName').textContent = savedUser + ' (offline)';
+            var nameEl = document.getElementById('loggedUserName');
+            if (nameEl) nameEl.textContent = savedUser + ' (offline)';
           }
         });
       }
     });
     syncOfflineLogs();
+  } else {
+    // User was logged in offline before — let them back in
+    dismissLogin(savedUser + ' (sin conexion)');
   }
 }
 
