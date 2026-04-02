@@ -5623,8 +5623,10 @@ function startScanner() {
       }
     } catch(e) { /* silently ignore */ }
   }).catch(err => {
+    var errMsg = (err && err.message) ? err.message : String(err);
+    console.error('Camera error:', errMsg);
     readerEl.innerHTML = '<div style="color:#666;text-align:center;padding:60px 20px;font-size:14px;">' +
-      'No se pudo acceder a la camara.<br>Usa la entrada manual abajo.</div>';
+      'No se pudo acceder a la camara.<br><span style="font-size:11px;color:#999;word-break:break-all;">Error: ' + errMsg + '</span><br><br>Usa la entrada manual abajo.</div>';
   });
 }
 

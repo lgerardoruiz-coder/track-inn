@@ -1,5 +1,5 @@
-// v52 — Fix login blocking camera, add offline entry, cleanup dead code
-const CACHE_VERSION = 'v52';
+// v53 — Show real camera error for debugging
+const CACHE_VERSION = 'v53';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
