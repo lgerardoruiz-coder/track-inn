@@ -1,5 +1,5 @@
-// v48 — Improved caching: static assets only, skip API/Algolia, network-first for HTML
-const CACHE_VERSION = 'v49';
+// v50 — Force cache clear after login system + logging update
+const CACHE_VERSION = 'v50';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
