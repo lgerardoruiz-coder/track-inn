@@ -1,5 +1,5 @@
-// v56 — Get high-res camera via getUserMedia then pass deviceId to html5-qrcode
-const CACHE_VERSION = 'v56';
+// v57 — Add fetch timeout to prevent hanging on dead tunnel URLs
+const CACHE_VERSION = 'v57';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
