@@ -1,5 +1,5 @@
-// v54 — Fix camera: cameraConfig must have exactly 1 key for html5-qrcode
-const CACHE_VERSION = 'v54';
+// v60 — Force complete cache clear
+const CACHE_VERSION = 'v60';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
