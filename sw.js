@@ -1,5 +1,5 @@
-// v60 — Force complete cache clear
-const CACHE_VERSION = 'v60';
+// v61 — Add Railway domain support
+const CACHE_VERSION = 'v61';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
