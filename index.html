@@ -75,6 +75,8 @@ button, .store-select-btn, .size-btn {
   background: var(--black);
   overflow: hidden;
   box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @media (min-width: 500px) {
@@ -179,9 +181,10 @@ button, .store-select-btn, .size-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   padding: 40px 30px;
   height: 100%;
+  overflow-y: auto;
 }
 
 .splash-content {
@@ -1659,9 +1662,9 @@ button, .store-select-btn, .size-btn {
 }
 
 /* Cambios de Precio module */
-.cp-body { padding: 8px 12px; overflow-y: auto; height: calc(100vh - 60px); height: calc(100dvh - 60px); }
+.cp-body { padding: 8px 12px; overflow-y: auto; height: calc(100vh - 60px); height: calc(100dvh - 60px); background: var(--black); }
 .cp-top-bar { display:flex;gap:8px;align-items:center;margin-bottom:8px; }
-.cp-actions { display:flex;gap:8px;align-items:center;margin-bottom:10px; }
+.cp-actions { display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap; }
 .cp-select-all { display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:11px;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer; }
 .cp-select-all.active { background:rgba(91,184,255,0.15);border-color:#5bb8ff;color:#5bb8ff; }
 .cp-print-btn { display:flex;align-items:center;gap:4px;padding:8px 16px;background:#5bb8ff;border:none;border-radius:8px;color:#000;font-size:11px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-left:auto; }
@@ -1690,6 +1693,7 @@ button, .store-select-btn, .size-btn {
   overflow-y: auto;
   height: calc(100vh - 56px);
   height: calc(100dvh - 56px);
+  background: var(--black);
 }
 .pu-filters {
   display: flex;
