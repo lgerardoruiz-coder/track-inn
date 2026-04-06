@@ -2071,6 +2071,10 @@ button, .store-select-btn, .size-btn {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a10 10 0 010 20"/><path d="M12 2a10 10 0 000 20"/></svg>
             CAMBIOS DE PRECIO
           </button>
+          <button class="btn-print-batch" onclick="goToScreen(8)" style="border-color:#FF6B35;color:#FF6B35">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+            COLA DE IMPRESION
+          </button>
           <button class="btn-secondary" id="btnLoadData" onclick="document.getElementById('excelInput').click()">
             CARGAR DATOS (EXCEL)
           </button>
@@ -2308,6 +2312,36 @@ button, .store-select-btn, .size-btn {
         <div id="cpList" class="cp-list"></div>
       </div>
     </div>
+
+<!-- ═══════════════════  SCREEN 8 — COLA DE IMPRESION  ═══════════════════ -->
+<div class="screen right" id="screen8">
+  <div class="screen-header header-dark">
+    <button class="back-btn" aria-label="Volver al inicio" onclick="leaveQueueScreen()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <div class="header-title">Cola de Impresion</div>
+  </div>
+  <div class="batch-body">
+    <div id="queueList"></div>
+    <button class="batch-add-btn" id="queueAddBtn" onclick="addQueueRow()">+ Agregar producto</button>
+    <div class="batch-summary" id="queueSummary">0 productos, 0 etiquetas</div>
+    <button class="batch-print-all" id="queueSendBtn" onclick="sendQueueToStore()" style="background:#FF6B35">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+      ENVIAR A TIENDA
+    </button>
+    <button class="batch-print-all" style="background:#333;margin-top:8px" onclick="clearQueueAll()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+      BORRAR TODO
+    </button>
+    <div class="batch-status" id="queueStatus"></div>
+    <button class="batch-print-all" id="queueLoadLastBtn" style="background:#222;margin-top:8px;display:none" onclick="loadLastQueueSession()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 9 9 9"/></svg>
+      CARGAR ULTIMA SESION
+    </button>
+  </div>
+</div>
   </div>
 
   <!-- Batch scanner modal -->
@@ -5152,6 +5186,271 @@ async function batchPrintAll() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// COLA DE IMPRESION (Screen 8) — Send batch to Store for desktop printing
+// ═══════════════════════════════════════════════════════════════════════════
+let queueItems = [];
+let queueRowCounter = 0;
+
+function initQueueScreen() {
+  queueItems = [];
+  queueRowCounter = 0;
+  document.getElementById('queueList').innerHTML = '';
+  addQueueRow();
+  updateQueueSummary();
+  document.getElementById('queueStatus').textContent = '';
+  var lastSession = localStorage.getItem('trackinn_print_queue_last');
+  var loadBtn = document.getElementById('queueLoadLastBtn');
+  if (loadBtn) loadBtn.style.display = lastSession ? '' : 'none';
+}
+
+function addQueueRow() {
+  if (queueItems.length >= 20) return;
+  queueRowCounter++;
+  var id = queueRowCounter;
+  queueItems.push({ id: id, code: '', labelData: null, qty: 1 });
+  var html = '<div class="batch-row" id="queueRow' + id + '">'
+    + '<div class="batch-input-row">'
+    + '<input class="batch-input" id="queueInput' + id + '" type="text" placeholder="UPC, Estilo o Material..." inputmode="text" onkeydown="if(event.key===\'Enter\')queueLookupCode(' + id + ')">'
+    + '<button class="batch-scan-btn" onclick="openQueueScanner(' + id + ')">'
+    + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'
+    + '</button>'
+    + '</div>'
+    + '<div class="batch-product-info" id="queueInfo' + id + '">Escanea o escribe un codigo</div>'
+    + '<div class="batch-bottom-row">'
+    + '<div class="batch-qty-row">'
+    + '<button class="batch-qty-btn" onclick="updateQueueQty(' + id + ',-1)">&#8722;</button>'
+    + '<input type="number" class="batch-qty-val" id="queueQty' + id + '" value="1" min="1" max="99" onchange="validateQueueQty(' + id + ')">'
+    + '<button class="batch-qty-btn" onclick="updateQueueQty(' + id + ',1)">+</button>'
+    + '</div>'
+    + '<button class="batch-delete-btn" onclick="removeQueueRow(' + id + ')" title="Eliminar">'
+    + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>'
+    + '</button>'
+    + '</div>'
+    + '</div>';
+  document.getElementById('queueList').insertAdjacentHTML('beforeend', html);
+  updateQueueAddBtn();
+}
+
+function removeQueueRow(id) {
+  queueItems = queueItems.filter(function(item) { return item.id !== id; });
+  var el = document.getElementById('queueRow' + id);
+  if (el) el.remove();
+  updateQueueSummary();
+  updateQueueAddBtn();
+  if (queueItems.length === 0) addQueueRow();
+}
+
+function updateQueueQty(id, delta) {
+  var input = document.getElementById('queueQty' + id);
+  if (!input) return;
+  var val = parseInt(input.value) || 1;
+  val += delta;
+  if (val < 1) val = 1;
+  if (val > 99) val = 99;
+  input.value = val;
+  var item = queueItems.find(function(i) { return i.id === id; });
+  if (item) item.qty = val;
+  updateQueueSummary();
+}
+
+function validateQueueQty(id) {
+  var input = document.getElementById('queueQty' + id);
+  if (!input) return;
+  var val = parseInt(input.value) || 1;
+  if (val < 1) val = 1;
+  if (val > 99) val = 99;
+  input.value = val;
+  var item = queueItems.find(function(i) { return i.id === id; });
+  if (item) item.qty = val;
+  updateQueueSummary();
+}
+
+function queueLookupCode(id) {
+  var input = document.getElementById('queueInput' + id);
+  var info = document.getElementById('queueInfo' + id);
+  var row = document.getElementById('queueRow' + id);
+  var item = queueItems.find(function(i) { return i.id === id; });
+  if (!input || !item) return;
+  var code = input.value.trim();
+  if (!code) return;
+  item.code = code;
+  var rows = lookupBarcode(code);
+  if (rows && rows.length > 0) {
+    item.labelData = buildLabelData(rows, code);
+    row.className = 'batch-row found';
+    info.className = 'batch-product-info found';
+    info.textContent = item.labelData.estilo + ' \u2014 ' + item.labelData.description + ' \u2014 ' + item.labelData.upc;
+    if (queueItems.indexOf(item) === queueItems.length - 1 && queueItems.length < 20) {
+      addQueueRow();
+    }
+  } else {
+    item.labelData = null;
+    row.className = 'batch-row not-found';
+    info.className = 'batch-product-info';
+    info.textContent = 'No encontrado: ' + code;
+  }
+  updateQueueSummary();
+}
+
+function openQueueScanner(rowId) {
+  if (window.__TRACK_INN_HYBRID__ && window.ReactNativeWebView) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'OPEN_SCANNER', mode: 'queue', rowId: rowId }));
+  } else {
+    openBatchScannerForQueue(rowId);
+  }
+}
+
+function openBatchScannerForQueue(rowId) {
+  batchScanTargetId = rowId;
+  var overlay = document.getElementById('batchScannerOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  startBatchScannerCamera(function(code) {
+    var input = document.getElementById('queueInput' + rowId);
+    if (input) input.value = code;
+    queueLookupCode(rowId);
+    closeBatchScanner();
+  });
+}
+
+function updateQueueSummary() {
+  var valid = queueItems.filter(function(i) { return i.labelData; });
+  var totalLabels = 0;
+  valid.forEach(function(i) { totalLabels += i.qty; });
+  var el = document.getElementById('queueSummary');
+  if (el) el.textContent = valid.length + ' producto' + (valid.length !== 1 ? 's' : '') + ', ' + totalLabels + ' etiqueta' + (totalLabels !== 1 ? 's' : '');
+}
+
+function updateQueueAddBtn() {
+  var btn = document.getElementById('queueAddBtn');
+  if (btn) btn.style.display = queueItems.length >= 20 ? 'none' : '';
+}
+
+async function sendQueueToStore() {
+  var toSend = queueItems.filter(function(item) { return item.labelData; });
+  if (toSend.length === 0) {
+    var statusEl = document.getElementById('queueStatus');
+    if (statusEl) statusEl.textContent = 'No hay productos para enviar.';
+    return;
+  }
+  var statusEl = document.getElementById('queueStatus');
+  var btn = document.getElementById('queueSendBtn');
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = 'Enviando a tienda...';
+  var payload = {
+    store_id: apiUser ? apiUser.store_id : null,
+    user_name: apiUser ? (apiUser.name || apiUser.username) : 'Vendedor',
+    items: toSend.map(function(item) {
+      return {
+        upc: item.labelData.upc,
+        estilo: item.labelData.estilo,
+        descripcion: item.labelData.description,
+        marca: item.labelData.brand,
+        precio_n1: item.labelData.n1,
+        precio_n2: item.labelData.n2,
+        precio_n3: item.labelData.n3,
+        impulso: item.labelData.impulso,
+        tag: item.labelData.tag,
+        qty: item.qty,
+      };
+    }),
+  };
+  try {
+    var res = await fetchWithTimeout(API_BASE + '/api/print-queue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiToken },
+      body: JSON.stringify(payload),
+    }, 10000);
+    if (res.ok) {
+      var data = await res.json();
+      payload.timestamp = new Date().toISOString();
+      payload.queue_id = data.id;
+      localStorage.setItem('trackinn_print_queue_last', JSON.stringify(payload));
+      if (statusEl) statusEl.textContent = '\u00A1Lote enviado a tienda! (' + data.total_labels + ' etiquetas)';
+      if (btn) btn.disabled = false;
+      setTimeout(function() {
+        clearQueueAll();
+        if (statusEl) statusEl.textContent = '';
+      }, 3000);
+    } else {
+      if (res.status === 401) apiRefreshToken();
+      throw new Error('Error ' + res.status);
+    }
+  } catch (e) {
+    if (btn) btn.disabled = false;
+    if (statusEl) statusEl.textContent = 'Error al enviar. Intenta de nuevo.';
+    payload.timestamp = new Date().toISOString();
+    localStorage.setItem('trackinn_print_queue_offline', JSON.stringify(payload));
+  }
+}
+
+function clearQueueAll() {
+  queueItems = [];
+  queueRowCounter = 0;
+  document.getElementById('queueList').innerHTML = '';
+  addQueueRow();
+  updateQueueSummary();
+  document.getElementById('queueStatus').textContent = '';
+}
+
+function leaveQueueScreen() {
+  goToScreen(1);
+}
+
+function loadLastQueueSession() {
+  var saved = localStorage.getItem('trackinn_print_queue_last');
+  if (!saved) return;
+  try {
+    var data = JSON.parse(saved);
+    if (!data.items || !data.items.length) return;
+    queueItems = [];
+    queueRowCounter = 0;
+    document.getElementById('queueList').innerHTML = '';
+    data.items.forEach(function(item) {
+      queueRowCounter++;
+      var id = queueRowCounter;
+      var labelData = {
+        upc: item.upc,
+        estilo: item.estilo,
+        description: item.descripcion,
+        brand: item.marca,
+        n1: item.precio_n1,
+        n2: item.precio_n2,
+        n3: item.precio_n3,
+        impulso: item.impulso,
+        tag: item.tag,
+      };
+      queueItems.push({ id: id, code: item.upc || item.estilo, labelData: labelData, qty: item.qty || 1 });
+      var html = '<div class="batch-row found" id="queueRow' + id + '">'
+        + '<div class="batch-input-row">'
+        + '<input class="batch-input" id="queueInput' + id + '" type="text" value="' + (item.upc || item.estilo) + '" inputmode="text" onkeydown="if(event.key===\'Enter\')queueLookupCode(' + id + ')">'
+        + '<button class="batch-scan-btn" onclick="openQueueScanner(' + id + ')">'
+        + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'
+        + '</button>'
+        + '</div>'
+        + '<div class="batch-product-info found" id="queueInfo' + id + '">' + item.estilo + ' \u2014 ' + item.descripcion + ' \u2014 ' + (item.upc || '') + '</div>'
+        + '<div class="batch-bottom-row">'
+        + '<div class="batch-qty-row">'
+        + '<button class="batch-qty-btn" onclick="updateQueueQty(' + id + ',-1)">&#8722;</button>'
+        + '<input type="number" class="batch-qty-val" id="queueQty' + id + '" value="' + (item.qty || 1) + '" min="1" max="99" onchange="validateQueueQty(' + id + ')">'
+        + '<button class="batch-qty-btn" onclick="updateQueueQty(' + id + ',1)">+</button>'
+        + '</div>'
+        + '<button class="batch-delete-btn" onclick="removeQueueRow(' + id + ')" title="Eliminar">'
+        + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>'
+        + '</button>'
+        + '</div>'
+        + '</div>';
+      document.getElementById('queueList').insertAdjacentHTML('beforeend', html);
+    });
+    updateQueueSummary();
+    updateQueueAddBtn();
+    document.getElementById('queueStatus').textContent = 'Sesion anterior cargada (' + data.timestamp.split('T')[0] + ')';
+  } catch (e) {
+    console.warn('Error loading last queue session:', e);
+  }
+}
+
 function selectSize(btn) {
   if (_longPressTriggered) { _longPressTriggered = false; return; }
   document.querySelectorAll('.size-btn.selected').forEach(b => b.classList.remove('selected'));
@@ -5499,7 +5798,7 @@ function goToScreen(target) {
   const targetEl = document.getElementById('screen' + target);
 
   // Hide heavy lists during transition for smooth animation
-  var heavyLists = ['cpList', 'puList', 'batchList'];
+  var heavyLists = ['cpList', 'puList', 'batchList', 'queueList'];
   heavyLists.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.style.visibility = 'hidden';
@@ -5568,10 +5867,21 @@ function goToScreen(target) {
     }
   }
 
+  // Initialize cola de impresion when entering
+  if (target === 8) {
+    requestWakeLock();
+    setTimeout(function() { initQueueScreen(); }, 300);
+  }
+
   // Close batch scanner when leaving screen 5
   if (currentScreen === 5 && target !== 5) {
     releaseWakeLock();
     try { closeBatchScanner(); } catch(e) {}
+  }
+
+  // Release wake lock when leaving screen 8
+  if (currentScreen === 8 && target !== 8) {
+    releaseWakeLock();
   }
 
   currentScreen = target;
