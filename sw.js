@@ -1,5 +1,5 @@
-// v61 — Add Railway domain support
-const CACHE_VERSION = 'v61';
+// v62 — Login UX: text input + autofill last username (no más dropdown)
+const CACHE_VERSION = 'v62';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

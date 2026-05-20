@@ -1887,6 +1887,39 @@ button, .store-select-btn, .size-btn {
   background-repeat: no-repeat;
   background-position: right 16px center;
 }
+.login-input {
+  width: 100%;
+  max-width: 280px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  background: var(--dark-gray);
+  color: var(--white);
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.login-input:focus {
+  border-color: var(--red);
+  outline: none;
+}
+.login-input::placeholder {
+  color: #6b6b6b;
+  font-weight: 400;
+}
+.login-change-user {
+  background: none;
+  border: none;
+  color: var(--gray);
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+  margin-top: -12px;
+}
+.login-change-user:active { opacity: 0.6; }
 .login-pin-row {
   display: flex;
   gap: 10px;
@@ -1982,19 +2015,8 @@ button, .store-select-btn, .size-btn {
         </div>
         <div class="logo-text" style="font-size:28px;letter-spacing:3px">TRACK <span>INN</span></div>
         <div class="login-title">Iniciar sesion</div>
-        <select id="loginUser" class="login-select">
-          <option value="">Selecciona tu usuario</option>
-          <option value="Gerardo">Gerardo</option>
-          <option value="Usuario2">Usuario 2</option>
-          <option value="Usuario3">Usuario 3</option>
-          <option value="Usuario4">Usuario 4</option>
-          <option value="Usuario5">Usuario 5</option>
-          <option value="Usuario6">Usuario 6</option>
-          <option value="Usuario7">Usuario 7</option>
-          <option value="Usuario8">Usuario 8</option>
-          <option value="Usuario9">Usuario 9</option>
-          <option value="Usuario10">Usuario 10</option>
-        </select>
+        <input type="text" id="loginUser" class="login-input" placeholder="Usuario" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button type="button" id="loginChangeUser" class="login-change-user" onclick="clearSavedUser()" style="display:none">¿No eres tú? Cambiar usuario</button>
         <div class="login-pin-row">
           <input type="tel" class="login-pin-digit" id="pin1" maxlength="1" inputmode="numeric" autocomplete="off">
           <input type="tel" class="login-pin-digit" id="pin2" maxlength="1" inputmode="numeric" autocomplete="off">
@@ -2581,6 +2603,8 @@ async function handleLogin() {
     localStorage.setItem('trackinn_api_refresh', data.refreshToken);
     localStorage.setItem('trackinn_api_creds', JSON.stringify({ username: username, password: pin }));
     localStorage.setItem('trackinn_logged_user', username);
+    // Remember last username forever (survives logout) for autofill on the login screen
+    localStorage.setItem('trackinn_last_username', username);
 
     // Clear PIN inputs BEFORE removing overlay
     ['pin1','pin2','pin3','pin4'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
@@ -2634,7 +2658,40 @@ function handleLogout() {
   localStorage.removeItem('trackinn_api_refresh');
   localStorage.removeItem('trackinn_api_creds');
   localStorage.removeItem('trackinn_logged_user');
+  // Keep trackinn_last_username so the username stays prefilled for next login
   window.location.reload();
+}
+
+// Limpia el username precargado para que el usuario pueda escribir otro
+function clearSavedUser() {
+  localStorage.removeItem('trackinn_last_username');
+  var input = document.getElementById('loginUser');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  var btn = document.getElementById('loginChangeUser');
+  if (btn) btn.style.display = 'none';
+}
+
+// Pre-llena el username en la pantalla de login con el último usuario que entró
+function prefillLoginUsername() {
+  var lastUser = localStorage.getItem('trackinn_last_username');
+  var input = document.getElementById('loginUser');
+  var changeBtn = document.getElementById('loginChangeUser');
+  if (!input) return;
+  if (lastUser) {
+    input.value = lastUser;
+    if (changeBtn) changeBtn.style.display = 'inline-block';
+    // Auto-focus el primer dígito del PIN — el usuario solo teclea su PIN
+    setTimeout(function() {
+      var pin1 = document.getElementById('pin1');
+      if (pin1) pin1.focus();
+    }, 150);
+  } else {
+    // Sin último usuario → focus en el input para escribirlo
+    setTimeout(function() { input.focus(); }, 150);
+  }
 }
 
 function checkSavedLogin() {
@@ -6162,6 +6219,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup login PIN inputs and check saved session
   setupPinInputs();
   checkSavedLogin();
+  // Si el login overlay sigue visible (no había sesión activa), pre-llenar el username
+  if (document.getElementById('loginOverlay')) {
+    prefillLoginUsername();
+  }
 
   // Prevent accidental browser back button from leaving the app
   history.pushState(null, '', location.href);
