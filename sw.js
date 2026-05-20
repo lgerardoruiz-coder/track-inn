@@ -1,5 +1,5 @@
-// v62 — Login UX: text input + autofill last username (no más dropdown)
-const CACHE_VERSION = 'v62';
+// v63 — Quitar 85 tiendas fake del talla sheet (solo inventario real del Excel)
+const CACHE_VERSION = 'v63';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
