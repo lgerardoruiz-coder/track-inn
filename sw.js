@@ -1,5 +1,5 @@
-// v64 — Quitar "NUEVO" de etiquetas + tamaño de etiqueta configurable (40x30 / 50x30)
-const CACHE_VERSION = 'v64';
+// v65 — Imagen estricta por estilo (nunca mostrar foto de producto equivocado)
+const CACHE_VERSION = 'v65';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

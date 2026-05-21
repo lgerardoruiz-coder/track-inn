@@ -3039,17 +3039,17 @@ async function fetchProductImage(description, brand, estilo) {
       const data = await response.json();
 
       if (data.hits && data.hits.length > 0) {
+        // OPCIÓN A (estricto): solo aceptar la imagen si el estilo coincide EXACTO.
+        // Si no hay match, NO usar data.hits[0] — mejor sin imagen (placeholder)
+        // que mostrar la foto de OTRO producto.
         let bestHit = null;
         if (estilo) {
           bestHit = data.hits.find(h =>
             h.code_string && h.code_string.includes(estilo)
           );
         }
-        if (!bestHit) {
-          bestHit = data.hits.find(h => h.image_string) || data.hits[0];
-        }
 
-        const imgUrl = bestHit.image_string || '';
+        const imgUrl = bestHit ? (bestHit.image_string || '') : '';
         if (imgUrl) {
           imageCache[cacheKey] = imgUrl;
           try { localStorage.setItem('trackinn_imgcache', JSON.stringify(imageCache)); } catch(e) { try { localStorage.removeItem('trackinn_imgcache'); localStorage.setItem('trackinn_imgcache', JSON.stringify(imageCache)); } catch(e2) { showToast('Cache de imágenes lleno. Algunas imágenes no se guardarán.'); } }
