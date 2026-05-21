@@ -1,5 +1,5 @@
-// v63 — Quitar 85 tiendas fake del talla sheet (solo inventario real del Excel)
-const CACHE_VERSION = 'v63';
+// v64 — Quitar "NUEVO" de etiquetas + tamaño de etiqueta configurable (40x30 / 50x30)
+const CACHE_VERSION = 'v64';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

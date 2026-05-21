@@ -2102,6 +2102,13 @@ button, .store-select-btn, .size-btn {
           </button>
           <input type="file" id="excelInput" class="file-input-hidden" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv" onchange="handleFileUpload(event)">
           <div id="dataStatus" class="data-status">Sin datos cargados</div>
+          <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;color:var(--gray)">
+            <span>Tamaño de etiqueta:</span>
+            <select id="labelSizeSelect" onchange="setLabelSize(this.value)" style="background:var(--dark-gray);color:#fff;border:1px solid #333;border-radius:8px;padding:5px 10px;font-family:'Poppins',sans-serif;font-size:12px">
+              <option value="40x30">40 × 30 mm</option>
+              <option value="50x30">50 × 30 mm</option>
+            </select>
+          </div>
           <div id="loggedUserBadge" style="margin-top:12px;font-size:12px;color:var(--green);font-weight:500">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:4px;vertical-align:middle"></span>
             <span id="loggedUserName"></span>
@@ -3392,8 +3399,7 @@ function displayProduct(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
-    upc: String(first['UPC'] || scannedCode).trim(),
-    vigencia: 'NUEVO'
+    upc: String(first['UPC'] || scannedCode).trim()
   };
 
   // Tappable badge helper
@@ -3770,7 +3776,6 @@ function generateLabelPreview() {
     + '<div>' + pricesHTML + '</div>'
     + '<div style="' + estiloAlign + '">'
     + '<div style="font-size:9px;font-weight:700;color:#000">' + escapeHTML(d.estilo) + '</div>'
-    + '<div style="font-size:8px;font-weight:800;color:#000;margin-top:1px">' + (d.vigencia || 'NUEVO') + '</div>'
     + '</div></div>'
     + '<div class="label-barcode-area" style="text-align:center;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><svg id="labelBarcode"></svg>'
     + '<div style="font-size:7px;color:#333;text-align:center;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px">' + escapeHTML(d.description) + '</div>'
@@ -4095,15 +4100,38 @@ function updatePrinterUI(state, customMsg) {
   }
 }
 
+// ====== TAMAÑO DE ETIQUETA — single source of truth ======
+// El diseño se dibuja a una resolución "maestra" (LABEL_BASE) y luego se escala
+// parejo al tamaño físico del rollo seleccionado (estilo PowerPoint: agrupar y
+// comprimir/expandir todo junto). Cambiar de tamaño = usar el selector; ninguna
+// posición interna se re-afina.
+const PRINT_DPMM = 8;                    // 8 px/mm = 203 DPI (Phomemo)
+const LABEL_BASE = { W: 320, H: 240 };   // lienzo maestro (coordenadas de diseño)
+const LABEL_SIZES = {
+  '40x30': { widthMM: 40, heightMM: 30, label: '40 × 30 mm' },
+  '50x30': { widthMM: 50, heightMM: 30, label: '50 × 30 mm' },
+};
+function getLabelSizeKey() { return localStorage.getItem('trackinn_label_size') || '40x30'; }
+function getLabelSize() { return LABEL_SIZES[getLabelSizeKey()] || LABEL_SIZES['40x30']; }
+function setLabelSize(key) {
+  if (!LABEL_SIZES[key]) return;
+  localStorage.setItem('trackinn_label_size', key);
+  if (typeof showToast === 'function') showToast('Tamaño de etiqueta: ' + LABEL_SIZES[key].label);
+}
+
 function renderLabelToCanvas() {
   var d = _labelData;
   if (!d) return null;
 
-  // M120: 40mm x 30mm label at 203 DPI = 320x240 px (8 px/mm)
-  var W = 320, H = 240;
+  // Tamaño físico destino (rollo) + escalado del diseño maestro
+  var size = getLabelSize();
+  var targetW = Math.round(size.widthMM * PRINT_DPMM);
+  var targetH = Math.round(size.heightMM * PRINT_DPMM);
+  var W = LABEL_BASE.W, H = LABEL_BASE.H;   // coordenadas de diseño (no cambian)
   var canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
+  canvas.width = targetW; canvas.height = targetH;
   var ctx = canvas.getContext('2d');
+  ctx.scale(targetW / W, targetH / H);      // comprime/expande TODO parejo
 
   var tag = d.tag;
   var isFullPrice = (tag === 'FULL PRICE' || tag === '');
@@ -4131,17 +4159,15 @@ function renderLabelToCanvas() {
     ctx.restore();
   }
 
-  // === TOP SECTION: Prices left, Estilo+Vigencia ===
+  // === TOP SECTION: Prices left, Estilo right ===
   var pad = 8;
   var contentW = W - 18;
 
-  // Estilo + Vigencia
+  // Estilo
   ctx.fillStyle = '#000';
   ctx.textAlign = 'right';
   ctx.font = 'bold 12px Arial';
   ctx.fillText(d.estilo, contentW - pad, 14);
-  ctx.font = 'bold 10px Arial';
-  ctx.fillText(d.vigencia || 'NUEVO', contentW - pad, 27);
   // Prices — top left
   ctx.textAlign = 'left';
 
@@ -4225,7 +4251,7 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
     var tmpSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     document.body.appendChild(tmpSvg);
     JsBarcode(tmpSvg, upc.trim(), {
-      format: 'CODE128', width: 3, height: 120,
+      format: 'CODE128', width: 2, height: 120,
       displayValue: false, margin: 0,
       background: 'transparent', lineColor: '#000'
     });
@@ -4692,7 +4718,7 @@ async function puPrintSelected() {
     var qty = puQty[p.estilo] || 1;
     _labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
       n1: p.n1, n2: p.n2, n3: p.n3,
-      tag: p.tag, impulso: '', upc: p.upc, vigencia: 'NUEVO' };
+      tag: p.tag, impulso: '', upc: p.upc };
     var canvas = renderLabelToCanvas();
     if (!canvas) continue;
     await new Promise(function(r){setTimeout(r,400)});
@@ -4942,7 +4968,7 @@ async function cpPrintSelected() {
     var hasPromo = p.tag.indexOf('PROMO')>=0;
     _labelData = { description: p.desc, estilo: p.estilo, brand: p.marca,
       n1: p.oldPrice, n2: p.n2, n3: p.n3,
-      tag: p.tag, impulso: '', upc: p.upc, vigencia: 'NUEVO' };
+      tag: p.tag, impulso: '', upc: p.upc };
     var canvas = renderLabelToCanvas();
     if (!canvas) continue;
     await new Promise(function(r){setTimeout(r,400)});
@@ -4995,8 +5021,7 @@ function buildLabelData(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
-    upc: String(first['UPC'] || scannedCode).trim(),
-    vigencia: 'NUEVO'
+    upc: String(first['UPC'] || scannedCode).trim()
   };
 }
 
@@ -6122,6 +6147,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('loginOverlay')) {
     prefillLoginUsername();
   }
+  // Reflejar el tamaño de etiqueta guardado en el selector
+  var _lsSel = document.getElementById('labelSizeSelect');
+  if (_lsSel) _lsSel.value = getLabelSizeKey();
 
   // Prevent accidental browser back button from leaving the app
   history.pushState(null, '', location.href);
