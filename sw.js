@@ -1,5 +1,5 @@
-// v66 — Fix misread: paso 2b solo para material interno + scanner PWA solo EAN13/UPCA/CODE128
-const CACHE_VERSION = 'v66';
+// v67 — Imagen: validar contra model_string (estilo fabricante) — recupera fotos exactas
+const CACHE_VERSION = 'v67';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

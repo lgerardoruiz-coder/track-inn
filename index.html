@@ -3030,7 +3030,7 @@ async function fetchProductImage(description, brand, estilo) {
           body: JSON.stringify({
             query: query,
             hitsPerPage: 10,
-            attributesToRetrieve: ['image_string', 'name_text_es', 'baseProductCode_string', 'code_string']
+            attributesToRetrieve: ['image_string', 'name_text_es', 'baseProductCode_string', 'code_string', 'model_string']
           }),
           signal: _ac.signal
         }
@@ -3039,14 +3039,25 @@ async function fetchProductImage(description, brand, estilo) {
       const data = await response.json();
 
       if (data.hits && data.hits.length > 0) {
-        // OPCIÓN A (estricto): solo aceptar la imagen si el estilo coincide EXACTO.
-        // Si no hay match, NO usar data.hits[0] — mejor sin imagen (placeholder)
-        // que mostrar la foto de OTRO producto.
+        // Validar contra model_string (= estilo del fabricante, ej. JP9274), que es
+        // donde Algolia guarda el estilo. code_string es el código INTERNO de
+        // Innovasport y nunca contiene el estilo (por eso antes no salía imagen).
+        // Estricto: si no hay match por estilo, NO mostrar imagen (mejor sin foto
+        // que la foto de otro producto).
         let bestHit = null;
         if (estilo) {
-          bestHit = data.hits.find(h =>
-            h.code_string && h.code_string.includes(estilo)
-          );
+          const estiloU = String(estilo).trim().toUpperCase();
+          const estiloBase = estiloU.split('-')[0];
+          // 1) match exacto por model_string (color exacto)
+          bestHit = data.hits.find(h => String(h.model_string || '').trim().toUpperCase() === estiloU);
+          // 2) match por estilo base (mismo modelo) o por code_string interno
+          if (!bestHit) {
+            bestHit = data.hits.find(h => {
+              const m = String(h.model_string || '').trim().toUpperCase();
+              return (m && (m === estiloBase || m.split('-')[0] === estiloBase)) ||
+                     (h.code_string && h.code_string.includes(estilo));
+            });
+          }
         }
 
         const imgUrl = bestHit ? (bestHit.image_string || '') : '';
