@@ -3277,9 +3277,13 @@ function lookupBarcode(code) {
   });
   if (materialRows.length > 0) return materialRows;
 
-  // 2b. Match by Genérico (first 6 digits of material code)
-  // Material barcodes like 375954003 → Genérico = 375954 (first 6 digits)
-  if (/^\d{7,}$/.test(normalizedCode)) {
+  // 2b. Match by Genérico (primeros 6 dígitos del código de material INTERNO)
+  // OJO: solo para códigos internos de material (con ceros a la izquierda o de
+  // 14+ dígitos). NUNCA para EAN-13/UPC retail: su prefijo GS1 (ej. 400342...)
+  // NO es el genérico y colisiona con otros productos — por eso un Adidas Copa
+  // (UPC 4003421166702) se leía como un Nike Air Max (genérico 400342).
+  const esMaterialInterno = /^0/.test(normalizedCode) || normalizedCode.length >= 14;
+  if (esMaterialInterno && /^\d{7,}$/.test(normalizedCode)) {
     const genCode = normalizedCode.replace(/^0+/, '').substring(0, 6);
     if (genCode.length >= 5) {
       const genRows = productData.filter(r => {
@@ -5159,7 +5163,15 @@ function openBatchScanner(rowId) {
   var reader = document.getElementById('batchScannerReader');
   reader.innerHTML = '';
 
-  batchScannerInstance = new Html5Qrcode('batchScannerReader');
+  batchScannerInstance = new Html5Qrcode('batchScannerReader', {
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.CODE_128
+    ],
+    useBarCodeDetectorIfSupported: true,
+    verbose: false
+  });
   batchScannerInstance.start(
     { facingMode: 'environment' },
     { fps: 10, qrbox: { width: 250, height: 100 } },
@@ -5884,29 +5896,24 @@ function startScanner() {
   const readerEl = document.getElementById('scanner-reader');
   readerEl.innerHTML = '';
 
-  html5QrCode = new Html5Qrcode('scanner-reader');
+  // Restringir formatos a los del retail (EAN-13 / UPC-A / CODE-128). Va en el
+  // CONSTRUCTOR para que html5-qrcode realmente lo respete. Evita misreads por
+  // ITF/CODABAR/CODE39/QR (ej. Adidas Copa leído como otro producto).
+  html5QrCode = new Html5Qrcode('scanner-reader', {
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.UPC_A,
+      Html5QrcodeSupportedFormats.CODE_128
+    ],
+    useBarCodeDetectorIfSupported: true,
+    verbose: false
+  });
 
   const config = {
     fps: 20,
     qrbox: { width: 340, height: 220 },
     aspectRatio: 1.0,
-    disableFlip: false,
-    formatsToSupport: [
-      Html5QrcodeSupportedFormats.EAN_13,
-      Html5QrcodeSupportedFormats.EAN_8,
-      Html5QrcodeSupportedFormats.UPC_A,
-      Html5QrcodeSupportedFormats.UPC_E,
-      Html5QrcodeSupportedFormats.CODE_128,
-      Html5QrcodeSupportedFormats.CODE_39,
-      Html5QrcodeSupportedFormats.CODE_93,
-      Html5QrcodeSupportedFormats.ITF,
-      Html5QrcodeSupportedFormats.CODABAR,
-      Html5QrcodeSupportedFormats.QR_CODE,
-      Html5QrcodeSupportedFormats.DATA_MATRIX
-    ],
-    experimentalFeatures: {
-      useBarCodeDetectorIfSupported: true
-    }
+    disableFlip: false
   };
 
   // html5-qrcode only accepts 1 key in camera config object
