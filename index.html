@@ -2962,6 +2962,9 @@ function detectStore() {
       userLat = pos.coords.latitude;
       userLng = pos.coords.longitude;
 
+      // Si hay tienda fijada manualmente, el GPS NO la sobreescribe
+      if (getMyStore()) { currentStore = getMyStore(); return; }
+
       let closest = null;
       let minDist = Infinity;
 

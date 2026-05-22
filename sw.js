@@ -1,5 +1,5 @@
-// v70 — Selector "Mi tienda" (manual, manda sobre GPS impreciso en interiores)
-const CACHE_VERSION = 'v70';
+// v71 — Fix: el GPS en segundo plano ya no pisa la tienda fijada manualmente
+const CACHE_VERSION = 'v71';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
