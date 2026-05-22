@@ -3580,8 +3580,25 @@ function displayProduct(rows, scannedCode) {
     return aDist - bDist;
   });
 
-  // Only show first one (current or closest store)
-  const showRows = sortedRows.slice(0, 1);
+  // Mostrar SIEMPRE la tienda actual (si está fijada), aunque el producto no esté
+  // ahí (en ese caso, Agotado). Si no hay tienda fijada, mostrar la más cercana.
+  let showRows;
+  if (currentStore) {
+    const currentRow = rows.find(r => (r['Sucursal'] || '') === currentStore);
+    if (currentRow) {
+      showRows = [currentRow];
+    } else {
+      // El producto/talla no está en mi tienda → tarjeta "Agotado" en mi tienda
+      const ref = allRelated.find(r => (r['Sucursal'] || '') === currentStore);
+      const synthetic = { 'Sucursal': currentStore };
+      synthetic[inventoryKey] = 0;
+      synthetic['Dirección'] = ref ? (ref['Dirección'] || ref['Direccion'] || '') : (STORE_COORDS[currentStore] ? STORE_COORDS[currentStore].address : '');
+      synthetic['Estado'] = ref ? (ref['Estado'] || '') : '';
+      showRows = [synthetic];
+    }
+  } else {
+    showRows = sortedRows.slice(0, 1);
+  }
 
   showRows.forEach(r => {
     const sucursal = r['Sucursal'] || '';

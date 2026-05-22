@@ -1,5 +1,5 @@
-// v71 — Fix: el GPS en segundo plano ya no pisa la tienda fijada manualmente
-const CACHE_VERSION = 'v71';
+// v72 — El resultado SIEMPRE muestra tu tienda fijada (Agotado si no hay), no la más cercana
+const CACHE_VERSION = 'v72';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
