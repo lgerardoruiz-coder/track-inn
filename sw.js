@@ -1,5 +1,5 @@
-// v68 — Coordenadas de tiendas Innvictus (IV) + detección de tienda respeta el banner
-const CACHE_VERSION = 'v68';
+// v69 — Ajuste coordenada IV Punto Valle (Valle Oriente)
+const CACHE_VERSION = 'v69';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
