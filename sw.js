@@ -1,5 +1,5 @@
-// v67 — Imagen: validar contra model_string (estilo fabricante) — recupera fotos exactas
-const CACHE_VERSION = 'v67';
+// v68 — Coordenadas de tiendas Innvictus (IV) + detección de tienda respeta el banner
+const CACHE_VERSION = 'v68';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
