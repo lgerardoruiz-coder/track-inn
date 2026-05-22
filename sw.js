@@ -1,5 +1,5 @@
-// v69 — Ajuste coordenada IV Punto Valle (Valle Oriente)
-const CACHE_VERSION = 'v69';
+// v70 — Selector "Mi tienda" (manual, manda sobre GPS impreciso en interiores)
+const CACHE_VERSION = 'v70';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
