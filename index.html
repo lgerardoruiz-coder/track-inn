@@ -4356,8 +4356,12 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
 
     return new Promise(function(resolve) {
       img.onload = function() {
-        // Estira el codigo a lo ANCHO para llenar maxW (barras mas grandes/legibles)
-        ctx.drawImage(img, x, y, maxW, maxH);
+        // Mantiene la proporcion natural del codigo (NO estira) y lo centra
+        // horizontalmente dentro del area [x .. x+maxW].
+        var scale = Math.min(maxW / img.width, maxH / img.height, 1);
+        var dw = img.width * scale;
+        var dh = img.height * scale;
+        ctx.drawImage(img, x + (maxW - dw) / 2, y, dw, dh);
         URL.revokeObjectURL(url);
         resolve();
       };
