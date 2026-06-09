@@ -4317,8 +4317,8 @@ function renderLabelToCanvas() {
   }
 
   // === Codigo de barras: estirado a lo ancho disponible, 25% mas bajo ===
-  var barcodeY = 84;
-  var barsH = 90;                       // antes 120 -> -25% de alto
+  var barcodeY = 78;
+  var barsH = 105;                      // punto medio (original 120, version chica 90)
   var barcodeW = (cx1 - cx0) - 2;
   renderBarcodeToCanvas(ctx, d.upc, cx0, barcodeY, barcodeW, barsH);
 
@@ -4327,11 +4327,11 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = '13px Arial';
-  ctx.fillText(String(d.material || d.upc || '').trim(), midX, 190);
+  ctx.fillText(String(d.material || d.upc || '').trim(), midX, 196);
 
   ctx.font = 'bold 11px Arial';
   var descText = d.description.length > 40 ? d.description.substring(0, 40) + '...' : d.description;
-  ctx.fillText(descText, midX, 208);
+  ctx.fillText(descText, midX, 211);
 
   return canvas;
 }
