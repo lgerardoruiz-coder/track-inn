@@ -3462,6 +3462,7 @@ function displayProduct(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
+    material: String(getField('Genérico Talla') || getField('Generico Talla') || '').trim(),
     upc: String(first['UPC'] || scannedCode).trim()
   };
 
@@ -4224,102 +4225,113 @@ function renderLabelToCanvas() {
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(0, 0, W, H);
 
-  // LIQUIDACIÓN text for CP products — centered at barcode height, large
-  // Barcode area: y=78 to ~y=170 (actual rendered). Center ≈ y=124
-  // Font ~24px (just below "A:" which is 34px). Text width ~160px when horizontal
-  // Rotated 90°: spans ~80px above and below center
-  if (hasCP) {
+  // Sellos verticales (LIQUIDACION / PROMOCION) centrados a la altura del barcode (y=124)
+  function sideBadge(text, xpos, fs) {
     ctx.save();
-    ctx.translate(W - 6, 124);
+    ctx.translate(xpos, 124);
     ctx.rotate(-Math.PI / 2);
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 24px Arial';
+    ctx.font = 'bold ' + fs + 'px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('LIQUIDACI\u00D3N', 0, 0);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, 0);
     ctx.restore();
+    ctx.textBaseline = 'alphabetic';
+  }
+  var rightRes = 8;
+  if (isCPPromo) {
+    sideBadge('LIQUIDACI\u00D3N', W - 30, 18);
+    sideBadge('PROMOCI\u00D3N', W - 12, 18);
+    rightRes = 38;
+  } else if (hasCP) {
+    sideBadge('LIQUIDACI\u00D3N', W - 13, 20);
+    rightRes = 22;
+  } else if (hasPromo) {
+    sideBadge('PROMOCI\u00D3N', W - 13, 20);
+    rightRes = 22;
   }
 
-  // === TOP SECTION: Prices left, Estilo right ===
-  var pad = 8;
-  var contentW = W - 18;
+  // === Contenido: limites horizontales (deja libre la derecha para los sellos) ===
+  var cx0 = 8;                 // contenido pegado a la izquierda
+  var cx1 = W - rightRes;      // limite derecho, antes de los sellos
 
-  // Estilo
+  // Estilo (arriba-derecha, por encima de los sellos)
   ctx.fillStyle = '#000';
   ctx.textAlign = 'right';
-  ctx.font = 'bold 12px Arial';
-  ctx.fillText(d.estilo, contentW - pad, 14);
-  // Prices — top left
-  ctx.textAlign = 'left';
+  ctx.font = 'bold 13px Arial';
+  ctx.fillText(d.estilo, W - 6, 16);
 
-  // Strikethrough helper — visible thin line
+  // Precios (arriba-izquierda) + % de descuento total
+  ctx.textAlign = 'left';
   function strikeThrough(x, y, width) {
     ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + width, y); ctx.stroke();
   }
+  // % total = del precio inicial (n1) al precio final mostrado ("A:")
+  var finalPrice = (isCPPromo || isPromoOnly) ? d.n3 : (hasCP ? d.n2 : d.n1);
+  var pctTotal = (d.n1 > 0 && finalPrice > 0 && d.n1 > finalPrice)
+    ? Math.round((1 - finalPrice / d.n1) * 100) : 0;
+  function drawPct(x, y) {
+    if (pctTotal <= 0) return;
+    ctx.save();
+    ctx.font = 'bold 19px Arial';
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'left';
+    ctx.fillText('-' + pctTotal + '%', x, y);
+    ctx.restore();
+  }
 
+  var px = cx0;
   if (isFullPrice) {
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText(formatPrice(d.n1), pad, 50);
+    ctx.font = 'bold 34px Arial';
+    ctx.fillText(formatPrice(d.n1), px, 48);
   } else if (isCPPromo) {
     ctx.fillStyle = '#000';
     ctx.font = '12px Arial';
     var t1 = 'De: ' + formatPrice(d.n1);
-    ctx.fillText(t1, pad, 18);
-    strikeThrough(pad, 14, ctx.measureText(t1).width);
-
-    ctx.font = '14px Arial';
+    ctx.fillText(t1, px, 18); strikeThrough(px, 14, ctx.measureText(t1).width);
+    ctx.font = '13px Arial';
     var t2 = 'CP: ' + formatPrice(d.n2);
-    ctx.fillText(t2, pad, 36);
-    strikeThrough(pad, 32, ctx.measureText(t2).width);
-
-    ctx.font = 'bold 34px Arial';
-    ctx.fillText('A: ' + formatPrice(d.n3), pad, 72);
+    ctx.fillText(t2, px, 35); strikeThrough(px, 31, ctx.measureText(t2).width);
+    ctx.font = 'bold 29px Arial';
+    var a1 = 'A: ' + formatPrice(d.n3);
+    ctx.fillText(a1, px, 66); drawPct(px + ctx.measureText(a1).width + 7, 64);
   } else if (isPromoOnly) {
     ctx.fillStyle = '#000';
-    ctx.font = '14px Arial';
+    ctx.font = '13px Arial';
     var t3 = 'De: ' + formatPrice(d.n1);
-    ctx.fillText(t3, pad, 22);
-    strikeThrough(pad, 18, ctx.measureText(t3).width);
-
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatPrice(d.n3), pad, 62);
+    ctx.fillText(t3, px, 20); strikeThrough(px, 16, ctx.measureText(t3).width);
+    ctx.font = 'bold 31px Arial';
+    var a2 = 'A: ' + formatPrice(d.n3);
+    ctx.fillText(a2, px, 56); drawPct(px + ctx.measureText(a2).width + 7, 54);
   } else {
     // REBAJA / CP
     ctx.fillStyle = '#000';
-    ctx.font = '14px Arial';
+    ctx.font = '13px Arial';
     var t4 = 'De: ' + formatPrice(d.n1);
-    ctx.fillText(t4, pad, 22);
-    strikeThrough(pad, 18, ctx.measureText(t4).width);
-
-    ctx.font = 'bold 36px Arial';
-    ctx.fillText('A: ' + formatPrice(d.n2), pad, 62);
+    ctx.fillText(t4, px, 20); strikeThrough(px, 16, ctx.measureText(t4).width);
+    ctx.font = 'bold 31px Arial';
+    var a3 = 'A: ' + formatPrice(d.n2);
+    ctx.fillText(a3, px, 56); drawPct(px + ctx.measureText(a3).width + 7, 54);
   }
 
-  // === BOTTOM SECTION: Barcode (bars only) + UPC text + Description ===
-  // Barcode renders BARS ONLY (no displayValue) so height is consistent
-  // Then UPC and description are drawn at fixed positions below
-  var barcodeY = 78;
-  var barsH = 120;
-  var barcodeW = contentW - 16;
-  renderBarcodeToCanvas(ctx, d.upc, 8, barcodeY, barcodeW, barsH);
+  // === Codigo de barras: estirado a lo ancho disponible, 25% mas bajo ===
+  var barcodeY = 84;
+  var barsH = 90;                       // antes 120 -> -25% de alto
+  var barcodeW = (cx1 - cx0) - 2;
+  renderBarcodeToCanvas(ctx, d.upc, cx0, barcodeY, barcodeW, barsH);
 
-  // UPC text — fixed position below bars area
-  // Bars max height = 120px starting at y=78, bars end at max y=198
-  // But bars scale down by width, so actual end varies. Fixed UPC position = 205
-  var upcY = 205;
+  // === Material (debajo de las barras) + Descripcion (renglon propio) ===
+  var midX = (cx0 + cx1) / 2;
   ctx.fillStyle = '#000';
   ctx.textAlign = 'center';
   ctx.font = '13px Arial';
-  ctx.fillText(String(d.upc || '').trim(), contentW / 2, upcY);
+  ctx.fillText(String(d.material || d.upc || '').trim(), midX, 190);
 
-  // Description — 1mm (8px) below UPC text
-  var descY = upcY + 14;
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 10px Arial';
-  var descText = d.description.length > 38 ? d.description.substring(0, 38) + '...' : d.description;
-  ctx.fillText(descText, contentW / 2, descY);
+  ctx.font = 'bold 11px Arial';
+  var descText = d.description.length > 40 ? d.description.substring(0, 40) + '...' : d.description;
+  ctx.fillText(descText, midX, 208);
 
   return canvas;
 }
@@ -4344,10 +4356,8 @@ function renderBarcodeToCanvas(ctx, upc, x, y, maxW, maxH) {
 
     return new Promise(function(resolve) {
       img.onload = function() {
-        var scale = Math.min(maxW / img.width, maxH / img.height, 1);
-        var dw = img.width * scale;
-        var dh = img.height * scale;
-        ctx.drawImage(img, x, y, dw, dh);
+        // Estira el codigo a lo ANCHO para llenar maxW (barras mas grandes/legibles)
+        ctx.drawImage(img, x, y, maxW, maxH);
         URL.revokeObjectURL(url);
         resolve();
       };
@@ -5101,6 +5111,7 @@ function buildLabelData(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
+    material: String(getField('Genérico Talla') || getField('Generico Talla') || '').trim(),
     upc: String(first['UPC'] || scannedCode).trim()
   };
 }
