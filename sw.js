@@ -1,6 +1,6 @@
-// v75 — Margen de tiempo entre etiquetas 500ms -> 3000ms (Camino A): evita que la
-// memoria de la impresora se sature en lote y se "acelere" perdiendo registro en la 3-4
-const CACHE_VERSION = 'v75';
+// v76 — Margen entre etiquetas 3000ms -> 6000ms: al subir 500->3000 la falla paso
+// de la etiqueta 3-4 a la 7-8 (monotono) => es ritmo; mas margen para aguantar lotes grandes
+const CACHE_VERSION = 'v76';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

@@ -3156,7 +3156,7 @@ if ('serviceWorker' in navigator) {
   if (document.getElementById('__pwaBadge__')) return;
   var b = document.createElement('div');
   b.id = '__pwaBadge__';
-  b.textContent = 'ETQ r3';
+  b.textContent = 'ETQ r4';
   b.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:2147483647;'
     + 'background:rgba(37,99,235,0.92);color:#fff;'
     + 'font:700 10px sans-serif;padding:2px 6px;border-radius:6px;pointer-events:none;';
@@ -4441,7 +4441,7 @@ async function printLabel() {
       updatePrinterUI('printing', 'Imprimiendo ' + (i + 1) + ' de ' + qty + '...');
       await window._phomemo.print(canvas);
       if (i < qty - 1) {
-        await new Promise(function(r) { setTimeout(r, 3000); });
+        await new Promise(function(r) { setTimeout(r, 6000); });
       }
     }
 
@@ -4840,7 +4840,7 @@ async function puPrintSelected() {
       printed++;
       showToast('Imprimiendo ' + printed + '/' + totalLabels);
       try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
-      if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,3000)});
+      if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,6000)});
     }
     sendPrintLog(p.upc, p.estilo, p.description, qty, 'batch_pu');
   }
@@ -5087,7 +5087,7 @@ async function cpPrintSelected() {
       printed++;
       showToast('Imprimiendo ' + printed + '/' + totalLabels);
       try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
-      if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,3000)});
+      if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,6000)});
     }
     sendPrintLog(p.upc, p.estilo, p.desc, qty, 'batch_cp');
   }
@@ -5364,7 +5364,7 @@ async function batchPrintAll() {
         if (statusEl) statusEl.textContent = 'Imprimiendo ' + printed + ' de ' + totalLabels + ' (' + item.labelData.estilo + ')';
         await window._phomemo.print(canvas);
         if (c < item.qty - 1 || p < toPrint.length - 1) {
-          await new Promise(function(r) { setTimeout(r, 3000); });
+          await new Promise(function(r) { setTimeout(r, 6000); });
         }
       }
       sendPrintLog(item.labelData.upc, item.labelData.estilo, item.labelData.description, item.qty, 'batch');
