@@ -1,5 +1,6 @@
-// v72 — El resultado SIEMPRE muestra tu tienda fijada (Agotado si no hay), no la más cercana
-const CACHE_VERSION = 'v72';
+// v73 — Fix race condition del codigo de barras: renderLabelToCanvas ahora espera
+// a que el barcode se dibuje antes de imprimir (evita etiquetas sin codigo/intermitentes)
+const CACHE_VERSION = 'v73';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

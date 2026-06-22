@@ -3150,6 +3150,19 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(function() { /* silently ignore */ });
 }
 
+// ============ MARCADOR DE VERSION (verificar deploy del PWA) ============
+(function addPwaBadge() {
+  if (!document.body) { setTimeout(addPwaBadge, 300); return; }
+  if (document.getElementById('__pwaBadge__')) return;
+  var b = document.createElement('div');
+  b.id = '__pwaBadge__';
+  b.textContent = 'ETQ r1';
+  b.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:2147483647;'
+    + 'background:rgba(37,99,235,0.92);color:#fff;'
+    + 'font:700 10px sans-serif;padding:2px 6px;border-radius:6px;pointer-events:none;';
+  document.body.appendChild(b);
+})();
+
 // ============ EXCEL HANDLING ============
 function handleFileUpload(event) {
   const file = event.target.files[0];
@@ -4203,7 +4216,7 @@ function setLabelSize(key) {
   if (typeof showToast === 'function') showToast('Tamaño de etiqueta: ' + LABEL_SIZES[key].label);
 }
 
-function renderLabelToCanvas() {
+async function renderLabelToCanvas() {
   var d = _labelData;
   if (!d) return null;
 
@@ -4323,7 +4336,11 @@ function renderLabelToCanvas() {
   var barcodeY = 78;
   var barsH = 105;                      // punto medio (original 120, version chica 90)
   var barcodeW = (cx1 - cx0) - 2;
-  renderBarcodeToCanvas(ctx, d.upc, cx0, barcodeY, barcodeW, barsH);
+  // IMPORTANTE: esperar a que el codigo de barras termine de dibujarse en el
+  // canvas ANTES de devolverlo. renderBarcodeToCanvas es asincrono (carga una
+  // imagen SVG). Si no se espera, el canvas se captura para imprimir antes de
+  // que el codigo este dibujado -> etiquetas sin codigo / codigos intermitentes.
+  await renderBarcodeToCanvas(ctx, d.upc, cx0, barcodeY, barcodeW, barsH);
 
   // === Material (debajo de las barras) + Descripcion (renglon propio) ===
   var midX = (cx0 + cx1) / 2;
@@ -4408,15 +4425,10 @@ async function printLabel() {
       updatePrinterUI(true);
     }
 
-    // Render label once
+    // Render label (renderLabelToCanvas espera el codigo de barras internamente)
     updatePrinterUI('printing', 'Generando etiqueta...');
-    var canvas = renderLabelToCanvas();
+    var canvas = await renderLabelToCanvas();
     if (!canvas) throw new Error('No se pudo generar la etiqueta');
-
-    // Wait for barcode SVG to render
-    await new Promise(function(r) { setTimeout(r, 400); });
-    canvas = renderLabelToCanvas();
-    await new Promise(function(r) { setTimeout(r, 400); });
 
     // Print N copies
     for (var i = 0; i < qty; i++) {
@@ -4816,11 +4828,8 @@ async function puPrintSelected() {
     _labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
       n1: p.n1, n2: p.n2, n3: p.n3,
       tag: p.tag, impulso: '', upc: p.upc };
-    var canvas = renderLabelToCanvas();
+    var canvas = await renderLabelToCanvas();
     if (!canvas) continue;
-    await new Promise(function(r){setTimeout(r,400)});
-    canvas = renderLabelToCanvas();
-    await new Promise(function(r){setTimeout(r,400)});
     for (var q = 0; q < qty; q++) {
       printed++;
       showToast('Imprimiendo ' + printed + '/' + totalLabels);
@@ -5066,11 +5075,8 @@ async function cpPrintSelected() {
     _labelData = { description: p.desc, estilo: p.estilo, brand: p.marca,
       n1: p.oldPrice, n2: p.n2, n3: p.n3,
       tag: p.tag, impulso: '', upc: p.upc };
-    var canvas = renderLabelToCanvas();
+    var canvas = await renderLabelToCanvas();
     if (!canvas) continue;
-    await new Promise(function(r){setTimeout(r,400)});
-    canvas = renderLabelToCanvas();
-    await new Promise(function(r){setTimeout(r,400)});
     for (var q = 0; q < qty; q++) {
       printed++;
       showToast('Imprimiendo ' + printed + '/' + totalLabels);
@@ -5344,12 +5350,8 @@ async function batchPrintAll() {
 
       // Set label data and render canvas
       _labelData = item.labelData;
-      var canvas = renderLabelToCanvas();
+      var canvas = await renderLabelToCanvas();
       if (!canvas) continue;
-      await new Promise(function(r) { setTimeout(r, 400); });
-      _labelData = item.labelData;
-      canvas = renderLabelToCanvas();
-      await new Promise(function(r) { setTimeout(r, 400); });
 
       for (var c = 0; c < item.qty; c++) {
         printed++;
