@@ -1,6 +1,6 @@
-// v73 — Fix race condition del codigo de barras: renderLabelToCanvas ahora espera
-// a que el barcode se dibuje antes de imprimir (evita etiquetas sin codigo/intermitentes)
-const CACHE_VERSION = 'v73';
+// v74 — Topar ancho del diseno al cabezal (384px/48mm): evita el wraparound del
+// contenido del borde derecho (sello LIQUIDACION aparecia a la izquierda) en 50x30
+const CACHE_VERSION = 'v74';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

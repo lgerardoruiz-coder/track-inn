@@ -3156,7 +3156,7 @@ if ('serviceWorker' in navigator) {
   if (document.getElementById('__pwaBadge__')) return;
   var b = document.createElement('div');
   b.id = '__pwaBadge__';
-  b.textContent = 'ETQ r1';
+  b.textContent = 'ETQ r2';
   b.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:2147483647;'
     + 'background:rgba(37,99,235,0.92);color:#fff;'
     + 'font:700 10px sans-serif;padding:2px 6px;border-radius:6px;pointer-events:none;';
@@ -4222,7 +4222,13 @@ async function renderLabelToCanvas() {
 
   // Tamaño físico destino (rollo) + escalado del diseño maestro
   var size = getLabelSize();
-  var targetW = Math.round(size.widthMM * PRINT_DPMM);
+  // El cabezal de la Phomemo M120 imprime maximo 384 px (48 mm) de ancho.
+  // Si el diseno excede ese ancho (ej. 50 mm = 400 px), los bytes sobrantes
+  // se "envuelven" al renglon siguiente y el contenido del borde derecho
+  // (sello LIQUIDACION/PROMOCION) aparece a la izquierda. Topamos el ancho
+  // al del cabezal para que TODO el diseno entre sin envolverse.
+  var PRINTER_MAX_W = 384;
+  var targetW = Math.min(Math.round(size.widthMM * PRINT_DPMM), PRINTER_MAX_W);
   var targetH = Math.round(size.heightMM * PRINT_DPMM);
   var W = LABEL_BASE.W, H = LABEL_BASE.H;   // coordenadas de diseño (no cambian)
   var canvas = document.createElement('canvas');
