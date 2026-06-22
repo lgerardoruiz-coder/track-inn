@@ -1,6 +1,6 @@
-// v74 — Topar ancho del diseno al cabezal (384px/48mm): evita el wraparound del
-// contenido del borde derecho (sello LIQUIDACION aparecia a la izquierda) en 50x30
-const CACHE_VERSION = 'v74';
+// v75 — Margen de tiempo entre etiquetas 500ms -> 3000ms (Camino A): evita que la
+// memoria de la impresora se sature en lote y se "acelere" perdiendo registro en la 3-4
+const CACHE_VERSION = 'v75';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
