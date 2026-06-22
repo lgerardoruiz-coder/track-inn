@@ -1,6 +1,6 @@
-// v76 — Margen entre etiquetas 3000ms -> 6000ms: al subir 500->3000 la falla paso
-// de la etiqueta 3-4 a la 7-8 (monotono) => es ritmo; mas margen para aguantar lotes grandes
-const CACHE_VERSION = 'v76';
+// v77 — Regresar margen a 3000ms; la basura en lotes largos la causaba el keepalive
+// (ping cada 30s que se metia a media impresion). Eso se arreglo en el APK (nativo).
+const CACHE_VERSION = 'v77';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
