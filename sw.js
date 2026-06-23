@@ -1,6 +1,6 @@
-// v77 — Regresar margen a 3000ms; la basura en lotes largos la causaba el keepalive
-// (ping cada 30s que se metia a media impresion). Eso se arreglo en el APK (nativo).
-const CACHE_VERSION = 'v77';
+// v78 — Bajar margen 3000ms -> 1500ms (optimizacion de velocidad). El control de
+// flujo real (writeWithResponse) frena solo; ya no se necesita tanto margen.
+const CACHE_VERSION = 'v78';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
