@@ -1,6 +1,6 @@
-// v78 — Bajar margen 3000ms -> 1500ms (optimizacion de velocidad). El control de
-// flujo real (writeWithResponse) frena solo; ya no se necesita tanto margen.
-const CACHE_VERSION = 'v78';
+// v79 — REVERTIR margen a 3000ms. 1500ms fue muy poco: el buffer de la impresora
+// se vuelve a saturar y sale basura desde la etiqueta 3. El margen SI es necesario.
+const CACHE_VERSION = 'v79';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [
