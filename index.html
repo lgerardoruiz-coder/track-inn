@@ -3188,7 +3188,7 @@ if ('serviceWorker' in navigator) {
   if (document.getElementById('__pwaBadge__')) return;
   var b = document.createElement('div');
   b.id = '__pwaBadge__';
-  b.textContent = 'ETQ r8 · Campaña';
+  b.textContent = 'ETQ r9 · Campaña';
   b.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:2147483647;'
     + 'background:rgba(37,99,235,0.92);color:#fff;'
     + 'font:700 10px sans-serif;padding:2px 6px;border-radius:6px;pointer-events:none;';
@@ -3489,7 +3489,8 @@ function displayProduct(rows, scannedCode) {
   const n3 = cleanPrice(getField('Precio Final a público - Nivel 3') || getField('Precio Final a publico - Nivel 3'));
   const impulso = String(getField('IMPULSO') || '').trim();
   const tag = String(getField('TAG') || '').trim().toUpperCase();
-  const tagRebaja = String(getField('TAG REBAJA') || '').trim();
+  // Exacto: NO usar getField (su match parcial confunde 'TAG REBAJA' con 'TAG').
+  const tagRebaja = String(first['TAG REBAJA'] || first['Tag Rebaja'] || first['TAG_REBAJA'] || '').trim();
 
   // TAG-driven logic
   const tagHasCP = tag.indexOf('CP') >= 0;
@@ -4625,7 +4626,7 @@ function initPiezasUnicas() {
       genero: String(getField(first, 'Genero') || '').trim(),
       deporte: String(getField(first, 'Deporte') || '').trim(),
       division: String(getField(first, 'Division') || '').trim(),
-      tagRebaja: String(getField(first, 'TAG REBAJA') || '').trim(),
+      tagRebaja: String(first['TAG REBAJA'] || first['Tag Rebaja'] || first['TAG_REBAJA'] || '').trim(),
       tallas: tallasStr,
       tallasCount: tallasWithInv.length,
       n1: n1,
@@ -4943,7 +4944,7 @@ function initCambiosPrecio() {
       gen: String(getField(r, 'Genero') || '').trim(),
       cat: String(getField(r, 'Deporte') || '').trim(),
       div: String(getField(r, 'Division') || '').trim(),
-      tagRebaja: String(getField(r, 'TAG REBAJA') || '').trim(),
+      tagRebaja: String(r['TAG REBAJA'] || r['Tag Rebaja'] || r['TAG_REBAJA'] || '').trim(),
       oldPrice: oldPrice,
       newPrice: finalPrice,
       n2: n2,
@@ -5174,7 +5175,7 @@ function buildLabelData(rows, scannedCode) {
     impulso: impulsoLabel,
     division: String(getField('Division') || '').trim(),
     deporte: String(getField('Deporte') || '').trim(),
-    tagRebaja: String(getField('TAG REBAJA') || '').trim(),
+    tagRebaja: String(first['TAG REBAJA'] || first['Tag Rebaja'] || first['TAG_REBAJA'] || '').trim(),
     material: String(getField('Genérico Talla') || getField('Generico Talla') || '').trim(),
     upc: String(first['UPC'] || scannedCode).trim()
   };
