@@ -2748,13 +2748,40 @@ function checkSavedLogin() {
 }
 
 // ============ LOG TRACKING ============
-function sendScanLog(upc, estilo, descripcion, found) {
+// Extrae la clasificacion + campana de una fila de Excel (para "congelar" en el log).
+function productMeta(row) {
+  if (!row) return {};
+  return {
+    marca:      String(row['Marca'] || row['MARCA'] || row['Grupos de Marca'] || '').trim() || null,
+    division:   String(row['Division'] || row['DIVISION'] || '').trim() || null,
+    deporte:    String(row['Deporte'] || row['DEPORTE'] || '').trim() || null,
+    tag_rebaja: String(row['TAG REBAJA'] || row['Tag Rebaja'] || row['TAG_REBAJA'] || '').trim() || null,
+  };
+}
+
+// Construye el meta a partir de un _labelData (que usa 'brand'/'tagRebaja').
+function labelMeta(ld) {
+  if (!ld) return {};
+  return {
+    marca:      ld.brand || null,
+    division:   ld.division || null,
+    deporte:    ld.deporte || null,
+    tag_rebaja: ld.tagRebaja || null,
+  };
+}
+
+function sendScanLog(upc, estilo, descripcion, found, meta) {
+  meta = meta || {};
   var logData = {
     upc: upc || null,
     estilo: estilo || null,
     descripcion: descripcion || null,
     found: !!found,
     store_name: currentStore || null,
+    marca: meta.marca || null,
+    division: meta.division || null,
+    deporte: meta.deporte || null,
+    tag_rebaja: meta.tag_rebaja || null,
   };
 
   if (apiToken) {
@@ -2778,7 +2805,8 @@ function sendScanLog(upc, estilo, descripcion, found) {
   }
 }
 
-function sendPrintLog(upc, estilo, descripcion, qty, printType) {
+function sendPrintLog(upc, estilo, descripcion, qty, printType, meta) {
+  meta = meta || {};
   var logData = {
     upc: upc || null,
     estilo: estilo || null,
@@ -2786,6 +2814,10 @@ function sendPrintLog(upc, estilo, descripcion, qty, printType) {
     qty: qty || 1,
     print_type: printType || 'single',
     store_name: currentStore || null,
+    marca: meta.marca || null,
+    division: meta.division || null,
+    deporte: meta.deporte || null,
+    tag_rebaja: meta.tag_rebaja || null,
   };
 
   if (apiToken) {
@@ -3156,7 +3188,7 @@ if ('serviceWorker' in navigator) {
   if (document.getElementById('__pwaBadge__')) return;
   var b = document.createElement('div');
   b.id = '__pwaBadge__';
-  b.textContent = 'ETQ r7';
+  b.textContent = 'ETQ r8 · Campaña';
   b.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:2147483647;'
     + 'background:rgba(37,99,235,0.92);color:#fff;'
     + 'font:700 10px sans-serif;padding:2px 6px;border-radius:6px;pointer-events:none;';
@@ -3457,6 +3489,7 @@ function displayProduct(rows, scannedCode) {
   const n3 = cleanPrice(getField('Precio Final a público - Nivel 3') || getField('Precio Final a publico - Nivel 3'));
   const impulso = String(getField('IMPULSO') || '').trim();
   const tag = String(getField('TAG') || '').trim().toUpperCase();
+  const tagRebaja = String(getField('TAG REBAJA') || '').trim();
 
   // TAG-driven logic
   const tagHasCP = tag.indexOf('CP') >= 0;
@@ -3478,6 +3511,9 @@ function displayProduct(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
+    division: division,
+    deporte: deporte,
+    tagRebaja: tagRebaja,
     material: String(getField('Genérico Talla') || getField('Generico Talla') || '').trim(),
     upc: String(first['UPC'] || scannedCode).trim()
   };
@@ -4449,7 +4485,7 @@ async function printLabel() {
     setTimeout(function() { updatePrinterUI(true); }, 3000);
 
     // Log print
-    if (_labelData) sendPrintLog(_labelData.upc, _labelData.estilo, _labelData.description, qty, 'single');
+    if (_labelData) sendPrintLog(_labelData.upc, _labelData.estilo, _labelData.description, qty, 'single', labelMeta(_labelData));
 
   } catch(e) {
     handleBleError(e);
@@ -4589,6 +4625,7 @@ function initPiezasUnicas() {
       genero: String(getField(first, 'Genero') || '').trim(),
       deporte: String(getField(first, 'Deporte') || '').trim(),
       division: String(getField(first, 'Division') || '').trim(),
+      tagRebaja: String(getField(first, 'TAG REBAJA') || '').trim(),
       tallas: tallasStr,
       tallasCount: tallasWithInv.length,
       n1: n1,
@@ -4833,7 +4870,9 @@ async function puPrintSelected() {
     var qty = puQty[p.estilo] || 1;
     _labelData = { description: p.description, estilo: p.estilo, brand: p.brand,
       n1: p.n1, n2: p.n2, n3: p.n3,
-      tag: p.tag, impulso: '', upc: p.upc };
+      tag: p.tag, impulso: '',
+      division: p.division, deporte: p.deporte, tagRebaja: p.tagRebaja,
+      upc: p.upc };
     var canvas = await renderLabelToCanvas();
     if (!canvas) continue;
     for (var q = 0; q < qty; q++) {
@@ -4842,7 +4881,7 @@ async function puPrintSelected() {
       try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
       if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,3000)});
     }
-    sendPrintLog(p.upc, p.estilo, p.description, qty, 'batch_pu');
+    sendPrintLog(p.upc, p.estilo, p.description, qty, 'batch_pu', labelMeta(_labelData));
   }
   showToast(printed + ' etiquetas impresas');
 }
@@ -4904,6 +4943,7 @@ function initCambiosPrecio() {
       gen: String(getField(r, 'Genero') || '').trim(),
       cat: String(getField(r, 'Deporte') || '').trim(),
       div: String(getField(r, 'Division') || '').trim(),
+      tagRebaja: String(getField(r, 'TAG REBAJA') || '').trim(),
       oldPrice: oldPrice,
       newPrice: finalPrice,
       n2: n2,
@@ -5080,7 +5120,9 @@ async function cpPrintSelected() {
     var hasPromo = p.tag.indexOf('PROMO')>=0;
     _labelData = { description: p.desc, estilo: p.estilo, brand: p.marca,
       n1: p.oldPrice, n2: p.n2, n3: p.n3,
-      tag: p.tag, impulso: '', upc: p.upc };
+      tag: p.tag, impulso: '',
+      division: p.div, deporte: p.cat, tagRebaja: p.tagRebaja,
+      upc: p.upc };
     var canvas = await renderLabelToCanvas();
     if (!canvas) continue;
     for (var q = 0; q < qty; q++) {
@@ -5089,7 +5131,7 @@ async function cpPrintSelected() {
       try { await window._phomemo.print(canvas); } catch(e) { showToast('Error al imprimir: '+e.message); return; }
       if (q < qty-1 || i < selected.length-1) await new Promise(function(r){setTimeout(r,3000)});
     }
-    sendPrintLog(p.upc, p.estilo, p.desc, qty, 'batch_cp');
+    sendPrintLog(p.upc, p.estilo, p.desc, qty, 'batch_cp', labelMeta(_labelData));
   }
   showToast(printed + ' etiquetas impresas');
 }
@@ -5130,6 +5172,9 @@ function buildLabelData(rows, scannedCode) {
     n1: n1, n2: n2, n3: n3,
     tag: tag,
     impulso: impulsoLabel,
+    division: String(getField('Division') || '').trim(),
+    deporte: String(getField('Deporte') || '').trim(),
+    tagRebaja: String(getField('TAG REBAJA') || '').trim(),
     material: String(getField('Genérico Talla') || getField('Generico Talla') || '').trim(),
     upc: String(first['UPC'] || scannedCode).trim()
   };
@@ -5367,7 +5412,7 @@ async function batchPrintAll() {
           await new Promise(function(r) { setTimeout(r, 3000); });
         }
       }
-      sendPrintLog(item.labelData.upc, item.labelData.estilo, item.labelData.description, item.qty, 'batch');
+      sendPrintLog(item.labelData.upc, item.labelData.estilo, item.labelData.description, item.qty, 'batch', labelMeta(item.labelData));
     }
 
     if (statusEl) statusEl.textContent = '¡' + totalLabels + ' etiquetas impresas!';
@@ -6188,7 +6233,7 @@ function onScanSuccess(decodedText, decodedResult) {
     setTimeout(() => { scanCooldown = false; }, 2000);
     // Log scan
     var r0 = rows[0];
-    sendScanLog(decodedText, r0['Estilo'] || r0['estilo'] || '', r0['Descripción'] || r0['Descripcion'] || r0['descripcion'] || '', true);
+    sendScanLog(decodedText, r0['Estilo'] || r0['estilo'] || '', r0['Descripción'] || r0['Descripcion'] || r0['descripcion'] || '', true, productMeta(r0));
   } else {
     // Not found — show immediately
     scanCooldown = true;
@@ -6225,7 +6270,7 @@ function processBarcode(code) {
     displayProduct(rows, code);
     goToScreen(3);
     var r0 = rows[0];
-    sendScanLog(code, r0['Estilo'] || r0['estilo'] || '', r0['Descripción'] || r0['Descripcion'] || r0['descripcion'] || '', true);
+    sendScanLog(code, r0['Estilo'] || r0['estilo'] || '', r0['Descripción'] || r0['Descripcion'] || r0['descripcion'] || '', true, productMeta(r0));
   } else {
     document.getElementById('notFoundCode').textContent = code + ' (' + code.length + ' dígitos)';
     goToScreen(4);
