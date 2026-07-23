@@ -1,6 +1,8 @@
 // v79 — REVERTIR margen a 3000ms. 1500ms fue muy poco: el buffer de la impresora
 // se vuelve a saturar y sale basura desde la etiqueta 3. El margen SI es necesario.
-const CACHE_VERSION = 'v81';
+// v82 — Modulo imprimir: el campo de codigo solo buscaba con Enter. Se agrego
+// onchange/onblur para que tambien busque al salir del campo o al pegar texto.
+const CACHE_VERSION = 'v82';
 const CACHE_NAME = 'trackinn-' + CACHE_VERSION;
 
 const PRE_CACHE = [

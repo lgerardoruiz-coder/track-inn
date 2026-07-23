@@ -3188,7 +3188,7 @@ if ('serviceWorker' in navigator) {
   if (document.getElementById('__pwaBadge__')) return;
   var b = document.createElement('div');
   b.id = '__pwaBadge__';
-  b.textContent = 'ETQ r9 · Campaña';
+  b.textContent = 'ETQ r10 · Campaña';
   b.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:2147483647;'
     + 'background:rgba(37,99,235,0.92);color:#fff;'
     + 'font:700 10px sans-serif;padding:2px 6px;border-radius:6px;pointer-events:none;';
@@ -5197,7 +5197,7 @@ function addBatchRow() {
   batchItems.push({ id: id, code: '', labelData: null, qty: 1 });
   var html = '<div class="batch-row" id="batchRow' + id + '">'
     + '<div class="batch-input-row">'
-    + '<input class="batch-input" id="batchInput' + id + '" type="text" placeholder="UPC, Estilo o Material..." inputmode="text" onkeydown="if(event.key===\'Enter\')batchLookupCode(' + id + ')">'
+    + '<input class="batch-input" id="batchInput' + id + '" type="text" placeholder="UPC, Estilo o Material..." inputmode="text" autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();batchLookupCode(' + id + ');}" onchange="batchLookupCode(' + id + ')" onblur="batchLookupCode(' + id + ')">'
     + '<button class="batch-scan-btn" onclick="openBatchScanner(' + id + ')">'
     + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>'
     + '</button>'
@@ -5262,6 +5262,10 @@ function batchLookupCode(id) {
 
   var code = input.value.trim();
   if (!code) return;
+  // Enter, change y blur pueden dispararse seguidos por la misma captura:
+  // no repetir la busqueda si ya se resolvio ese mismo codigo.
+  if (item.searchedCode === code && item.labelData) return;
+  item.searchedCode = code;
   item.code = code;
 
   var rows = lookupBarcode(code);
